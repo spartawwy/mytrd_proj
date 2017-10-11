@@ -14,7 +14,13 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
+*.sdf
+*.log
+*.tlog
+*.pdb
+*.lastbuildstate
+*.exp
+*.ilk
 
 # Fortran module files
 *.mod
