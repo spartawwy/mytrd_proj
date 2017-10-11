@@ -10,6 +10,7 @@
 # Precompiled Headers
 *.gch
 *.pch
+*.suo
 
 # Compiled Dynamic libraries
 *.so
@@ -21,6 +22,9 @@
 *.lastbuildstate
 *.exp
 *.ilk
+*.unsuccessfulbuild
+*.opensdf
+*.kd
 
 # Fortran module files
 *.mod
