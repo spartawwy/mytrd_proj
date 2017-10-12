@@ -70,6 +70,9 @@ public slots:
     void DoQueryQtyCanBuy();
 
 	void ResetBuyTabTaskTime();
+    //---------------eqsection task related----
+
+
     //------------------
 	
     void ChangeTabBuyAssistantImg(TypeTask type);
@@ -81,7 +84,7 @@ public slots:
 
     void AssignHintListAndLineEdit(HintList *& p_list, QLineEdit *&p_edit, QDoubleSpinBox *&p_dbspinbox);
 
-  signals:
+signals:
 
     //void SigRemoveTask(int task_id);
 
@@ -91,14 +94,17 @@ protected:
       
 private:
 
+    // sell task related 
     void InitSellTaskWin();
     void SetupSellTaskWin();
     void FillSellTaskWin(TypeTask type, T_TaskInformation& info);
-   
-
-    // buy task
+    
+    // buy task related
     void InitBuyTaskWin();
     void FillBuyTaskWin(TypeTask type, T_TaskInformation& info);
+
+    // equal section task related
+    void InitEqSectionTaskWin();
 
     Ui::TradeWinnerClass ui;
     WinnerApp *app_;

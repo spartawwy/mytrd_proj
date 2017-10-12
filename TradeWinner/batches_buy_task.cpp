@@ -11,12 +11,15 @@ BatchesBuyTask::BatchesBuyTask(T_TaskInformation &task_info, WinnerApp *app)
 { 
     step_items_.resize(100);
 
+    //app_->local_logger().LogLocal(utility::FormatStr("construct BatchesBuyTask %d step: %.2f %% ", para_.id, para_.step));
+
     for( int i = 0; i < step_items_.size(); ++i )
     {
         if( 100 - i * para_.step < 0 )
             break;
         step_items_[i].up_price = para_.alert_price * (100 - i * para_.step) / 100;
         step_items_[i].bottom_price = para_.alert_price * (100 - (i + 1) * para_.step) / 100;
+        //app_->local_logger().LogLocal(utility::FormatStr("BatchesBuyTask %d up_price:%.2f btm_price:%.2f", para_.id, step_items_[i].up_price, step_items_[i].bottom_price));
     }
 }
 
@@ -62,7 +65,7 @@ void BatchesBuyTask::HandleQuoteData()
 
         app_->trade_strand().PostTask([iter, this]()
         {
-            // send order 
+        // send order 
         char result[1024] = {0};
         char error_info[1024] = {0};
 	            
@@ -99,7 +102,13 @@ void BatchesBuyTask::HandleQuoteData()
             this->app_->EmitSigShowUi(ret_str);
         }
         if( times_has_buy_ >= para_.bs_times )
+        {
+            auto info_str = utility::FormatStr("分批买入任务:%d %s 已买 %d 次,任务结束!", para_.id, para_.stock.c_str(), times_has_buy_);
+            this->app_->local_logger().LogLocal(info_str);
+            this->app_->AppendLog2Ui(info_str.c_str());
+
             this->app_->RemoveTask(this->task_id());
+        }
 
         });
     } 

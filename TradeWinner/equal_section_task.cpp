@@ -27,12 +27,14 @@ format: section0_type$section0_price#section1_type$section1_price
 
 #include "winner_app.h"
 
+static const int cst_max_sec = 5;
+
 void EqualSectionTask::CalculateSections(double price, IN T_TaskInformation &task_info, OUT std::vector<T_SectionAutom> &sections)
 {
 	assert( price > 0.0);
-	assert( task_info.secton_task.raise_percent > 0 && task_info.secton_task.fall_percent > 0 );
-	assert( task_info.secton_task.fall_percent < 100 );
-	assert( task_info.secton_task.min_trig_price <= task_info.secton_task.max_trig_price );
+	assert( task_info.secton_task.raise_percent > 0.0 && task_info.secton_task.fall_percent > 0.0 );
+	assert( task_info.secton_task.fall_percent < 100.0 );
+	assert( task_info.secton_task.min_trig_price < task_info.secton_task.max_trig_price );
 
 	sections.clear();
 	// construct clearing section
@@ -41,13 +43,14 @@ void EqualSectionTask::CalculateSections(double price, IN T_TaskInformation &tas
 	// calculate buy_sec_num
 	int buy_sec_num = 0;
 	double temp_price = price * (100.00 - (buy_sec_num + 1) * task_info.secton_task.fall_percent) / 100.00;
-	while( temp_price > task_info.secton_task.min_trig_price && temp_price > 0.01 + task_info.secton_task.min_trig_price )
+	while( temp_price > 0.01 + task_info.secton_task.min_trig_price && buy_sec_num < cst_max_sec )
 	{
 		++buy_sec_num;
 		if( 100.00 < (buy_sec_num + 1) * task_info.secton_task.fall_percent )
 			break;
 		temp_price = price * (100.00 - (buy_sec_num + 1) * task_info.secton_task.fall_percent) / 100.00;
 	}
+     
 	// construct buy sections 
 	for( int i = buy_sec_num; i > 0; --i )
 	{
@@ -60,7 +63,7 @@ void EqualSectionTask::CalculateSections(double price, IN T_TaskInformation &tas
 	// calculate sell sections
 	int sell_sec_num = 0;
 	temp_price = price * (100.00 + (sell_sec_num + 1) * task_info.secton_task.raise_percent) / 100.00;
-	while( temp_price < task_info.secton_task.max_trig_price && task_info.secton_task.max_trig_price > 0.01 + temp_price )
+	while( 0.01 + temp_price < task_info.secton_task.max_trig_price  && sell_sec_num < cst_max_sec )
 	{
 		++sell_sec_num;
 		temp_price = price * (100.00 + (sell_sec_num + 1) * task_info.secton_task.raise_percent) / 100.00;
@@ -106,15 +109,26 @@ void EqualSectionTask::HandleQuoteData()
     assert(iter);
 
 	double pre_price = quote_data_queue_.size() > 1 ? (*(++data_iter))->cur_price : iter->cur_price;
-      
+    if( IsPriceJumpDown(pre_price, iter->cur_price) || IsPriceJumpUp(pre_price, iter->cur_price) )
+    {
+        app_->local_logger().LogLocal(TSystem::utility::FormatStr("%d EqualSectionTask price jump %.2f to %.2f", para_.id, pre_price, iter->cur_price));
+        return;
+    };
+
 	TypeOrderCategory order_type = TypeOrderCategory::SELL;
+    unsigned int qty = para_.quantity;
 	int index = 0;
 	for( ; index < sections_.size(); ++index )
 	{
 		switch(sections_[index].section_type)
 		{
 		case TypeEqSection::CLEAR:
-			if( iter->cur_price < sections_[index].represent_price ) order_type = TypeOrderCategory::SELL; break;
+			if( iter->cur_price < sections_[index].represent_price ) 
+            {
+                order_type = TypeOrderCategory::SELL; 
+                // todo: set qty to all avialable quantity
+            }
+            break;
 		case TypeEqSection::BUY:
 			if( iter->cur_price <= sections_[index].represent_price ) order_type = TypeOrderCategory::BUY; break;
 		case TypeEqSection::SELL:
@@ -123,7 +137,11 @@ void EqualSectionTask::HandleQuoteData()
 			if( iter->cur_price < sections_[index].represent_price ) return; break;
 		case TypeEqSection::STOP:
 			if( iter->cur_price >= sections_[index].represent_price ) return; break;
-		default: assert(false);break;
+		default: 
+            {//assert(false);
+                app_->local_logger().LogLocal(TSystem::utility::FormatStr("error: %d EqualSectionTask %s switch section_type:%d, index:%d curprice:%.2f ", para_.id, para_.stock.c_str(), (int)sections_[index].section_type, index, iter->cur_price));
+                return;
+            }
 		}
 	}
 	
@@ -147,7 +165,7 @@ void EqualSectionTask::HandleQuoteData()
         this->app_->trade_agent().SendOrder(this->app_->trade_client_id()
             , (int)order_type, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
-            , price, para_.quantity
+            , price, qty
             , result, error_info); 
 #endif
         // judge result 

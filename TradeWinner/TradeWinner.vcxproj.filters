@@ -267,6 +267,9 @@
     <ClInclude Include="equal_section_task.h">
       <Filter>task</Filter>
     </ClInclude>
+    <ClInclude Include="eqsection_task_win.cpp">
+      <Filter>win</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TradeWinner.rc" />
