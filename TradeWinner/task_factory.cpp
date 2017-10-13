@@ -6,6 +6,8 @@
 
 #include "inflection_buy_task.h"
 #include "breakup_buy_task.h"
+#include "batches_buy_task.h"
+#include "batches_sell_task.h"
 
 #include "winner_app.h"
  
@@ -39,7 +41,7 @@ void TaskFactory::CreateAllTasks(std::unordered_map<int, std::shared_ptr<T_TaskI
                 }
             case TypeTask::BATCHES_BUY:
                 {
-                    // todo:
+                   out_task_objs.push_back( std::move(std::make_shared<BatchesBuyTask>(*iter->second, app)) );
                    break;
                 }
             case TypeTask::INFLECTION_SELL:
@@ -49,7 +51,6 @@ void TaskFactory::CreateAllTasks(std::unordered_map<int, std::shared_ptr<T_TaskI
                 }
             case TypeTask::BREAK_SELL:
                 {
-                    //TypeMarket type_market = iter->second->stock.c_str()[0] == '6' ? TypeMarket::SH : TypeMarket::SZ;
                     out_task_objs.push_back( std::move(std::make_shared<BreakDownTask>(*iter->second, app)) );
                     break;
                 }
@@ -59,7 +60,8 @@ void TaskFactory::CreateAllTasks(std::unordered_map<int, std::shared_ptr<T_TaskI
                    break;
                 }
             case TypeTask::BATCHES_SELL:
-                { // todo:
+                {  
+                   out_task_objs.push_back( std::move(std::make_shared<BatchesSellTask>(*iter->second, app)) );
                    break;
                 }
             default: break;

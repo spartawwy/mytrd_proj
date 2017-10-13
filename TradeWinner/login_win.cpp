@@ -12,7 +12,7 @@ LoginWin::LoginWin(WinnerApp* app)
     ui_.le_pwd->setEchoMode(QLineEdit::Password);
     //setAttribute(Qt::WA_DeleteOnClose);
 
-    ui_.le_name->setText("wgh");
+    ui_.le_name->setText("wwy");
     ui_.le_pwd->setText("123");
 }
 

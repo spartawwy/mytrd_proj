@@ -8,8 +8,21 @@ BatchesSellTask::BatchesSellTask(T_TaskInformation &task_info, WinnerApp *app)
     : StrategyTask(task_info, app)
     , time_point_open_warning_(0) 
 { 
-    step_items_.resize(100);
+    step_items_.resize(50);
  
+    auto array_ordered = utility::split(task_info.assistant_field, ";");
+     
+    for( int i = 0; i < array_ordered.size(); ++i )
+    {
+        try
+        {
+            auto index = std::stoi(array_ordered[i]);
+            step_items_[index].has_selled = true;
+        }catch(...)
+        {
+            app_->local_logger().LogLocal(utility::FormatStr("error: task %d construct BatchesSellTask trans assistant_field index %d", para_.id, i));
+        }
+    }
 
     for( int i = 0; i < step_items_.size(); ++i )
     {
@@ -52,6 +65,8 @@ void BatchesSellTask::HandleQuoteData()
         step_items_[index].has_selled = true;
         if( index == step_items_.size() - 1 )
             is_to_remove = true;
+        // todo: if stocks quantity is 0 then to remove task
+
         app_->trade_strand().PostTask([iter, is_to_remove, this]()
         {
         // send order 
@@ -87,7 +102,20 @@ void BatchesSellTask::HandleQuoteData()
             auto ret_str = new std::string(utility::FormatStr("执行任务:%d 分批出货 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, para_.quantity));
             this->app_->EmitSigShowUi(ret_str);
         }
+        // update assistant filed in db ------------
+        para_.assistant_field.clear();
+        for( int i = 0; i < step_items_.size(); ++i )
+        { 
+            if( step_items_[i].has_selled ) 
+            {
+                if( para_.assistant_field.empty() )
+                    para_.assistant_field.append(std::to_string(i));
+                else
+                    para_.assistant_field += ";" + std::to_string(i);
+            }
+        } 
 
+        app_->db_moudle().UpdateTaskInfo(para_);
         if( is_to_remove )
             this->app_->RemoveTask(this->task_id());
 

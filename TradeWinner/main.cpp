@@ -28,6 +28,10 @@ public:
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("GBK"));
 
     //QApplication a(argc, argv);
+    //-------------test
+    
+    //---------------end
+
     WinnerApp  winner_app(argc, argv);
     int ret = 0;
  

@@ -130,6 +130,10 @@ void WinnerWin::FillSellTaskWin(TypeTask type, T_TaskInformation& info)
         ui.combox_sell_type->setCurrentText(cst_str_follow_sell);
         ui.dbspbox_step_range->setValue(info.step);
 		break;
+    case TypeTask::BATCHES_SELL: 
+        ui.combox_sell_type->setCurrentText(cst_str_batches_sell);
+        ui.dbspbox_step_range->setValue(info.step); 
+		break;
 	default:
 		assert(false);
 	}

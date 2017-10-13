@@ -1,6 +1,10 @@
 #ifndef DBMOULDE_H_DSFWDSF_
 #define DBMOULDE_H_DSFWDSF_
 
+#include <boost/thread.hpp>  
+#include <boost/thread/recursive_mutex.hpp>  
+#include <boost/thread/mutex.hpp>
+
 #include <string>
 #include <atomic>
 #include <unordered_map>
@@ -12,11 +16,16 @@ namespace SQLite
     class SQLiteConnection;
 }
 
+namespace TSystem
+{
+    class TaskStrand;
+}
 //namespace TSystem
 //{
 //    class LocalLogger;
 //}
 class WinnerApp;
+
 class DBMoudle
 {
 public:
@@ -60,11 +69,18 @@ private:
     DBMoudle(DBMoudle&);
     DBMoudle& operator = (DBMoudle&);
      
+    void Open(std::shared_ptr<SQLite::SQLiteConnection>& db_conn);
+
     //TSystem::LocalLogger *local_logger_;
     WinnerApp *app_;
     std::shared_ptr<SQLite::SQLiteConnection>  db_conn_;
 
-    void Open(std::shared_ptr<SQLite::SQLiteConnection>& db_conn);
+    std::shared_ptr<TSystem::TaskStrand> strand_;
+
+    typedef boost::shared_mutex            WRMutex;  
+	typedef boost::unique_lock<WRMutex>    WriteLock;  
+	typedef boost::shared_lock<WRMutex>    ReadLock;  
+	WRMutex  taskinfo_table_mutex_;
 
     // (broker id, broker info)
     std::unordered_map<int, T_BrokerInfo>  broker_info_map_;
@@ -73,6 +89,8 @@ private:
 
     int max_accoun_id_;
 	//std::atomic_uint64_t max_task_id_;
+
+    
 };
 
 #endif

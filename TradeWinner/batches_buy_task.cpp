@@ -13,9 +13,23 @@ BatchesBuyTask::BatchesBuyTask(T_TaskInformation &task_info, WinnerApp *app)
 
     //app_->local_logger().LogLocal(utility::FormatStr("construct BatchesBuyTask %d step: %.2f %% ", para_.id, para_.step));
 
+    auto array_ordered = utility::split(task_info.assistant_field, ";");
+     
+    for( int i = 0; i < array_ordered.size(); ++i )
+    {
+        try
+        {
+            auto index = std::stoi(array_ordered[i]);
+            step_items_[index].has_buy = true;
+        }catch(...)
+        {
+            app_->local_logger().LogLocal(utility::FormatStr("error: task %d construct BatchesBuyTask trans assistant_field index %d", para_.id, i));
+        }
+    }
+
     for( int i = 0; i < step_items_.size(); ++i )
     {
-        if( 100 - i * para_.step < 0 )
+        if( 100.0 - i * para_.step < 0.0 )
             break;
         step_items_[i].up_price = para_.alert_price * (100 - i * para_.step) / 100;
         step_items_[i].bottom_price = para_.alert_price * (100 - (i + 1) * para_.step) / 100;
@@ -97,10 +111,26 @@ void BatchesBuyTask::HandleQuoteData()
            this->app_->EmitSigShowUi(ret_str);
 
         }else
-        {
+        { 
             auto ret_str = new std::string(utility::FormatStr("执行任务:%d 分批买入 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, para_.quantity));
             this->app_->EmitSigShowUi(ret_str);
         }
+        // update assistant filed in db ------------
+        para_.assistant_field.clear();
+        for( int i = 0; i < step_items_.size(); ++i )
+        {
+            if( 100.0 - i * para_.step < 0.0 )
+                break;
+            if( step_items_[i].has_buy ) 
+            {
+                if( para_.assistant_field.empty() )
+                    para_.assistant_field.append(std::to_string(i));
+                else
+                    para_.assistant_field += ";" + std::to_string(i);
+            }
+        } 
+        app_->db_moudle().UpdateTaskInfo(para_);
+
         if( times_has_buy_ >= para_.bs_times )
         {
             auto info_str = utility::FormatStr("分批买入任务:%d %s 已买 %d 次,任务结束!", para_.id, para_.stock.c_str(), times_has_buy_);
