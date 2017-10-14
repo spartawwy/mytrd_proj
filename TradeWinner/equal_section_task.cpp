@@ -24,6 +24,7 @@ format: section0_type$section0_price#section1_type$section1_price
 #include "equal_section_task.h"
 
 #include <TLib/core/tsystem_utility_functions.h>
+#include <TLib/core/tsystem_core_error.h>
 
 #include "winner_app.h"
 
@@ -94,7 +95,19 @@ void EqualSectionTask::TranslateSections(IN std::vector<T_SectionAutom> &section
 EqualSectionTask::EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app)
 	: StrategyTask(task_info, app)
 { 
-	CalculateSections(task_info.alert_price, task_info, sections_);
+	if( task_info.secton_task.is_original )
+		CalculateSections(task_info.alert_price, task_info, sections_);
+	else
+	{
+		if( task_info.assistant_field.empty() )
+		{
+			 app_->local_logger().LogLocal(utility::FormatStr("error EqualSectionTask::EqualSectionTask task %d is not is_original but assistant_field is empty ", task_info.id));
+			 ThrowTException( TSystem::CoreErrorCategory::ErrorCode::BAD_CONTENT
+                , "EqualSectionTask::EqualSectionTask"
+                , "is not original but assistant_field is empty!");
+		}
+		CalculateSections(std::stod(task_info.assistant_field), task_info, sections_);
+	}
 	 
 }
 
@@ -127,16 +140,22 @@ void EqualSectionTask::HandleQuoteData()
             {
                 order_type = TypeOrderCategory::SELL; 
                 // todo: set qty to all avialable quantity
-            }
+            }else
+				return;
             break;
 		case TypeEqSection::BUY:
-			if( iter->cur_price <= sections_[index].represent_price ) order_type = TypeOrderCategory::BUY; break;
+			if( iter->cur_price <= sections_[index].represent_price ) { order_type = TypeOrderCategory::BUY; goto BEFORE_TRADE; }
+			break;
 		case TypeEqSection::SELL:
-			if( iter->cur_price >= sections_[index].represent_price ) order_type = TypeOrderCategory::SELL; break;
+			if( iter->cur_price >= sections_[index].represent_price ) { order_type = TypeOrderCategory::SELL; goto BEFORE_TRADE; }
+			break;
 		case TypeEqSection::NOOP:
-			if( iter->cur_price < sections_[index].represent_price ) return; break;
+			if( iter->cur_price < sections_[index].represent_price ) return; 
+			break;
 		case TypeEqSection::STOP:
-			if( iter->cur_price >= sections_[index].represent_price ) return; break;
+			if( iter->cur_price >= sections_[index].represent_price ) return; 
+			else { order_type = TypeOrderCategory::SELL; goto BEFORE_TRADE; }
+			break;
 		default: 
             {//assert(false);
                 app_->local_logger().LogLocal(TSystem::utility::FormatStr("error: %d EqualSectionTask %s switch section_type:%d, index:%d curprice:%.2f ", para_.id, para_.stock.c_str(), (int)sections_[index].section_type, index, iter->cur_price));
@@ -145,6 +164,8 @@ void EqualSectionTask::HandleQuoteData()
 		}
 	}
 	
+BEFORE_TRADE:
+
 	app_->trade_strand().PostTask([&, this]()
     {
         char result[1024] = {0};
@@ -182,8 +203,11 @@ void EqualSectionTask::HandleQuoteData()
             auto ret_str = new std::string(utility::FormatStr("区间任务:%d %s %s %.2f %d 成功!", para_.id, cn_order_str.c_str(), para_.stock.c_str(), price, para_.quantity));
             this->app_->EmitSigShowUi(ret_str);
         }
-
+		para_.secton_task.is_original = false;
+		// re calculate
 		CalculateSections(iter->cur_price, para_, sections_);
+		// save to db: save cur_price as start_price in assistant_field 
+		app_->db_moudle().UpdateEqualSection(para_.id, para_.secton_task.is_original, iter->cur_price);
     });
 
 }

@@ -95,16 +95,16 @@ DBMoudle::~DBMoudle()
 
 void DBMoudle::Init()
 {
-    std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
-    Open(db_conn);
+    if( !db_conn_ )
+		Open(db_conn_);
 
-    if( !utility::ExistTable("accountInfo", *db_conn) )
+    if( !utility::ExistTable("accountInfo", *db_conn_) )
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
                 , "DBMoudle::Init"
                 , "can't find table accountInfo");
 
      std::string sql = "SELECT max(id) FROM AccountInfo ";
-     db_conn->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+     db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
      {
          try
          {
@@ -117,7 +117,7 @@ void DBMoudle::Init()
      });
 
      sql = "SELECT max(id) FROM TaskInfo ";
-     db_conn->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+     db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
      {
 		 if( !(*vals) )
 			 return 0;
@@ -201,9 +201,10 @@ void DBMoudle::LoadAllUserBrokerInfo()
 
 void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInformation> > &taskinfos)
 {
-    std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
-    Open(db_conn);
-    if( !utility::ExistTable("TaskInfo", *db_conn) )
+    if( !db_conn_ )
+		Open(db_conn_);
+
+    if( !utility::ExistTable("TaskInfo", *db_conn_) )
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
                 , "DBMoudle::LoadAllTaskInfo"
                 , "can't find table TaskInfo: ");
@@ -212,7 +213,7 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
 		" FROM TaskInfo WHERE user_id=%d AND type != %d order by id ", app_->user_info().id, (int)TypeTask::EQUAL_SECTION);
     
     //std::make_shared<std::string>();
-    db_conn->ExecuteSQL(sql.c_str(),[&taskinfos, this](int num_cols, char** vals, char** names)->int
+    db_conn_->ExecuteSQL(sql.c_str(),[&taskinfos, this](int num_cols, char** vals, char** names)->int
     {
         auto task_info = std::make_shared<T_TaskInformation>();
         
@@ -261,7 +262,7 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
 		" t.quantity, t.target_price_level, t.start_time, t.end_time, t.state, t.user_id, "
 		" e.raise_percent, e.fall_percent, e.raise_infection, e.fall_infection, e.multi_qty, e.max_trig_price, e.min_trig_price, e.is_original, t.assistant_field "
         " FROM TaskInfo t INNER JOIN EqualSectionTask e ON t.id=e.id WHERE t.user_id=%d order by t.id ", app_->user_info().id);
-    db_conn->ExecuteSQL(sql.c_str(),[&taskinfos, this](int num_cols, char** vals, char** names)->int
+    db_conn_->ExecuteSQL(sql.c_str(),[&taskinfos, this](int num_cols, char** vals, char** names)->int
     {
         auto task_info = std::make_shared<T_TaskInformation>();
         
@@ -341,9 +342,9 @@ T_BrokerInfo * DBMoudle::FindUserBrokerByBroker(int id)
 std::shared_ptr<T_UserAccountInfo> DBMoudle::FindAccountInfoByAccNoAndBrokerId(const std::string& accno, int broker_id)
 {
     std::shared_ptr<T_UserAccountInfo>  p_info = nullptr;
-    std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
-    Open(db_conn);
-    if( !utility::ExistTable("UserInformation", *db_conn) || !utility::ExistTable("accountinfo", *db_conn))
+   if( !db_conn_ )
+		Open(db_conn_);
+    if( !utility::ExistTable("UserInformation", *db_conn_) || !utility::ExistTable("accountinfo", *db_conn_))
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
                 , "DBMoudle::FindUserAccountInfoByAccNoAndBrokerId"
                 , "can't find table UserInformation or accountinfo ");
@@ -354,7 +355,7 @@ std::shared_ptr<T_UserAccountInfo> DBMoudle::FindAccountInfoByAccNoAndBrokerId(c
     std::string sql = utility::FormatStr("SELECT broker_id, account_no, trade_account_no, trade_pwd, comm_pwd, department_id, id, remark "
         " FROM AccountInfo WHERE account_no='%s' and broker_id = %d"
         , accno.c_str(), broker_id);
-    db_conn->ExecuteSQL(sql.c_str(),[&p_info, this](int num_cols, char** vals, char** names)->int
+    db_conn_->ExecuteSQL(sql.c_str(),[&p_info, this](int num_cols, char** vals, char** names)->int
     {
          p_info = std::make_shared<T_UserAccountInfo>();
          try
@@ -419,15 +420,15 @@ bool DBMoudle::AddAccountInfo(T_AccountInformation &info)
         , info.broker_id
         , info.department_id.c_str()
         , info.remark.c_str());
-    std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
-    Open(db_conn);
-    if( !utility::ExistTable("AccountInfo", *db_conn) )
+    if( !db_conn_ )
+		Open(db_conn_);
+    if( !utility::ExistTable("AccountInfo", *db_conn_) )
     {
         // throw exception
         return false; 
     }
 
-    auto ret = db_conn->ExecuteSQL(sql.c_str());
+    auto ret = db_conn_->ExecuteSQL(sql.c_str());
     if( ret ) 
     {
         ++ this->max_accoun_id_;
@@ -450,30 +451,30 @@ bool DBMoudle::UpdateAccountInfo(T_AccountInformation &info)
                             , info.department_id.c_str()
                             , info.remark.c_str()
                             , info.id);
-    std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
-    Open(db_conn);
-    if( !utility::ExistTable("AccountInfo", *db_conn) )
+   if( !db_conn_ )
+		Open(db_conn_);
+    if( !utility::ExistTable("AccountInfo", *db_conn_) )
     {
         // throw exception
         return false; 
     }
      
-    return db_conn->ExecuteSQL(sql.c_str());
+    return db_conn_->ExecuteSQL(sql.c_str());
 }
 
 int DBMoudle::FindBorkerIdByAccountID(int account_id)
 {
     // assert all broker_id > 0
-    std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
-    Open(db_conn);
-    if( !utility::ExistTable("AccountInfo", *db_conn) )
+   if( !db_conn_ )
+		Open(db_conn_);
+    if( !utility::ExistTable("AccountInfo", *db_conn_) )
     {
         // throw exception
         return 0; 
     }
     std::string sql = utility::FormatStr("SELECT broker_id FROM AccountInfo WHERE id = %d", account_id);
     int broker_id  = 0;
-    db_conn->ExecuteSQL(sql.c_str(),[&broker_id , this](int num_cols, char** vals, char** names)->int
+    db_conn_->ExecuteSQL(sql.c_str(),[&broker_id , this](int num_cols, char** vals, char** names)->int
     {
         broker_id = boost::lexical_cast<int>(*vals);
         return 0;
@@ -503,9 +504,9 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
 		, info->stock_pinyin.c_str()
         , info->bs_times
         , info->assistant_field.c_str());
-    std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
-    Open(db_conn);
-    if( !utility::ExistTable("TaskInfo", *db_conn) )
+   if( !db_conn_ )
+		Open(db_conn_);
+    if( !utility::ExistTable("TaskInfo", *db_conn_) )
     {
         // throw exception
         return false; 
@@ -515,7 +516,7 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
      
     {
         WriteLock locker(taskinfo_table_mutex_);
-        ret = db_conn->ExecuteSQL(sql.c_str());
+        ret = db_conn_->ExecuteSQL(sql.c_str());
     }
     if( ret )
     {
@@ -524,12 +525,14 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
     return ret;
 }
 
-bool DBMoudle::DelTaskInfo(int task_id)
+bool DBMoudle::DelTaskInfo(int task_id, TypeTask type)
 {
-    std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
-    Open(db_conn);
+    if( !db_conn_ )
+    {
+        Open(db_conn_);
+    }
 
-    if( !utility::ExistTable("TaskInfo", *db_conn) )
+    if( !utility::ExistTable("TaskInfo", *db_conn_) )
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
                 , "DBMoudle::DelTaskInfo"
                 , "can't find table TaskInfo");
@@ -538,20 +541,32 @@ bool DBMoudle::DelTaskInfo(int task_id)
      
     {
         WriteLock locker(taskinfo_table_mutex_);
-        db_conn->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+        db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
         { 
             return 0;
         });
     }
+	if( type == TypeTask::EQUAL_SECTION )
+	{
+		// del related recorde in table EqualSectionTask
+		std::string sql = utility::FormatStr("DELETE FROM EqualSectionTask WHERE id=%d ", task_id);
+		WriteLock locker(equalsection_table_mutex_);
+		db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+        { 
+            return 0;
+        });
+	}
     return true;
 }
 
 bool DBMoudle::UpdateTaskInfo(T_TaskInformation &info)
 {
-    std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
-    Open(db_conn);
+    if( !db_conn_ )
+    {
+        Open(db_conn_);
+    }
 
-    if( !utility::ExistTable("TaskInfo", *db_conn) )
+    if( !utility::ExistTable("TaskInfo", *db_conn_) )
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
                 , "DBMoudle::UpdateTaskInfo"
                 , "can't find table TaskInfo");
@@ -579,12 +594,37 @@ bool DBMoudle::UpdateTaskInfo(T_TaskInformation &info)
     bool ret = true; 
     {
         WriteLock locker(taskinfo_table_mutex_);
-        ret = db_conn->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+        ret = db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
         { 
             return 0;
         });
     }
     return ret;
+}
+
+void DBMoudle::UpdateEqualSection(int taskid, bool is_original, double start_price)
+{ 
+	if( !db_conn_ )
+    {
+        Open(db_conn_);
+    }
+
+	std::string sql = utility::FormatStr("UPDATE TaskInfo SET assistant_field='%.2f' WHERE id=%d ", start_price, taskid); 
+	{
+		WriteLock locker(taskinfo_table_mutex_);
+		db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+		{ 
+			return 0;
+		});
+	}
+	sql = utility::FormatStr("UPDATE EqualSectionTask SET is_original=%d WHERE id=%d ", (int)is_original, taskid); 
+	{
+		WriteLock locker(equalsection_table_mutex_);
+		db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+		{ 
+			return 0;
+		});
+	}
 }
 
 bool DBMoudle::AddHisTask(std::shared_ptr<T_TaskInformation>& info)
@@ -624,10 +664,12 @@ bool DBMoudle::AddHisTask(std::shared_ptr<T_TaskInformation>& info)
 
 bool DBMoudle::IsTaskExists(int user_id, TypeTask type, const std::string& stock)
 {
-    std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
-    Open(db_conn);
+    if( !db_conn_ )
+    {
+        Open(db_conn_);
+    }
 
-    if( !utility::ExistTable("TaskInfo", *db_conn) )
+    if( !utility::ExistTable("TaskInfo", *db_conn_) )
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
                 , "DBMoudle::Init"
                 , "can't find table TaskInfo");
@@ -635,7 +677,7 @@ bool DBMoudle::IsTaskExists(int user_id, TypeTask type, const std::string& stock
     std::string sql = utility::FormatStr("SELECT id FROM TaskInfo WHERE user_id=%d AND type=%d AND stock like '%%%s%%'", user_id, int(type), stock.c_str());
     
     ReadLock locker(taskinfo_table_mutex_);
-    db_conn->ExecuteSQL(sql.c_str(),[&exists, this](int num_cols, char** vals, char** names)->int
+    db_conn_->ExecuteSQL(sql.c_str(),[&exists, this](int num_cols, char** vals, char** names)->int
     {
         exists = true;
         return 0;
@@ -648,14 +690,16 @@ bool DBMoudle::IsTaskExists(int user_id, TypeTask type, const std::string& stock
 int DBMoudle::CheckLogin(const std::string& name, const std::string& pwd, T_UserInformation *user_info)
 {
     int ret = -1;
-    std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
-    Open(db_conn);
-    if( !utility::ExistTable("UserInformation", *db_conn) )
+    if( !db_conn_ )
+    {
+        Open(db_conn_);
+    }
+    if( !utility::ExistTable("UserInformation", *db_conn_) )
         return ret;
 
     std::string sql = utility::FormatStr("SELECT u.id, u.level, u.name, u.nick_name, u.password, u.account_id, u.remark, a.account_no FROM UserInformation u LEFT JOIN accountinfo a ON u.account_id = a.id WHERE u.name='%s' AND u.password='%s'", name.c_str(), pwd.c_str());
      
-    db_conn->ExecuteSQL(sql.c_str(),[&, this](int num_cols, char** vals, char** names)->int
+    db_conn_->ExecuteSQL(sql.c_str(),[&, this](int num_cols, char** vals, char** names)->int
     { 
         ret = boost::lexical_cast<int>(*vals);
         if( user_info )

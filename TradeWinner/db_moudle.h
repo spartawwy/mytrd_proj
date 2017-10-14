@@ -51,9 +51,11 @@ public:
     int FindBorkerIdByAccountID(int account_id);
 
     bool AddTaskInfo(std::shared_ptr<T_TaskInformation> &info);
-    bool DelTaskInfo(int task_id);
+    bool DelTaskInfo(int task_id, TypeTask type);
     bool UpdateTaskInfo(T_TaskInformation &info);
 
+	void UpdateEqualSection(int taskid, bool is_original, double start_price);
+	
     bool AddHisTask(std::shared_ptr<T_TaskInformation>& info);
 
     bool IsTaskExists(int user_id, TypeTask type, const std::string& stock);
@@ -81,7 +83,7 @@ private:
 	typedef boost::unique_lock<WRMutex>    WriteLock;  
 	typedef boost::shared_lock<WRMutex>    ReadLock;  
 	WRMutex  taskinfo_table_mutex_;
-
+	WRMutex  equalsection_table_mutex_;
     // (broker id, broker info)
     std::unordered_map<int, T_BrokerInfo>  broker_info_map_;
     // (user id, account info) 

@@ -158,6 +158,9 @@
     <ClCompile Include="equal_section_task.cpp">
       <Filter>task</Filter>
     </ClCompile>
+    <ClCompile Include="eqsection_task_win.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="trade_winner.ui">
@@ -266,9 +269,6 @@
     </ClInclude>
     <ClInclude Include="equal_section_task.h">
       <Filter>task</Filter>
-    </ClInclude>
-    <ClInclude Include="eqsection_task_win.cpp">
-      <Filter>win</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

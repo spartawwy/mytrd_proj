@@ -71,7 +71,10 @@ public slots:
 
 	void ResetBuyTabTaskTime();
     //---------------eqsection task related----
-
+	void DoAddEqSectionTask();
+	void ResetEqSectionTaskTime();
+	void DoMaxStopTrigCheckBoxChanged(int);
+	void DoMinClearTrigCheckBoxChanged(int);
 
     //------------------
 	
@@ -116,8 +119,12 @@ private:
     // buy task related
     HintList *m_bt_list_hint_; 
 
+	// eqsection task related
+    HintList *m_eqsec_list_hint_; 
+
     double pre_close_price_;
     double buytask_pre_close_price_;
+    double eqsec_task_pre_close_price_;
 };
 
 #endif // TRADE_WINNER_H

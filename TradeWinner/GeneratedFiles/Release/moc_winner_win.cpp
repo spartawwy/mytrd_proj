@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_WinnerWin_t {
-    QByteArrayData data[53];
-    char stringdata[827];
+    QByteArrayData data[55];
+    char stringdata[869];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -67,21 +67,23 @@ QT_MOC_LITERAL(34, 537, 16),
 QT_MOC_LITERAL(35, 554, 12),
 QT_MOC_LITERAL(36, 567, 16),
 QT_MOC_LITERAL(37, 584, 19),
-QT_MOC_LITERAL(38, 604, 24),
-QT_MOC_LITERAL(39, 629, 20),
-QT_MOC_LITERAL(40, 650, 26),
-QT_MOC_LITERAL(41, 677, 3),
-QT_MOC_LITERAL(42, 681, 19),
-QT_MOC_LITERAL(43, 701, 5),
-QT_MOC_LITERAL(44, 707, 21),
-QT_MOC_LITERAL(45, 729, 4),
-QT_MOC_LITERAL(46, 734, 25),
-QT_MOC_LITERAL(47, 760, 10),
-QT_MOC_LITERAL(48, 771, 6),
-QT_MOC_LITERAL(49, 778, 11),
-QT_MOC_LITERAL(50, 790, 6),
-QT_MOC_LITERAL(51, 797, 16),
-QT_MOC_LITERAL(52, 814, 11)
+QT_MOC_LITERAL(38, 604, 18),
+QT_MOC_LITERAL(39, 623, 22),
+QT_MOC_LITERAL(40, 646, 24),
+QT_MOC_LITERAL(41, 671, 20),
+QT_MOC_LITERAL(42, 692, 26),
+QT_MOC_LITERAL(43, 719, 3),
+QT_MOC_LITERAL(44, 723, 19),
+QT_MOC_LITERAL(45, 743, 5),
+QT_MOC_LITERAL(46, 749, 21),
+QT_MOC_LITERAL(47, 771, 4),
+QT_MOC_LITERAL(48, 776, 25),
+QT_MOC_LITERAL(49, 802, 10),
+QT_MOC_LITERAL(50, 813, 6),
+QT_MOC_LITERAL(51, 820, 11),
+QT_MOC_LITERAL(52, 832, 6),
+QT_MOC_LITERAL(53, 839, 16),
+QT_MOC_LITERAL(54, 856, 11)
     },
     "WinnerWin\0DoQueryCapital\0\0SlotAppendLog\0"
     "char*\0SlotTabChanged\0SlotTbvTasksContextMenu\0"
@@ -99,6 +101,7 @@ QT_MOC_LITERAL(52, 814, 11)
     "ResetSellTabTaskTime\0DoBuyAlertPercentChanged\0"
     "DoBuyTypeChanged\0DoAddBuyTask\0"
     "DoQueryQtyCanBuy\0ResetBuyTabTaskTime\0"
+    "DoAddEqSectionTask\0ResetEqSectionTaskTime\0"
     "ChangeTabBuyAssistantImg\0TbvTasksCurRowTaskId\0"
     "FlushFromStationListWidget\0str\0"
     "OnClickedListWidget\0index\0"
@@ -115,7 +118,7 @@ static const uint qt_meta_data_WinnerWin[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      31,   14, // methods
+      33,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -123,37 +126,39 @@ static const uint qt_meta_data_WinnerWin[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,  169,    2, 0x0a,
-       3,    1,  170,    2, 0x0a,
-       5,    1,  173,    2, 0x0a,
-       6,    1,  176,    2, 0x0a,
-       8,    1,  179,    2, 0x0a,
-       9,    1,  182,    2, 0x0a,
-      10,    1,  185,    2, 0x0a,
-      11,    1,  188,    2, 0x0a,
-      12,    1,  191,    2, 0x0a,
-      14,    1,  194,    2, 0x0a,
-      16,    1,  197,    2, 0x0a,
-      17,    1,  200,    2, 0x0a,
-      20,    0,  203,    2, 0x0a,
-      21,    1,  204,    2, 0x0a,
-      22,    0,  207,    2, 0x0a,
-      23,    0,  208,    2, 0x0a,
-      24,    2,  209,    2, 0x0a,
-      26,    0,  214,    2, 0x0a,
-      27,    2,  215,    2, 0x0a,
-      32,    0,  220,    2, 0x0a,
-      33,    1,  221,    2, 0x0a,
-      34,    1,  224,    2, 0x0a,
-      35,    0,  227,    2, 0x0a,
-      36,    0,  228,    2, 0x0a,
-      37,    0,  229,    2, 0x0a,
-      38,    1,  230,    2, 0x0a,
-      39,    0,  233,    2, 0x0a,
-      40,    1,  234,    2, 0x0a,
-      42,    1,  237,    2, 0x0a,
-      44,    1,  240,    2, 0x0a,
-      46,    3,  243,    2, 0x0a,
+       1,    0,  179,    2, 0x0a,
+       3,    1,  180,    2, 0x0a,
+       5,    1,  183,    2, 0x0a,
+       6,    1,  186,    2, 0x0a,
+       8,    1,  189,    2, 0x0a,
+       9,    1,  192,    2, 0x0a,
+      10,    1,  195,    2, 0x0a,
+      11,    1,  198,    2, 0x0a,
+      12,    1,  201,    2, 0x0a,
+      14,    1,  204,    2, 0x0a,
+      16,    1,  207,    2, 0x0a,
+      17,    1,  210,    2, 0x0a,
+      20,    0,  213,    2, 0x0a,
+      21,    1,  214,    2, 0x0a,
+      22,    0,  217,    2, 0x0a,
+      23,    0,  218,    2, 0x0a,
+      24,    2,  219,    2, 0x0a,
+      26,    0,  224,    2, 0x0a,
+      27,    2,  225,    2, 0x0a,
+      32,    0,  230,    2, 0x0a,
+      33,    1,  231,    2, 0x0a,
+      34,    1,  234,    2, 0x0a,
+      35,    0,  237,    2, 0x0a,
+      36,    0,  238,    2, 0x0a,
+      37,    0,  239,    2, 0x0a,
+      38,    0,  240,    2, 0x0a,
+      39,    0,  241,    2, 0x0a,
+      40,    1,  242,    2, 0x0a,
+      41,    0,  245,    2, 0x0a,
+      42,    1,  246,    2, 0x0a,
+      44,    1,  249,    2, 0x0a,
+      46,    1,  252,    2, 0x0a,
+      48,    3,  255,    2, 0x0a,
 
  // slots: parameters
     QMetaType::Void,
@@ -181,12 +186,14 @@ static const uint qt_meta_data_WinnerWin[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
     QMetaType::Void, 0x80000000 | 18,   19,
     QMetaType::Int,
-    QMetaType::Void, QMetaType::QString,   41,
-    QMetaType::Void, QMetaType::QModelIndex,   43,
-    QMetaType::Void, QMetaType::QString,   45,
-    QMetaType::Void, 0x80000000 | 47, 0x80000000 | 49, 0x80000000 | 51,   48,   50,   52,
+    QMetaType::Void, QMetaType::QString,   43,
+    QMetaType::Void, QMetaType::QModelIndex,   45,
+    QMetaType::Void, QMetaType::QString,   47,
+    QMetaType::Void, 0x80000000 | 49, 0x80000000 | 51, 0x80000000 | 53,   50,   52,   54,
 
        0        // eod
 };
@@ -221,13 +228,15 @@ void WinnerWin::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 22: _t->DoAddBuyTask(); break;
         case 23: _t->DoQueryQtyCanBuy(); break;
         case 24: _t->ResetBuyTabTaskTime(); break;
-        case 25: _t->ChangeTabBuyAssistantImg((*reinterpret_cast< TypeTask(*)>(_a[1]))); break;
-        case 26: { int _r = _t->TbvTasksCurRowTaskId();
+        case 25: _t->DoAddEqSectionTask(); break;
+        case 26: _t->ResetEqSectionTaskTime(); break;
+        case 27: _t->ChangeTabBuyAssistantImg((*reinterpret_cast< TypeTask(*)>(_a[1]))); break;
+        case 28: { int _r = _t->TbvTasksCurRowTaskId();
             if (_a[0]) *reinterpret_cast< int*>(_a[0]) = _r; }  break;
-        case 27: _t->FlushFromStationListWidget((*reinterpret_cast< QString(*)>(_a[1]))); break;
-        case 28: _t->OnClickedListWidget((*reinterpret_cast< QModelIndex(*)>(_a[1]))); break;
-        case 29: _t->ChangeFromStationText((*reinterpret_cast< QString(*)>(_a[1]))); break;
-        case 30: _t->AssignHintListAndLineEdit((*reinterpret_cast< HintList*(*)>(_a[1])),(*reinterpret_cast< QLineEdit*(*)>(_a[2])),(*reinterpret_cast< QDoubleSpinBox*(*)>(_a[3]))); break;
+        case 29: _t->FlushFromStationListWidget((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        case 30: _t->OnClickedListWidget((*reinterpret_cast< QModelIndex(*)>(_a[1]))); break;
+        case 31: _t->ChangeFromStationText((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        case 32: _t->AssignHintListAndLineEdit((*reinterpret_cast< HintList*(*)>(_a[1])),(*reinterpret_cast< QLineEdit*(*)>(_a[2])),(*reinterpret_cast< QDoubleSpinBox*(*)>(_a[3]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -269,13 +278,13 @@ int WinnerWin::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 31)
+        if (_id < 33)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 31;
+        _id -= 33;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 31)
+        if (_id < 33)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 31;
+        _id -= 33;
     }
     return _id;
 }

@@ -1734,7 +1734,7 @@ background-color: rgb(255, 255,255);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QDoubleSpinBox" name="dbspbox_eqsec_raise_percent_2">
+     <widget class="QDoubleSpinBox" name="dbspbox_eqsec_fall_percent">
       <property name="geometry">
        <rect>
         <x>170</x>
@@ -1874,7 +1874,7 @@ background-color: rgb(255, 255,255);</string>
        </rect>
       </property>
      </widget>
-     <widget class="QPushButton" name="pbtn_eqsec_buytask">
+     <widget class="QPushButton" name="pbtn_add_eqsection_task">
       <property name="geometry">
        <rect>
         <x>460</x>
@@ -1945,7 +1945,7 @@ background-color: rgb(255, 255,255);</string>
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
-     <widget class="QDoubleSpinBox" name="dbspbox_eqsec_max_price_2">
+     <widget class="QDoubleSpinBox" name="dbspbox_eqsec_min_price">
       <property name="geometry">
        <rect>
         <x>170</x>
@@ -2011,7 +2011,7 @@ background-color: rgb(255, 255,255);</string>
      <x>0</x>
      <y>0</y>
      <width>917</width>
-     <height>18</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_system">
@@ -2076,12 +2076,12 @@ background-color: rgb(255, 255,255);</string>
   <tabstop>le_eqsec_stock</tabstop>
   <tabstop>dbspbox_eqsec_start_price</tabstop>
   <tabstop>dbspbox_eqsec_raise_percent</tabstop>
-  <tabstop>dbspbox_eqsec_raise_percent_2</tabstop>
+  <tabstop>dbspbox_eqsec_fall_percent</tabstop>
   <tabstop>spinBox_eqsec_quantity</tabstop>
   <tabstop>combox_eqsec_price_level</tabstop>
   <tabstop>timeEdit_eqsec_begin</tabstop>
   <tabstop>timeEdit_eqsec_end</tabstop>
-  <tabstop>pbtn_eqsec_buytask</tabstop>
+  <tabstop>pbtn_add_eqsection_task</tabstop>
  </tabstops>
  <resources>
   <include location="tradewinner.qrc"/>

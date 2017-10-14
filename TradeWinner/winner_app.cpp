@@ -336,15 +336,17 @@ bool WinnerApp::DelTaskById(int task_id)
         this->stock_ticker_->UnRegister(task_id);
     });
 
+	TypeTask  task_type;
     {
     ReadLock  locker(task_infos_mutex_);
     auto iter = task_infos_.find(task_id);
     assert(iter != task_infos_.end());
+	task_type = iter->second->type;
     db_moudle().AddHisTask(iter->second);
     }
 
     // del database related records
-    db_moudle().DelTaskInfo(task_id);
+    db_moudle().DelTaskInfo(task_id, task_type);
 
     WriteLock  locker(strategy_tasks_mutex_);
     for( auto iter = strategy_tasks_.begin(); iter != strategy_tasks_.end(); ++iter )

@@ -38,7 +38,8 @@ static const int cst_tab_capital = 0;
 static const int cst_tab_index_task_list = 1;
 static const int cst_tab_index_sell_task = 2;
 static const int cst_tab_index_buy_task = 3;
-static const int cst_tab_index_log = 4;
+static const int cst_tab_index_eqsec_task = 4;
+static const int cst_tab_index_log = 5;
 
 WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     : QMainWindow(parent)
@@ -47,8 +48,10 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     , m_list_hint_(nullptr)
 	, is_open_hint_(true)
     , m_bt_list_hint_(nullptr)
+	, m_eqsec_list_hint_(nullptr)
     , pre_close_price_(0.0)
     , buytask_pre_close_price_(0.0)
+	, eqsec_task_pre_close_price_(0.0)
 {
     ui.setupUi(this);
 
@@ -98,7 +101,9 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
    
     //------------------tab add buy task------------ 
     InitBuyTaskWin();
-    //----------------------------------
+
+    //------------------tab equal section task----------------
+	InitEqSectionTaskWin();
 }
 
 WinnerWin::~WinnerWin()
@@ -229,7 +234,10 @@ void WinnerWin::keyPressEvent(QKeyEvent *event)
         }else if(ui.le_buytask_stock->hasFocus() )
         {
             m_bt_list_hint_->close();
-        }
+		}else if( ui.le_eqsec_stock->hasFocus() )
+		{
+			m_eqsec_list_hint_->close();
+		}
     }else
     {
         if( ui.le_stock->hasFocus() )
@@ -238,7 +246,10 @@ void WinnerWin::keyPressEvent(QKeyEvent *event)
         }else if(ui.le_buytask_stock->hasFocus() )
         {
             m_bt_list_hint_->setFocus();
-        }
+        }else if( ui.le_eqsec_stock->hasFocus() )
+		{
+			m_eqsec_list_hint_->setFocus();
+		}
     }
 }
 
@@ -278,6 +289,7 @@ void WinnerWin::SlotTabChanged(int /*index*/)
 	assert(m_list_hint_ && m_bt_list_hint_);
 	m_list_hint_->hide();
     m_bt_list_hint_->hide();
+    m_eqsec_list_hint_->hide();
 }
 
 void WinnerWin::SlotTbvTasksContextMenu(QPoint p)
@@ -586,14 +598,18 @@ void WinnerWin::ChangeFromStationText(QString text)
         p_dbspinbox->setValue(p_info->pre_close_price);
         if( ui.tabwid_holder->currentIndex() == cst_tab_index_sell_task )
             pre_close_price_ = p_info->pre_close_price;
-        else
+        else if( ui.tabwid_holder->currentIndex() == cst_tab_index_buy_task )
             buytask_pre_close_price_ = p_info->pre_close_price;
+		else if( ui.tabwid_holder->currentIndex() == cst_tab_index_eqsec_task )
+			eqsec_task_pre_close_price_ = p_info->pre_close_price;
     }else
     {
         if( ui.tabwid_holder->currentIndex() == cst_tab_index_sell_task )
             pre_close_price_ = 0.0;
-        else
+        else if( ui.tabwid_holder->currentIndex() == cst_tab_index_buy_task )
             buytask_pre_close_price_ = 0.0;
+		else if( ui.tabwid_holder->currentIndex() == cst_tab_index_eqsec_task )
+			eqsec_task_pre_close_price_ = 0.0;
     }
 }
 
@@ -609,6 +625,11 @@ void WinnerWin::AssignHintListAndLineEdit(HintList *& p_list, QLineEdit *&p_edit
         p_list = m_bt_list_hint_;
         p_edit = ui.le_buytask_stock;
         p_dbspinbox = ui.dbspbox_buytask_alert_price;
+    }else if( ui.tabwid_holder->currentIndex() == cst_tab_index_eqsec_task )
+    {   
+        p_list = m_eqsec_list_hint_;
+        p_edit = ui.le_eqsec_stock;
+        p_dbspinbox = ui.dbspbox_eqsec_start_price;
     }else
         assert(false);
 }
