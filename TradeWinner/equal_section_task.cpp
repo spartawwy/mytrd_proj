@@ -140,8 +140,8 @@ void EqualSectionTask::HandleQuoteData()
             {
                 order_type = TypeOrderCategory::SELL; 
                 // todo: set qty to all avialable quantity
-            }else
-				return;
+                goto BEFORE_TRADE; 
+            } 
             break;
 		case TypeEqSection::BUY:
 			if( iter->cur_price <= sections_[index].represent_price ) { order_type = TypeOrderCategory::BUY; goto BEFORE_TRADE; }
@@ -166,7 +166,7 @@ void EqualSectionTask::HandleQuoteData()
 	
 BEFORE_TRADE:
 
-	app_->trade_strand().PostTask([&, this]()
+	app_->trade_strand().PostTask([iter, order_type, qty, this]()
     {
         char result[1024] = {0};
         char error_info[1024] = {0};

@@ -19,9 +19,11 @@ Cookie::~Cookie()
 {
     UnmapViewOfFile(mmfm_base_address_);
      
-    CloseHandle(mmfm_);
+    if( mmfm_ != INVALID_HANDLE_VALUE )
+        CloseHandle(mmfm_);
     // close file handle
-    CloseHandle(mmHandle_);
+    if( mmHandle_ != INVALID_HANDLE_VALUE )
+        CloseHandle(mmHandle_);
 }
 
 Cookie::TRetCookie Cookie::Init()
@@ -30,7 +32,7 @@ Cookie::TRetCookie Cookie::Init()
     TRetCookie  ret = TRetCookie::OK;
 
     //const char* shared_name = "cookietrdw";
-    const char* shared_name = "cookietrdw_test1";
+    const char* shared_name = "cookietrdw_test2";
      
     _mkdir("c:\\trade_localf");
 
@@ -75,7 +77,7 @@ Cookie::TRetCookie Cookie::Init()
     error_code = GetLastError();
     if(SUCCESS != error_code || mmfm_ == NULL )   
     {             
-        ret = TRetCookie::ERROR_FILE_OPEN;
+        ret = TRetCookie::ERROR_FILE_OPEN; 
         goto EXIT_PRO;
     } 
                   
@@ -105,7 +107,8 @@ EXIT_PRO:
      
     UnmapViewOfFile(mmfm_base_address_);
     CloseHandle(mmfm_);
+    mmfm_ = INVALID_HANDLE_VALUE;
     CloseHandle(mmHandle_);
-
+    mmHandle_ = INVALID_HANDLE_VALUE;
     return ret;
 }

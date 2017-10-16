@@ -1,7 +1,13 @@
 #include "winner_win.h"
 
+#include "winner_app.h"
+
 #include "MySpinBox.h"
 #include "HintList.h"
+
+#include "stock_ticker.h"
+#include "strategy_task.h"
+#include "equal_section_task.h"
 
 void WinnerWin::InitEqSectionTaskWin()
 {
@@ -25,6 +31,9 @@ void WinnerWin::InitEqSectionTaskWin()
     ui.spinBox_eqsec_quantity->setGeometry(geome_val);
     ui.spinBox_eqsec_quantity->setMaximum(1000000000);
 #endif
+    ui.dbspbox_eqsec_max_price->setValue(EQSEC_MAX_STOP_PRICE);
+    ui.dbspbox_eqsec_min_price->setValue(EQSEC_MIN_CLEAR_PRICE);
+     
 	ui.dbspbox_eqsec_max_price->setDisabled(true);
 	ui.dbspbox_eqsec_min_price->setDisabled(true);
 	ui.cb_max_stop_trigger->setChecked(false);
@@ -53,7 +62,113 @@ void WinnerWin::InitEqSectionTaskWin()
 
 void WinnerWin::DoAddEqSectionTask()
 {
+    static auto check_le_stock = [this](TypeTask type) ->bool
+    {
+       // check stock codes
+		QString::SectionFlag flag = QString::SectionSkipEmpty;
+		QString text_str = ui.le_eqsec_stock->text().trimmed();
+		QString stock_str = text_str.section('/', 0, 0, flag);
+        if( stock_str.length() != 6 )
+        {
+			// todo: show erro info
+            ui.le_buytask_stock->setFocus();
+            return false;
+        } 
 
+        if( app_->db_moudle().IsTaskExists(app_->user_info().id, type, stock_str.toStdString()) )
+        {
+            //QMessageBox::information(nullptr, "notice", QString::fromLocal8Bit("任务已经存在!"));
+            app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("任务已经存在!"));
+            return false;
+        }
+        if( ui.dbspbox_eqsec_raise_percent->value() < 0.1 )
+        {
+            ui.dbspbox_eqsec_raise_percent->setFocus();
+            return false;
+        }
+        if( ui.dbspbox_eqsec_fall_percent->value() < 0.1 )
+        {
+            ui.dbspbox_eqsec_fall_percent->setFocus();
+            return false;
+        }
+         
+        auto start_time = ui.timeEdit_eqsec_begin->time().toString("Hmmss").toInt();
+        auto end_time = ui.timeEdit_eqsec_end->time().toString("Hmmss").toInt();
+            
+        if( ui.dbspbox_eqsec_start_price->value() < 0.01 )
+        {
+            ui.dbspbox_eqsec_start_price->setFocus();
+            return false;
+        }
+        if( ui.spinBox_eqsec_quantity->value() < 100 )
+        {
+            ui.spinBox_eqsec_quantity->setFocus();
+            return false;
+        }
+        
+        if( ui.cb_max_stop_trigger->isChecked() && ui.dbspbox_eqsec_max_price->value() > 999.0 )
+        {
+            ui.dbspbox_eqsec_max_price->setFocus();
+            return false;
+        }
+        if( ui.cb_min_clear_trigger->isChecked() && ui.dbspbox_eqsec_min_price->value() < 0.01 )
+        {
+            ui.dbspbox_eqsec_min_price->setFocus();
+            return false;
+        }
+        if( start_time >= end_time )
+        {
+            ui.timeEdit_eqsec_begin->setFocus();
+            return false;
+        }
+        return true;
+    };
+    if( !check_le_stock(TypeTask::EQUAL_SECTION) )
+        return;
+
+    auto task_info = std::make_shared<T_TaskInformation>();
+    task_info->type = TypeTask::EQUAL_SECTION;
+
+    QString::SectionFlag flag = QString::SectionSkipEmpty;
+	QString stock_str = ui.le_eqsec_stock->text().trimmed();
+	QString stock_pinyin = stock_str.section('/', 1, 1, flag);
+	task_info->stock = stock_str.section('/', 0, 0, flag).toLocal8Bit();
+	task_info->stock_pinyin = stock_str.section('/', 1, 1, flag).toLocal8Bit();
+
+	task_info->alert_price = ui.dbspbox_eqsec_start_price->value();  
+    //task_info->continue_second = 5;
+    task_info->secton_task.is_original = true;
+    task_info->secton_task.raise_percent = ui.dbspbox_eqsec_raise_percent->value();
+    task_info->secton_task.fall_percent = ui.dbspbox_eqsec_fall_percent->value();
+    if( ui.cb_max_stop_trigger->isChecked() )
+        task_info->secton_task.max_trig_price = ui.dbspbox_eqsec_max_price->value();
+    if( ui.cb_min_clear_trigger->isChecked() )
+        task_info->secton_task.min_trig_price = ui.dbspbox_eqsec_min_price->value();
+
+	task_info->quantity = ui.spinBox_eqsec_quantity->value();
+    task_info->target_price_level = ui.combox_eqsec_price_level->currentData().toInt();
+    task_info->start_time = ui.timeEdit_eqsec_begin->time().toString("Hmmss").toInt();
+    task_info->end_time = ui.timeEdit_eqsec_end->time().toString("Hmmss").toInt();
+    
+    task_info->state = 1;		
+    if( !app_->db_moudle().AddTaskInfo(task_info) )
+    {
+        // log error
+        return;
+    }
+    app_->AppendTaskInfo(task_info->id, task_info);
+            
+    auto equal_section_task = std::make_shared<EqualSectionTask>(*task_info, this->app_);
+    app_->AppendStrategyTask(std::shared_ptr<StrategyTask>(equal_section_task));
+
+    app_->ticker_strand().PostTask([equal_section_task, this]()
+    {
+        this->app_->stock_ticker().Register(std::shared_ptr<StrategyTask>(equal_section_task));
+    });
+    // add to task list ui
+    InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+    app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("区间任务添加成功!"));
+    app_->AppendLog2Ui("添加区间任务 : %d 成功\n", task_info->id);
 }
 
 void WinnerWin::ResetEqSectionTaskTime()

@@ -507,21 +507,48 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
    if( !db_conn_ )
 		Open(db_conn_);
     if( !utility::ExistTable("TaskInfo", *db_conn_) )
-    {
-        // throw exception
+    {  // throw exception
         return false; 
     }
-
+    if( info->type == TypeTask::EQUAL_SECTION && !utility::ExistTable("EqualSectionTask", *db_conn_) )
+    {  // throw exception
+        return false; 
+    }
     bool ret = true;
      
     {
         WriteLock locker(taskinfo_table_mutex_);
         ret = db_conn_->ExecuteSQL(sql.c_str());
     }
-    if( ret )
+    if( ret && info->type == TypeTask::EQUAL_SECTION )
     {
-        info->id = app_->Cookie_NextTaskId();
+        sql = utility::FormatStr("INSERT INTO EqualSectionTask VALUES( %d, %.2f, %.2f, %.2f, %.2f, %d, %.2f, %.2f, %d) "
+            , app_->Cookie_MaxTaskId() + 1
+            , info->secton_task.raise_percent 
+            , info->secton_task.fall_percent 
+            , info->secton_task.raise_infection 
+            , info->secton_task.fall_infection 
+            , info->secton_task.multi_qty 
+            , info->secton_task.max_trig_price 
+            , info->secton_task.min_trig_price 
+            , (int)info->secton_task.is_original);
+        {
+            {
+                WriteLock locker(equalsection_table_mutex_);
+                ret = db_conn_->ExecuteSQL(sql.c_str()); 
+            }
+            if( !ret )
+            { 
+                { 
+                    sql = utility::FormatStr("DELETE FROM TaskInfo WHERE id=%d", app_->Cookie_MaxTaskId() + 1);
+                    WriteLock locker(taskinfo_table_mutex_);
+                    db_conn_->ExecuteSQL(sql.c_str());
+                }
+            }  
+        } 
     }
+    if( ret )
+      info->id = app_->Cookie_NextTaskId();
     return ret;
 }
 

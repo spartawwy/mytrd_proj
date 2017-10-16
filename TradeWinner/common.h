@@ -17,6 +17,9 @@
 #define  INOUT
 #endif
 
+#define EQSEC_MAX_STOP_PRICE 999.00
+#define EQSEC_MIN_CLEAR_PRICE 0.0
+
 #if 0
 std::vector<std::string> split(const std::string& line, const std::string& seperator = " ", 
 		const std::string& quotation = "\"");
@@ -304,7 +307,7 @@ struct T_SectionTask
 	std::string sections_info; //format: section0_type$section0_price#section1_type$section1_price
 	bool is_original;
 	T_SectionTask():raise_percent(0.0), fall_percent(0.0), raise_infection(0.0), fall_infection(0.0)
-		, multi_qty(0),max_trig_price(0.0), min_trig_price(0.0), sections_info(), is_original(true)
+		, multi_qty(0),max_trig_price(EQSEC_MAX_STOP_PRICE), min_trig_price(EQSEC_MIN_CLEAR_PRICE), sections_info(), is_original(true)
 	{
 	}
 };
@@ -333,7 +336,7 @@ struct T_TaskInformation
     T_TaskInformation() : id(0), type(TypeTask::BREAK_SELL), alert_price(0),back_alert_trigger(0), rebounce(0), continue_second(0), step(0), quantity(0), target_price_level(0), start_time(0), end_time(0), is_loop(0), state(0), bs_times(0), assistant_field() {} 
      
     T_TaskInformation(const T_TaskInformation& lh) : id(lh.id), type(lh.type), stock(lh.stock), stock_pinyin(lh.stock_pinyin), alert_price(lh.alert_price), back_alert_trigger(lh.back_alert_trigger)
-        , rebounce(lh.rebounce), continue_second(lh.continue_second), step(lh.step), quantity(lh.quantity), target_price_level(lh.target_price_level)
+        , rebounce(lh.rebounce), continue_second(lh.continue_second), step(lh.step), quantity(lh.quantity), secton_task(lh.secton_task), target_price_level(lh.target_price_level)
         , start_time(lh.start_time), end_time(lh.end_time), is_loop(lh.is_loop), state(lh.state), bs_times(lh.bs_times), assistant_field(lh.assistant_field) { }
 
 };
@@ -400,5 +403,6 @@ std::string TagOfOrderLog();
 std::tuple<int, std::string> CurrentDateTime();
 
 #define USE_TRADE_FLAG
+
 
 #endif

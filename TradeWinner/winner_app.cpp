@@ -388,9 +388,7 @@ std::unordered_map<std::string, T_PositionData> WinnerApp::QueryPosition()
     qDebug() << QString::fromLocal8Bit( result->data() ) << "\n";
 #endif
     std::string str_result = result->c_data();
-     qDebug() << " line 374" << " ----\n";
-     qDebug() << str_result.c_str() << " ----\n";
-
+     
     /*TSystem::utility::replace_all_distinct(str_result, "\n\t", "\t");
     TSystem::utility::replace_all_distinct(str_result, "\t\n", "\t");
     qDebug() << " line 378" << "\n";
@@ -405,37 +403,45 @@ std::unordered_map<std::string, T_PositionData> WinnerApp::QueryPosition()
 
     
     int start = 14;
+    int content_col = 13;
     if( p_user_broker_info_->type == TypeBroker::ZHONGYGJ )
         start = 15;
-    for( int n = 0; n < (result_array.size() - 14) / 13; ++n )
+    else if ( p_user_broker_info_->type == TypeBroker::PING_AN )
     {
-        T_PositionData  pos_data;
-        pos_data.code = result_array.at( start + n * 13);
-        TSystem::utility::replace_all_distinct(pos_data.code, "\t", "");
-        double qty_can_sell = 0;
-        try
+        start = 23;
+        content_col = 21;
+    } 
+    { 
+        for( int n = 0; n < (result_array.size() - start) / content_col; ++n )
         {
-           // ndchk
-           pos_data.pinyin = result_array.at( start + n * 13 + 1);
-           pos_data.total = boost::lexical_cast<double>(result_array.at( start + n * 13 + 2 ));
-           pos_data.avaliable = boost::lexical_cast<double>(result_array.at(start + n * 13 + 3));
-           pos_data.cost = boost::lexical_cast<double>(result_array.at(start + n * 13 + 4));
-           pos_data.value = boost::lexical_cast<double>(result_array.at(start + n * 13 + 6));
-           pos_data.profit = boost::lexical_cast<double>(result_array.at(start + n * 13 + 7));
-           pos_data.profit_percent = boost::lexical_cast<double>(result_array.at(start + n * 13 + 8));
+            T_PositionData  pos_data;
+            pos_data.code = result_array.at( start + n * content_col);
+            TSystem::utility::replace_all_distinct(pos_data.code, "\t", "");
+            double qty_can_sell = 0;
+            try
+            {
+               pos_data.pinyin = result_array.at( start + n * content_col + 1);
+               pos_data.total = boost::lexical_cast<double>(result_array.at( start + n * content_col + 2 ));
+               pos_data.avaliable = boost::lexical_cast<double>(result_array.at(start + n * content_col + 3));
+               pos_data.cost = boost::lexical_cast<double>(result_array.at(start + n * content_col + 4));
+               pos_data.value = boost::lexical_cast<double>(result_array.at(start + n * content_col + 6));
+               pos_data.profit = boost::lexical_cast<double>(result_array.at(start + n * content_col + 7));
+               pos_data.profit_percent = boost::lexical_cast<double>(result_array.at(start + n * content_col + 8));
 
-        }catch(boost::exception &e)
-        { 
-            continue;
-        } 
+            }catch(boost::exception &e)
+            { 
+                continue;
+            } 
 
-        auto iter = stocks_position_.find(pos_data.code);
-        if( iter == stocks_position_.end() )
-        {
-            stocks_position_.insert(std::make_pair(pos_data.code, std::move(pos_data)));
-        }else
-            iter->second = pos_data;
-    }
+            auto iter = stocks_position_.find(pos_data.code);
+            if( iter == stocks_position_.end() )
+            {
+                stocks_position_.insert(std::make_pair(pos_data.code, std::move(pos_data)));
+            }else
+                iter->second = pos_data;
+        }
+    } 
+      
     return stocks_position_;
 }
 
@@ -474,9 +480,17 @@ T_Capital WinnerApp::QueryCapital()
         return capital;
     try
     {
-     capital.remain = boost::lexical_cast<double>(result_array.at(11));
-     capital.available = boost::lexical_cast<double>(result_array.at(12));
-     capital.total = boost::lexical_cast<double>(result_array.at(15));
+        if( p_user_broker_info_->type == TypeBroker::PING_AN )
+        {
+            capital.remain = boost::lexical_cast<double>(result_array.at(19));
+            capital.available = boost::lexical_cast<double>(result_array.at(20));
+            capital.total = boost::lexical_cast<double>(result_array.at(25));
+        }else
+        {
+         capital.remain = boost::lexical_cast<double>(result_array.at(11));
+         capital.available = boost::lexical_cast<double>(result_array.at(12));
+         capital.total = boost::lexical_cast<double>(result_array.at(15));
+        }
     }catch(boost::exception &e)
     { 
     }

@@ -304,7 +304,7 @@ void WinnerWin::DoAddBuyTask()
         });
         // add to task list ui
         InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
-        app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("任务添加成功!"));
+        app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("突破买入任务添加成功!"));
         app_->AppendLog2Ui("添加突破买入任务 : %d 成功\n", task_info->id);
 
     }else if( ui.combox_buy_type->currentText() == cst_str_inflection_buy )
@@ -344,8 +344,7 @@ void WinnerWin::DoAddBuyTask()
     {
         if( !check_le_stock(TypeTask::BATCHES_BUY) )
             return;
- 
-        ui.dbspbox_buytask_alert_price->value();
+  
         //  Inflection sell task  info setup 
         auto task_info = std::make_shared<T_TaskInformation>();
         task_info->type = TypeTask::BATCHES_BUY;

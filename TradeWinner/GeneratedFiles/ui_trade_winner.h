@@ -698,7 +698,7 @@ public:
         TradeWinnerClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(TradeWinnerClass);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 917, 23));
+        menuBar->setGeometry(QRect(0, 0, 917, 18));
         menu_system = new QMenu(menuBar);
         menu_system->setObjectName(QStringLiteral("menu_system"));
         menu_help = new QMenu(menuBar);
@@ -758,7 +758,7 @@ public:
 
         retranslateUi(TradeWinnerClass);
 
-        tabwid_holder->setCurrentIndex(4);
+        tabwid_holder->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(TradeWinnerClass);

@@ -262,7 +262,7 @@ void WinnerWin::DoQueryCapital()
     ui.pte_capital->appendPlainText(QString::fromLocal8Bit("资金:\n"));
     ui.pte_capital->appendPlainText(QString::fromLocal8Bit(utility::FormatStr("总资金:\t%.2f\n", captital.total).c_str())); 
     ui.pte_capital->appendPlainText(QString::fromLocal8Bit(utility::FormatStr("可用:\t%.2f\n", captital.available).c_str()));
-    ui.pte_capital->appendPlainText(QString::fromLocal8Bit(utility::FormatStr("余额:\t%.2f\n", captital.remain).c_str()));
+    ui.pte_capital->appendPlainText(QString::fromLocal8Bit(utility::FormatStr("余额:\t%.2f\n\n", captital.remain).c_str()));
 
     //ui.pte_capital->appendPlainText(QString::fromLocal8Bit("资金:\n"));
 
@@ -385,6 +385,34 @@ void WinnerWin::SlotTbvTasksActionDetail(bool)
         FillBuyTaskWin(p_tskinfo->type, *p_tskinfo);
 		ui.tabwid_holder->setCurrentIndex(cst_tab_index_buy_task);
         break;
+    case TypeTask::EQUAL_SECTION:
+        {
+            ui.le_eqsec_stock->setText( QString("%1/%2").arg(p_tskinfo->stock.c_str()).arg(QString::fromLocal8Bit(p_tskinfo->stock_pinyin.c_str())) );
+            
+            ui.dbspbox_eqsec_start_price->setValue(p_tskinfo->alert_price);
+            ui.dbspbox_eqsec_raise_percent->setValue(p_tskinfo->secton_task.raise_percent);
+            ui.dbspbox_eqsec_fall_percent->setValue(p_tskinfo->secton_task.fall_percent);
+            ui.spinBox_eqsec_quantity->setValue(p_tskinfo->quantity);
+             
+            if( Equal(p_tskinfo->secton_task.max_trig_price, EQSEC_MAX_STOP_PRICE) )
+                ui.cb_max_stop_trigger->setChecked(false);
+            else
+                ui.cb_max_stop_trigger->setChecked(true);
+            if( Equal(p_tskinfo->secton_task.min_trig_price, EQSEC_MIN_CLEAR_PRICE) )
+                ui.cb_min_clear_trigger->setChecked(false);
+            else
+                ui.cb_min_clear_trigger->setChecked(true);
+            ui.dbspbox_eqsec_max_price->setValue(p_tskinfo->secton_task.max_trig_price);
+            ui.dbspbox_eqsec_min_price->setValue(p_tskinfo->secton_task.min_trig_price);
+
+            ui.combox_eqsec_price_level->setCurrentText(ToQString(static_cast<TypeQuoteLevel>(p_tskinfo->target_price_level)));
+            
+            ui.timeEdit_eqsec_begin->setTime(Int2Qtime(p_tskinfo->start_time));
+            ui.timeEdit_eqsec_end->setTime(Int2Qtime(p_tskinfo->end_time));
+            ui.tabwid_holder->setCurrentIndex(cst_tab_index_eqsec_task);
+        }
+        break;
+
     }
      
 

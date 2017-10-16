@@ -26,6 +26,8 @@ QString ToQString(TypeTask val)
         return QString::fromLocal8Bit("跟踪止盈");
     case TypeTask::BATCHES_SELL:
         return QString::fromLocal8Bit("分批出货");
+    case TypeTask::EQUAL_SECTION:
+        return QString::fromLocal8Bit("等区间交易");
     default: assert(0);
     }
     return "";

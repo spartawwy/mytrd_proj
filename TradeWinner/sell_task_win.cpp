@@ -326,7 +326,7 @@ void WinnerWin::DoAddTask()
     ui.timeEdit_begin->setTime(QTime(9, 30, 0));
     ui.timeEdit_end->setTime(QTime(15, 30, 0));
       
-    app_->msg_win().ShowUI(QString::fromLocal8Bit("提示!"), QString::fromLocal8Bit("添加成功!"));
+    app_->msg_win().ShowUI(QString::fromLocal8Bit("提示!"), QString::fromLocal8Bit("任务添加成功!"));
 }
 
 void WinnerWin::DoAlertPercentChanged(double val)
