@@ -89,7 +89,7 @@ public:
 
     void Emit(StrategyTask* p, int type) { emit SigTaskStatChange(p, type); }
     void EmitSigRemoveTask(int id) { emit SigRemoveTask(id);}
-     
+    // memory will be delete by this function 
     void EmitSigShowUi(std::string *str) { emit SigShowUi(str); }
 
     T_PositionData* WinnerApp::QueryPosition(const std::string& code);
@@ -126,7 +126,8 @@ private:
     TaskStrand  trade_strand_;
     //std::shared_ptr<MyThread>  thread_;
     std::shared_ptr<StockTicker>  stock_ticker_;
-    int stock_ticker_life_count;
+    int stock_ticker_life_count_;
+    bool stock_ticker_enable_flag_;
 
     TradeAgent  trade_agent_;
 

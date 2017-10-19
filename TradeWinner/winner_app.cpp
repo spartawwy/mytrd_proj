@@ -21,6 +21,7 @@
 #include "message_win.h"
 
 static bool SetCurrentEnvPath();
+static void AjustTickFlag(bool & enable_flag);
 
 static const int cst_update_interval = 2000;  //ms :notice value have to be bigger than 1000
 
@@ -29,7 +30,8 @@ WinnerApp::WinnerApp(int argc, char* argv[])
     , ServerClientAppBase("client", "trade_winner", "0.1")
     , ticker_strand_(task_pool())
     , task_calc_strand_(task_pool())
-    , stock_ticker_life_count(0)
+    , stock_ticker_life_count_(0)
+    , stock_ticker_enable_flag_(false)
     , trade_strand_(task_pool())
     , task_infos_(256)
     , msg_win_(new MessageWin())
@@ -197,18 +199,23 @@ bool WinnerApp::Init()
 	StkQuote_GetQuote = (StkQuoteGetQuoteDelegate)GetProcAddress(stk_quoter_moudle_, "StkQuoteGetQuote");
 	assert(StkQuote_GetQuote);
 
+    AjustTickFlag(stock_ticker_enable_flag_);
+
     //-----------ticker main loop----------
     task_pool().PostTask([this]()
     {
         while(!this->exit_flag_)
         {
+            Delay(cst_update_interval);
+
+            if( !this->stock_ticker_enable_flag_ )
+               continue;
+
             ticker_strand_.PostTask([this]()
             {
                 this->stock_ticker_->Procedure();
-                this->stock_ticker_life_count  = 0;
+                this->stock_ticker_life_count_ = 0;
             });
-
-            Delay(cst_update_interval);
         }
         qDebug() << "out loop \n";
     });
@@ -216,7 +223,7 @@ bool WinnerApp::Init()
 #endif
 
     strategy_tasks_timer_->start(1000); //msec invoke DoStrategyTasksTimeout
-    normal_timer_->start(2000); // invoke DoNormalTimeout
+    normal_timer_->start(2000); // invoke DoNormalTimer
     return true;
 }
 
@@ -557,10 +564,15 @@ void WinnerApp::DoShowUi(std::string* str)
 }
 
 void WinnerApp::DoNormalTimer()
-{
-    if( ++stock_ticker_life_count > 10 )
+{ 
+    AjustTickFlag(stock_ticker_enable_flag_);
+     
+    if( stock_ticker_enable_flag_ )
     {
-        local_logger().LogLocal("thread stock_ticker procedure stop!");
+        if( ++stock_ticker_life_count_ > 10 )
+        {
+            local_logger().LogLocal("thread stock_ticker procedure stoped!");
+        }
     }
 }
 
@@ -611,3 +623,26 @@ bool SetCurrentEnvPath()
 
    return bRet;  
 }  
+
+
+void AjustTickFlag(bool & enable_flag)
+{
+    time_t rawtime;
+	struct tm * timeinfo;
+	time( &rawtime );
+	timeinfo = localtime( &rawtime ); // from 1900 year
+     
+    if( timeinfo->tm_wday == 6 || timeinfo->tm_wday == 0 ) // sunday: 0, monday : 1 ...
+        enable_flag = false;
+
+    if( !enable_flag )
+    {
+        if( timeinfo->tm_hour == 9 && timeinfo->tm_min > 19 && timeinfo->tm_sec > 19 )
+            enable_flag = true;
+
+    }else  
+    {
+        if( timeinfo->tm_hour == 15 && timeinfo->tm_min > 32 )
+            enable_flag = false;
+    }
+}

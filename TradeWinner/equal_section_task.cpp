@@ -166,13 +166,18 @@ void EqualSectionTask::HandleQuoteData()
 	
 BEFORE_TRADE:
 
-	app_->trade_strand().PostTask([iter, order_type, qty, this]()
+	app_->trade_strand().PostTask([iter, index, order_type, qty, this]()
     {
         char result[1024] = {0};
         char error_info[1024] = {0};
 	            
         // to choice price to order
-		const auto price = GetQuoteTargetPrice(*iter, order_type == TypeOrderCategory::BUY ? true : false);
+		auto price = 0.0;
+        if( this->sections_[index].section_type == TypeEqSection::CLEAR )
+            price = iter->price_b_1;
+        else
+            price = GetQuoteTargetPrice(*iter, order_type == TypeOrderCategory::BUY ? true : false);
+
 #ifdef USE_TRADE_FLAG
         assert(this->app_->trade_agent().account_data(market_type_));
 
@@ -204,10 +209,22 @@ BEFORE_TRADE:
             this->app_->EmitSigShowUi(ret_str);
         }
 		para_.secton_task.is_original = false;
-		// re calculate
-		CalculateSections(iter->cur_price, para_, sections_);
-		// save to db: save cur_price as start_price in assistant_field 
-		app_->db_moudle().UpdateEqualSection(para_.id, para_.secton_task.is_original, iter->cur_price);
+
+        if( this->sections_[index].section_type != TypeEqSection::CLEAR )
+        {
+		    // re calculate
+		    CalculateSections(iter->cur_price, para_, sections_);
+		    // save to db: save cur_price as start_price in assistant_field 
+		    app_->db_moudle().UpdateEqualSection(para_.id, para_.secton_task.is_original, iter->cur_price);
+        }else
+        {
+            auto ret_str = new std::string(utility::FormatStr("区间任务:%d %s 破底清仓!", para_.id, para_.stock.c_str()));
+            this->app_->AppendLog2Ui(ret_str->c_str());
+            this->app_->EmitSigShowUi(ret_str);
+
+            is_waitting_removed_ = true;
+            this->app_->RemoveTask(this->task_id());
+        }
     });
 
 }

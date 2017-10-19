@@ -85,8 +85,11 @@ void BreakDownTask::HandleQuoteData()
 
     }else
     {
-        time_point_open_warning_ = 0; //reset
-        this->app_->local_logger().LogLocal(TSystem::utility::FormatStr("任务:%d %s 解除预警", para_.id, this->code_data())); 
+        if( time_point_open_warning_ != 0 )
+        {
+          time_point_open_warning_ = 0; //reset
+          this->app_->local_logger().LogLocal(TSystem::utility::FormatStr("任务:%d %s 解除预警", para_.id, this->code_data())); 
+        }
     }
 
 }

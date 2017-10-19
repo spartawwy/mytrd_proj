@@ -44,7 +44,7 @@ TdxHq_GetFinanceInfoDelegate TdxHq_GetFinanceInfo = nullptr;
 using namespace TSystem;
 
 static char cst_hq_server[] = "122.224.66.108";
-
+static int  cst_hq_port = 7709;
 StockTicker::StockTicker(TSystem::LocalLogger  &logger)
     : registered_tasks_(cst_max_stock_code_count)
     , codes_taskids_(cst_max_stock_code_count)
@@ -90,7 +90,7 @@ bool StockTicker::Init()
     Buffer ErrInfo(cst_error_len);
     // 
     
-    bool bool1 = TdxHq_Connect(cst_hq_server, 7709, Result.data(), ErrInfo.data());
+    bool bool1 = TdxHq_Connect(cst_hq_server, cst_hq_port, Result.data(), ErrInfo.data());
     if (!bool1)
     { 
         qDebug() << ErrInfo.data() << "\n";//Á¬½ÓÊ§°Ü
@@ -137,9 +137,7 @@ void StockTicker::Procedure()
             { 
                 stock_codes[stock_count] = entry.second->code_data();
                 markets[stock_count] = static_cast<byte>(entry.second->market_type());
-                //entry.second->cur_state(TaskCurrentState::RUNNING);
-                //entry.second->app()->Emit(entry.second.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
-
+                 
                 ++stock_count;
             }
         });
@@ -149,7 +147,21 @@ void StockTicker::Procedure()
     {
         qDebug() << ErrInfo.data() << endl;
         logger_.LogLocal(std::string("StockTicker::Procedure TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
-        return;
+        TdxHq_Disconnect();
+        ret = TdxHq_Connect(cst_hq_server, cst_hq_port, Result.data(), ErrInfo.data());
+        if ( !ret )
+        {
+            logger_.LogLocal(std::string("StockTicker::Procedure retry TdxHq_Connect fail:") + ErrInfo.data());
+            return;
+        }
+
+        ret = TdxHq_GetSecurityQuotes(markets, stock_codes, stock_count, Result.data(), ErrInfo.data());
+        if ( !ret )
+        {
+            logger_.LogLocal(std::string("StockTicker::Procedure retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
+            return;
+        }
+         
     }
     auto tp_now = std::chrono::system_clock::now();
     time_t t_t = std::chrono::system_clock::to_time_t(tp_now); 
