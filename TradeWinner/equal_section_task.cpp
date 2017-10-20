@@ -101,7 +101,10 @@ EqualSectionTask::EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app)
 	{
 		if( task_info.assistant_field.empty() )
 		{
-			 app_->local_logger().LogLocal(utility::FormatStr("error EqualSectionTask::EqualSectionTask task %d is not is_original but assistant_field is empty ", task_info.id));
+             auto str = new std::string(utility::FormatStr("error EqualSectionTask::EqualSectionTask task %d is not is_original but assistant_field is empty ", task_info.id));
+             
+			 app_->local_logger().LogLocal(*str);
+             this->app_->EmitSigShowUi(str);
 			 ThrowTException( TSystem::CoreErrorCategory::ErrorCode::BAD_CONTENT
                 , "EqualSectionTask::EqualSectionTask"
                 , "is not original but assistant_field is empty!");

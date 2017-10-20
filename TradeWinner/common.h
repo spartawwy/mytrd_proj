@@ -285,7 +285,8 @@ struct  T_UserAccountInfo
     std::string comm_pwd_;
     std::string department_id_;
     T_UserAccountInfo(): level_(0), account_id(0), broker_id_(0){}
-
+    T_UserAccountInfo(const T_UserAccountInfo &lh) : level_(lh.level_), account_id(lh.account_id), broker_id_(lh.broker_id_), account_no_in_broker_(lh.account_no_in_broker_)
+        , trade_no_in_broker_(lh.trade_no_in_broker_), trade_pwd_(lh.trade_pwd_), comm_pwd_(lh.comm_pwd_), department_id_(lh.department_id_){}
     T_UserAccountInfo& operator = (T_UserAccountInfo lh)
     {
         level_ = lh.level_; account_id = lh.account_id; broker_id_ = lh.broker_id_; account_no_in_broker_ = lh.account_no_in_broker_;
@@ -307,9 +308,9 @@ struct T_SectionTask
 	std::string sections_info; //format: section0_type$section0_price#section1_type$section1_price
 	bool is_original;
 	T_SectionTask():raise_percent(0.0), fall_percent(0.0), raise_infection(0.0), fall_infection(0.0)
-		, multi_qty(0),max_trig_price(EQSEC_MAX_STOP_PRICE), min_trig_price(EQSEC_MIN_CLEAR_PRICE), sections_info(), is_original(true)
-	{
-	}
+		, multi_qty(0),max_trig_price(EQSEC_MAX_STOP_PRICE), min_trig_price(EQSEC_MIN_CLEAR_PRICE), sections_info(), is_original(true){}
+    T_SectionTask(const T_SectionTask&lh): raise_percent(lh.raise_percent), fall_percent(lh.fall_percent), raise_infection(lh.raise_infection), fall_infection(lh.fall_infection)
+        , multi_qty(lh.multi_qty),max_trig_price(lh.max_trig_price), min_trig_price(lh.min_trig_price), sections_info(lh.sections_info), is_original(lh.is_original){}
 };
 
 struct T_TaskInformation
@@ -363,9 +364,8 @@ struct T_StockCodeName
 {
     std::string code;
     std::string name;
-    T_StockCodeName(const std::string &cd, const std::string &nm) : code(cd), name(nm)
-    { 
-    }
+    T_StockCodeName(const std::string &cd, const std::string &nm) : code(cd), name(nm){}
+    T_StockCodeName(const T_StockCodeName &lh) : code(lh.code), name(lh.name){}
 };
 
 struct T_Capital
