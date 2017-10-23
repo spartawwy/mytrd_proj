@@ -23,7 +23,8 @@
 static bool SetCurrentEnvPath();
 static void AjustTickFlag(bool & enable_flag);
 
-static const int cst_update_interval = 2000;  //ms :notice value have to be bigger than 1000
+static const int cst_ticker_update_interval = 2000;  //ms :notice value have to be bigger than 1000
+static const int cst_normal_timer_interval = 2000;
 
 WinnerApp::WinnerApp(int argc, char* argv[])
     : QApplication(argc, argv)
@@ -199,6 +200,7 @@ bool WinnerApp::Init()
 	StkQuote_GetQuote = (StkQuoteGetQuoteDelegate)GetProcAddress(stk_quoter_moudle_, "StkQuoteGetQuote");
 	assert(StkQuote_GetQuote);
 
+    QueryPosition();
     AjustTickFlag(stock_ticker_enable_flag_);
 
     //-----------ticker main loop----------
@@ -206,7 +208,7 @@ bool WinnerApp::Init()
     {
         while(!this->exit_flag_)
         {
-            Delay(cst_update_interval);
+            Delay(cst_ticker_update_interval);
 
             if( !this->stock_ticker_enable_flag_ )
                continue;
@@ -464,6 +466,53 @@ T_PositionData* WinnerApp::QueryPosition(const std::string& code)
     return std::addressof(iter->second);
 }
 
+int WinnerApp::QueryPosAvaliable_LazyMode(const std::string& code) 
+{
+    std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
+    auto iter = stocks_position_.find(code);
+    if( iter == stocks_position_.end() )
+        return 0;
+     
+    return iter->second.avaliable;
+}
+
+void WinnerApp::AddPosition(const std::string& code, int pos)
+{
+    std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
+    auto iter = stocks_position_.find(code);
+    if( iter == stocks_position_.end() )
+    {
+        T_PositionData  pos_data;
+        pos_data.code = code;
+        pos_data.total = pos; 
+        stocks_position_.insert(std::make_pair(code, std::move(pos_data)));
+    }else
+    {
+        iter->second.total += pos;
+    }
+}
+
+// sub avaliable position
+void WinnerApp::SubPosition(const std::string& code, int pos)
+{
+    assert( pos > 0 );
+    std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
+    auto iter = stocks_position_.find(code);
+    if( iter == stocks_position_.end() )
+    {
+        local_logger().LogLocal("error: WinnerApp::SubPosition can't find " + code);
+    }else
+    {
+        if( iter->second.avaliable < pos )
+        {
+            local_logger().LogLocal( utility::FormatStr("error: WinnerApp::SubPosition %s avaliable < %d ", code.c_str(), pos) );
+        }else
+        {
+            iter->second.avaliable -= pos; 
+        }
+    }
+}
+
 T_Capital WinnerApp::QueryCapital()
 {
     T_Capital capital = {0};
@@ -574,6 +623,17 @@ void WinnerApp::DoNormalTimer()
             local_logger().LogLocal("thread stock_ticker procedure stoped!");
         }
     }
+
+    static int count_query = 0;
+    // 30 second do a position query
+    assert( 30000 / cst_normal_timer_interval > 0 );
+    if( ++count_query % (30000 / cst_normal_timer_interval) == 0 )
+    {
+        trade_strand().PostTask([this]()
+        {
+            this->QueryPosition();
+        });
+    }
 }
 
 
@@ -631,18 +691,35 @@ void AjustTickFlag(bool & enable_flag)
 	struct tm * timeinfo;
 	time( &rawtime );
 	timeinfo = localtime( &rawtime ); // from 1900 year
-     
+    
+    struct tm tm_trade_beg; 
+    tm_trade_beg.tm_year = timeinfo->tm_year;
+    tm_trade_beg.tm_mon = timeinfo->tm_mon;
+    tm_trade_beg.tm_mday = timeinfo->tm_mday;
+    tm_trade_beg.tm_hour = 9;
+    tm_trade_beg.tm_min = 20;
+    tm_trade_beg.tm_sec = 59;
+    time_t sec_beg = mktime(&tm_trade_beg);
+
+    struct tm tm_trade_end; 
+    tm_trade_end.tm_year = timeinfo->tm_year;
+    tm_trade_end.tm_mon = timeinfo->tm_mon;
+    tm_trade_end.tm_mday = timeinfo->tm_mday;
+    tm_trade_end.tm_hour = 15;
+    tm_trade_end.tm_min = 32;
+    tm_trade_end.tm_sec = 59;
+    time_t sec_end = mktime(&tm_trade_end);
+
     if( timeinfo->tm_wday == 6 || timeinfo->tm_wday == 0 ) // sunday: 0, monday : 1 ...
         enable_flag = false;
 
     if( !enable_flag )
     {
-        if( timeinfo->tm_hour == 9 && timeinfo->tm_min > 19 && timeinfo->tm_sec > 19 )
+        if( rawtime >= sec_beg && rawtime <= sec_end )
             enable_flag = true;
-
     }else  
     {
-        if( timeinfo->tm_hour == 15 && timeinfo->tm_min > 32 )
+        if( rawtime < sec_beg && rawtime > sec_end )
             enable_flag = false;
     }
 }

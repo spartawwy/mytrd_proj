@@ -92,10 +92,14 @@ public:
     // memory will be delete by this function 
     void EmitSigShowUi(std::string *str) { emit SigShowUi(str); }
 
-    T_PositionData* WinnerApp::QueryPosition(const std::string& code);
+    T_PositionData* QueryPosition(const std::string& code);
     T_Capital QueryCapital();
     //std::unordered_map<std::string, int>& stocks_position() { return stocks_position_; }
     std::unordered_map<std::string, T_PositionData> QueryPosition();
+    int QueryPosAvaliable_LazyMode(const std::string& code);
+
+    void AddPosition(const std::string& code, int pos);
+    void SubPosition(const std::string& code, int pos);
 
 	T_StockPriceInfo * GetStockPriceInfo(const std::string& code);
 

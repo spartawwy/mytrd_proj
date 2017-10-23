@@ -84,6 +84,8 @@ void FollowSellTask::HandleQuoteData()
         char result[1024] = {0};
         char error_info[1024] = {0};
 	            
+        int qty = this->app_->QueryPosAvaliable_LazyMode(para_.stock);
+        if( qty > para_.quantity ) qty = para_.quantity;
         // to choice price to sell
         const auto price = GetQuoteTargetPrice(*iter, false);
 #ifdef USE_TRADE_FLAG
@@ -91,27 +93,28 @@ void FollowSellTask::HandleQuoteData()
 
         auto sh_hld_code  = const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code;
         this->app_->local_logger().LogLocal(TagOfOrderLog(), 
-            TSystem::utility::FormatStr("触发任务:%d 跟踪止盈 %s 价格:%.2f 数量:%d", para_.id, this->code_data(), price, para_.quantity)); 
-        this->app_->AppendLog2Ui("触发任务:%d 跟踪止盈 %s 价格:%.2f 数量:%d", para_.id, this->code_data(), price, para_.quantity);
+            TSystem::utility::FormatStr("触发任务:%d 跟踪止盈 %s 价格:%.2f 数量:%d", para_.id, this->code_data(), price, qty)); 
+        this->app_->AppendLog2Ui("触发任务:%d 跟踪止盈 %s 价格:%.2f 数量:%d", para_.id, this->code_data(), price, qty);
         // sell the stock
         this->app_->trade_agent().SendOrder(this->app_->trade_client_id()
             , (int)TypeOrderCategory::SELL, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
-            , price, para_.quantity
+            , price, qty
             , result, error_info); 
 #endif
         // judge result 
         if( strlen(error_info) > 0 )
         {
             auto ret_str = new std::string(utility::FormatStr("error %d 跟踪止盈 buy %s %.2f %d fail:%s"
-                        , para_.id, para_.stock.c_str(), price, para_.quantity, error_info));
+                        , para_.id, para_.stock.c_str(), price, qty, error_info));
             this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
             this->app_->AppendLog2Ui(ret_str->c_str());
             this->app_->EmitSigShowUi(ret_str);
            
         }else
         {
-            auto ret_str = new std::string(utility::FormatStr("任务:%d 跟踪止盈 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, para_.quantity));
+            this->app_->SubPosition(para_.stock, qty);
+            auto ret_str = new std::string(utility::FormatStr("任务:%d 跟踪止盈 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, qty));
             this->app_->EmitSigShowUi(ret_str);
         }
 

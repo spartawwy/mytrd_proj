@@ -126,7 +126,7 @@ void InflectionBuyTask::HandleQuoteData()
             // send order 
         char result[1024] = {0};
         char error_info[1024] = {0};
-	            
+               
         // to choice price to sell
         const auto price = GetQuoteTargetPrice(*iter, false);
 #ifdef USE_TRADE_FLAG

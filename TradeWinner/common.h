@@ -179,7 +179,7 @@ struct T_PositionData
     double value;
     double profit;
     double profit_percent;
-    T_PositionData() : code(), pinyin(), total(0),avaliable(0), cost(0.0), value(0.0), profit(0.0), profit_percent(0.0){}
+    T_PositionData() : code(), pinyin(), total(0), avaliable(0), cost(0.0), value(0.0), profit(0.0), profit_percent(0.0){}
     T_PositionData(const T_PositionData &lh) : code(lh.code), pinyin(lh.pinyin), total(lh.total),avaliable(lh.avaliable), cost(lh.cost), value(lh.value), profit(lh.profit), profit_percent(lh.profit_percent){}
     T_PositionData(const T_PositionData &&lh) : code(std::move(lh.code)), pinyin(std::move(lh.pinyin)), total(lh.total),avaliable(lh.avaliable), cost(lh.cost), value(lh.value), profit(lh.profit), profit_percent(lh.profit_percent){}
 };
