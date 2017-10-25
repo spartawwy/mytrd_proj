@@ -38,7 +38,7 @@ QString ToQString(TypeQuoteLevel val)
     switch(val)
     {
     case TypeQuoteLevel::PRICE_CUR:
-        return QString::fromLocal8Bit("现价");
+        return QString::fromLocal8Bit("即时价");
     case TypeQuoteLevel::PRICE_BUYSELL_1:
         return QString::fromLocal8Bit("买一和卖一");
     case TypeQuoteLevel::PRICE_BUYSELL_2:

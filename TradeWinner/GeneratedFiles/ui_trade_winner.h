@@ -37,11 +37,11 @@ QT_BEGIN_NAMESPACE
 class Ui_TradeWinnerClass
 {
 public:
+    QAction *actionClose;
+    QAction *actionRestart;
+    QAction *actionStopAllTask;
     QWidget *centralWidget;
     QTabWidget *tabwid_holder;
-    QWidget *tab_capital;
-    QPlainTextEdit *pte_capital;
-    QPushButton *pbtn_query_capital;
     QWidget *tab_task_list;
     QTableView *tbview_tasks;
     QWidget *tab_sell_task;
@@ -164,11 +164,15 @@ public:
     QDoubleSpinBox *dbspbox_eqsec_min_price;
     QCheckBox *cb_min_clear_trigger;
     QCheckBox *cb_max_stop_trigger;
+    QWidget *tab_capital;
+    QPlainTextEdit *pte_capital;
+    QPushButton *pbtn_query_capital;
     QWidget *tab_log;
     QPlainTextEdit *pte_log;
     QMenuBar *menuBar;
     QMenu *menu_system;
     QMenu *menu_help;
+    QMenu *menu_operate;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
@@ -177,6 +181,12 @@ public:
         if (TradeWinnerClass->objectName().isEmpty())
             TradeWinnerClass->setObjectName(QStringLiteral("TradeWinnerClass"));
         TradeWinnerClass->resize(917, 620);
+        actionClose = new QAction(TradeWinnerClass);
+        actionClose->setObjectName(QStringLiteral("actionClose"));
+        actionRestart = new QAction(TradeWinnerClass);
+        actionRestart->setObjectName(QStringLiteral("actionRestart"));
+        actionStopAllTask = new QAction(TradeWinnerClass);
+        actionStopAllTask->setObjectName(QStringLiteral("actionStopAllTask"));
         centralWidget = new QWidget(TradeWinnerClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         tabwid_holder = new QTabWidget(centralWidget);
@@ -186,19 +196,6 @@ public:
         font.setPointSize(12);
         tabwid_holder->setFont(font);
         tabwid_holder->setIconSize(QSize(32, 32));
-        tab_capital = new QWidget();
-        tab_capital->setObjectName(QStringLiteral("tab_capital"));
-        pte_capital = new QPlainTextEdit(tab_capital);
-        pte_capital->setObjectName(QStringLiteral("pte_capital"));
-        pte_capital->setGeometry(QRect(20, 20, 681, 481));
-        pte_capital->setStyleSheet(QLatin1String("\n"
-"background-color: rgb(255, 255,255);"));
-        pte_capital->setFrameShape(QFrame::Panel);
-        pte_capital->setFrameShadow(QFrame::Plain);
-        pbtn_query_capital = new QPushButton(tab_capital);
-        pbtn_query_capital->setObjectName(QStringLiteral("pbtn_query_capital"));
-        pbtn_query_capital->setGeometry(QRect(750, 220, 81, 31));
-        tabwid_holder->addTab(tab_capital, QString());
         tab_task_list = new QWidget();
         tab_task_list->setObjectName(QStringLiteral("tab_task_list"));
         tbview_tasks = new QTableView(tab_task_list);
@@ -689,6 +686,19 @@ public:
         cb_max_stop_trigger->setObjectName(QStringLiteral("cb_max_stop_trigger"));
         cb_max_stop_trigger->setGeometry(QRect(290, 310, 61, 21));
         tabwid_holder->addTab(tab_eq_section_trd, QString());
+        tab_capital = new QWidget();
+        tab_capital->setObjectName(QStringLiteral("tab_capital"));
+        pte_capital = new QPlainTextEdit(tab_capital);
+        pte_capital->setObjectName(QStringLiteral("pte_capital"));
+        pte_capital->setGeometry(QRect(20, 20, 681, 481));
+        pte_capital->setStyleSheet(QLatin1String("\n"
+"background-color: rgb(255, 255,255);"));
+        pte_capital->setFrameShape(QFrame::Panel);
+        pte_capital->setFrameShadow(QFrame::Plain);
+        pbtn_query_capital = new QPushButton(tab_capital);
+        pbtn_query_capital->setObjectName(QStringLiteral("pbtn_query_capital"));
+        pbtn_query_capital->setGeometry(QRect(750, 220, 81, 31));
+        tabwid_holder->addTab(tab_capital, QString());
         tab_log = new QWidget();
         tab_log->setObjectName(QStringLiteral("tab_log"));
         pte_log = new QPlainTextEdit(tab_log);
@@ -703,6 +713,8 @@ public:
         menu_system->setObjectName(QStringLiteral("menu_system"));
         menu_help = new QMenu(menuBar);
         menu_help->setObjectName(QStringLiteral("menu_help"));
+        menu_operate = new QMenu(menuBar);
+        menu_operate->setObjectName(QStringLiteral("menu_operate"));
         TradeWinnerClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(TradeWinnerClass);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -754,11 +766,15 @@ public:
         QWidget::setTabOrder(timeEdit_eqsec_end, pbtn_add_eqsection_task);
 
         menuBar->addAction(menu_system->menuAction());
+        menuBar->addAction(menu_operate->menuAction());
         menuBar->addAction(menu_help->menuAction());
+        menu_system->addAction(actionClose);
+        menu_system->addAction(actionRestart);
+        menu_operate->addAction(actionStopAllTask);
 
         retranslateUi(TradeWinnerClass);
 
-        tabwid_holder->setCurrentIndex(1);
+        tabwid_holder->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(TradeWinnerClass);
@@ -767,8 +783,9 @@ public:
     void retranslateUi(QMainWindow *TradeWinnerClass)
     {
         TradeWinnerClass->setWindowTitle(QApplication::translate("TradeWinnerClass", "TradeWinner 0.1 Copyright reserved by sparta.wwy", 0));
-        pbtn_query_capital->setText(QApplication::translate("TradeWinnerClass", "\346\237\245\350\257\242", 0));
-        tabwid_holder->setTabText(tabwid_holder->indexOf(tab_capital), QApplication::translate("TradeWinnerClass", "\350\265\204\344\272\247\344\277\241\346\201\257", 0));
+        actionClose->setText(QApplication::translate("TradeWinnerClass", "\351\200\200\345\207\272", 0));
+        actionRestart->setText(QApplication::translate("TradeWinnerClass", "\351\207\215\346\226\260\345\220\257\345\212\250", 0));
+        actionStopAllTask->setText(QApplication::translate("TradeWinnerClass", "\345\201\234\346\255\242\346\211\200\346\234\211\344\273\273\345\212\241", 0));
         tabwid_holder->setTabText(tabwid_holder->indexOf(tab_task_list), QApplication::translate("TradeWinnerClass", "\344\273\273\345\212\241\345\210\227\350\241\250", 0));
         lab_out_sell2->setText(QApplication::translate("TradeWinnerClass", "sell2", 0));
         label_4->setText(QApplication::translate("TradeWinnerClass", "sell4", 0));
@@ -850,9 +867,12 @@ public:
         cb_min_clear_trigger->setText(QString());
         cb_max_stop_trigger->setText(QString());
         tabwid_holder->setTabText(tabwid_holder->indexOf(tab_eq_section_trd), QApplication::translate("TradeWinnerClass", "\347\255\211\345\214\272\351\227\264\344\272\244\346\230\223", 0));
+        pbtn_query_capital->setText(QApplication::translate("TradeWinnerClass", "\346\237\245\350\257\242", 0));
+        tabwid_holder->setTabText(tabwid_holder->indexOf(tab_capital), QApplication::translate("TradeWinnerClass", "\350\265\204\344\272\247\344\277\241\346\201\257", 0));
         tabwid_holder->setTabText(tabwid_holder->indexOf(tab_log), QApplication::translate("TradeWinnerClass", "\346\211\247\350\241\214\350\256\260\345\275\225", 0));
         menu_system->setTitle(QApplication::translate("TradeWinnerClass", "\347\263\273\347\273\237", 0));
         menu_help->setTitle(QApplication::translate("TradeWinnerClass", "\345\270\256\345\212\251", 0));
+        menu_operate->setTitle(QApplication::translate("TradeWinnerClass", "\346\223\215\344\275\234", 0));
     } // retranslateUi
 
 };

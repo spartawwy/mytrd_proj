@@ -142,6 +142,8 @@ void StockTicker::Procedure()
             }
         });
     }
+    if( stock_count < 1 )
+        return;
     auto ret = TdxHq_GetSecurityQuotes(markets, stock_codes, stock_count, Result.data(), ErrInfo.data());
     if ( !ret )
     {
@@ -307,6 +309,13 @@ void StockTicker::UnRegister(unsigned int task_id)
     }
     iter->second->cur_state(TaskCurrentState::STOP);
 	registered_tasks_.erase(iter);
+}
+
+void StockTicker::UnRegisterAll()
+{
+    std::lock_guard<std::mutex>  locker(tasks_list_mutex_);
+    registered_tasks_.clear();
+    codes_taskids_.clear();
 }
 
 bool StockTicker::GetSecurityBars(int Category, int Market, char* Zqdm, short Start, short& Count, char* Result, char* ErrInfo)

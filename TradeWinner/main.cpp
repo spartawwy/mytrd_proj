@@ -43,8 +43,7 @@ public:
         ret = winner_app.exec(); 
     }else
         winner_app.Stop();
-
-    //winner_app.Shutdown();
+     
     winner_app.WaitShutdown();
    
     return ret;

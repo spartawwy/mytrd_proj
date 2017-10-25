@@ -44,6 +44,9 @@ public slots:
 
     void RemoveByTaskId(int task_id);
 
+    void DoStatusBar(const std::string& str);
+    void DoStatusBar(std::string* str, bool is_delete=false);
+
     // sell task win--------------------
     void DoAlertPercentChanged(double val);
     void DoSellTypeChanged(const QString&);
@@ -121,6 +124,8 @@ private:
 
 	// eqsection task related
     HintList *m_eqsec_list_hint_; 
+
+    QLabel  *status_label_;
 
     double pre_close_price_;
     double buytask_pre_close_price_;

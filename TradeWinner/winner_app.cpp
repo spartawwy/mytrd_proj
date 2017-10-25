@@ -612,6 +612,22 @@ void WinnerApp::DoShowUi(std::string* str)
     delete str; str = nullptr;
 }
 
+void WinnerApp::SlotStopAllTasks(bool)
+{
+    ticker_strand().PostTask([this]()
+    {
+        this->stock_ticker().UnRegisterAll(); 
+
+        std::for_each( std::begin(strategy_tasks_), std::end(strategy_tasks_), [this](std::shared_ptr<StrategyTask> entry)
+        {
+            entry->SetOriginalState(TaskCurrentState::STOP);
+            db_moudle().UpdateTaskInfo(entry->task_info());
+            this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+        });
+    }); 
+
+}
+
 void WinnerApp::DoNormalTimer()
 { 
     AjustTickFlag(stock_ticker_enable_flag_);
@@ -621,9 +637,11 @@ void WinnerApp::DoNormalTimer()
         if( ++stock_ticker_life_count_ > 10 )
         {
             local_logger().LogLocal("thread stock_ticker procedure stoped!");
-        }
+            winner_win_.DoStatusBar("异常: 内部报价停止!");
+        }else
+            winner_win_.DoStatusBar("正常");
     }
-
+      
     static int count_query = 0;
     // 30 second do a position query
     assert( 30000 / cst_normal_timer_interval > 0 );

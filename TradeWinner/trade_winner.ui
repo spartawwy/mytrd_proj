@@ -29,7 +29,7 @@
      </font>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <property name="iconSize">
      <size>
@@ -37,44 +37,6 @@
       <height>32</height>
      </size>
     </property>
-    <widget class="QWidget" name="tab_capital">
-     <attribute name="title">
-      <string>资产信息</string>
-     </attribute>
-     <widget class="QPlainTextEdit" name="pte_capital">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>20</y>
-        <width>681</width>
-        <height>481</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">
-background-color: rgb(255, 255,255);</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::Panel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Plain</enum>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pbtn_query_capital">
-      <property name="geometry">
-       <rect>
-        <x>750</x>
-        <y>220</y>
-        <width>81</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>查询</string>
-      </property>
-     </widget>
-    </widget>
     <widget class="QWidget" name="tab_task_list">
      <attribute name="title">
       <string>任务列表</string>
@@ -1988,6 +1950,44 @@ background-color: rgb(255, 255,255);</string>
       </property>
      </widget>
     </widget>
+    <widget class="QWidget" name="tab_capital">
+     <attribute name="title">
+      <string>资产信息</string>
+     </attribute>
+     <widget class="QPlainTextEdit" name="pte_capital">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>681</width>
+        <height>481</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">
+background-color: rgb(255, 255,255);</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Panel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbtn_query_capital">
+      <property name="geometry">
+       <rect>
+        <x>750</x>
+        <y>220</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>查询</string>
+      </property>
+     </widget>
+    </widget>
     <widget class="QWidget" name="tab_log">
      <attribute name="title">
       <string>执行记录</string>
@@ -2018,13 +2018,22 @@ background-color: rgb(255, 255,255);</string>
     <property name="title">
      <string>系统</string>
     </property>
+    <addaction name="actionClose"/>
+    <addaction name="actionRestart"/>
    </widget>
    <widget class="QMenu" name="menu_help">
     <property name="title">
      <string>帮助</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menu_operate">
+    <property name="title">
+     <string>操作</string>
+    </property>
+    <addaction name="actionStopAllTask"/>
+   </widget>
    <addaction name="menu_system"/>
+   <addaction name="menu_operate"/>
    <addaction name="menu_help"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -2036,6 +2045,21 @@ background-color: rgb(255, 255,255);</string>
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionClose">
+   <property name="text">
+    <string>退出</string>
+   </property>
+  </action>
+  <action name="actionRestart">
+   <property name="text">
+    <string>重新启动</string>
+   </property>
+  </action>
+  <action name="actionStopAllTask">
+   <property name="text">
+    <string>停止所有任务</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>

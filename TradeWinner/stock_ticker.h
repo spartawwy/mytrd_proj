@@ -23,6 +23,7 @@ public:
     bool Init();
     void Register(const std::shared_ptr<StrategyTask> & task);
     void UnRegister(unsigned int task_id);
+    void UnRegisterAll();
 
     bool GetSecurityBars(int Category, int Market, char* Zqdm, short Start, short& Count, char* Result, char* ErrInfo);
 

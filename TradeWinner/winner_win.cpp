@@ -34,11 +34,11 @@ static const int cst_tbview_tasks_rowindex_price_level = 7;
 static const int cst_tbview_tasks_rowindex_start_time = 8;
 static const int cst_tbview_tasks_rowindex_end_time = 9;
 
-static const int cst_tab_capital = 0;
-static const int cst_tab_index_task_list = 1;
-static const int cst_tab_index_sell_task = 2;
-static const int cst_tab_index_buy_task = 3;
-static const int cst_tab_index_eqsec_task = 4;
+static const int cst_tab_index_task_list = 0;
+static const int cst_tab_index_sell_task = 1;
+static const int cst_tab_index_buy_task = 2;
+static const int cst_tab_index_eqsec_task = 3;
+static const int cst_tab_capital = 4;
 static const int cst_tab_index_log = 5;
 
 WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
@@ -104,6 +104,11 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
 
     //------------------tab equal section task----------------
 	InitEqSectionTaskWin();
+
+    status_label_ = new QLabel("");
+    status_label_->setIndent(3);
+    statusBar()->addWidget(status_label_, 1);
+	statusBar()->update();
 }
 
 WinnerWin::~WinnerWin()
@@ -161,9 +166,11 @@ void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_
  
 void WinnerWin::Init()
 {
-    //todo: load strategy tasks 
     bool ret = connect(this->app_, SIGNAL(SigAppendLog(char*)), this, SLOT(SlotAppendLog(char*)));
 	connect(ui.tabwid_holder, SIGNAL(currentChanged(int)), this, SLOT(SlotTabChanged(int)));
+
+    //
+    ret = connect(ui.actionStopAllTask, SIGNAL(triggered(bool)), this->app_, SLOT(SlotStopAllTasks(bool)));
 
     ui.tbview_tasks->setContextMenuPolicy(Qt::CustomContextMenu);
     ui.tbview_tasks->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -270,8 +277,8 @@ void WinnerWin::DoQueryCapital()
     std::for_each(std::begin(pos_map), std::end(pos_map), [this]( std::unordered_map<std::string, T_PositionData>::reference entry)
     {  
         auto str = QString::fromLocal8Bit(
-        utility::FormatStr("%s\t%s\t%d\t%d\t%.2f\t%.2f\n", entry.first.c_str(), app_->db_moudle().GetStockName(entry.first).c_str()
-        , entry.second.total, entry.second.avaliable, entry.second.profit, entry.second.profit_percent).c_str()  );
+            utility::FormatStr("%s\t%s\t%d\t%d\t%.2f\t%.2f\n", entry.first.c_str(), app_->db_moudle().GetStockName(entry.first).c_str()
+                , entry.second.total, entry.second.avaliable, entry.second.profit, entry.second.profit_percent).c_str()  );
         qDebug() << str << " -------\n";
         ui.pte_capital->appendPlainText(str);
          
@@ -439,6 +446,19 @@ void WinnerWin::RemoveByTaskId(int task_id)
     
 }
 
+void WinnerWin::DoStatusBar(const std::string& str)
+{
+    status_label_->setText(QString::fromLocal8Bit(str.c_str()));
+}
+
+void WinnerWin::DoStatusBar(std::string* str, bool is_delete)
+{
+    assert(str);
+    status_label_->setText(QString::fromLocal8Bit(str->c_str()));
+    if( is_delete )
+        delete str;
+}
+
 void WinnerWin::DoLeStockEditingFinished()
 {
     if( !ui.le_stock->isModified() )
@@ -487,7 +507,12 @@ void WinnerWin::DoSpboxQuantityEditingFinished()
 
 void WinnerWin::closeEvent(QCloseEvent * event)
 {
-    app_->Stop();
+    auto ret_button = QMessageBox::question(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("确定退出系统?"),
+        QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
+    if( ret_button == QMessageBox::Cancel )
+        event->ignore();
+    else
+        app_->Stop();
 }
 
 void WinnerWin::DoTaskStatChangeSignal(StrategyTask* p_task, int val)
