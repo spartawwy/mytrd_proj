@@ -35,8 +35,8 @@ static const int cst_tbview_tasks_rowindex_start_time = 8;
 static const int cst_tbview_tasks_rowindex_end_time = 9;
 
 static const int cst_tab_index_task_list = 0;
-static const int cst_tab_index_sell_task = 1;
-static const int cst_tab_index_buy_task = 2;
+static const int cst_tab_index_buy_task = 1;
+static const int cst_tab_index_sell_task = 2;
 static const int cst_tab_index_eqsec_task = 3;
 static const int cst_tab_capital = 4;
 static const int cst_tab_index_log = 5;

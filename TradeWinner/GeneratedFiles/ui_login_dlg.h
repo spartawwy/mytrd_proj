@@ -98,8 +98,8 @@ public:
     void retranslateUi(QDialog *login_dlg)
     {
         login_dlg->setWindowTitle(QApplication::translate("login_dlg", "\347\231\273\345\275\225TradeWinner 0.1", 0));
-        okButton->setText(QApplication::translate("login_dlg", "OK", 0));
-        cancelButton->setText(QApplication::translate("login_dlg", "Cancel", 0));
+        okButton->setText(QApplication::translate("login_dlg", "\347\241\256\345\256\232", 0));
+        cancelButton->setText(QApplication::translate("login_dlg", "\345\217\226\346\266\210", 0));
         label_2->setText(QApplication::translate("login_dlg", " \345\257\206\347\240\201:", 0));
         label->setText(QApplication::translate("login_dlg", "\347\224\250\346\210\267\345\220\215:", 0));
         label_3->setText(QApplication::translate("login_dlg", "TradeWinner\350\202\241\347\245\250\350\207\252\345\212\250\345\214\226\344\272\244\346\230\223\347\263\273\347\273\237", 0));
