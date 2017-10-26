@@ -13,6 +13,7 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
@@ -37,6 +38,7 @@ public:
     QLabel *label;
     QLineEdit *le_pwd;
     QLabel *label_3;
+    QCheckBox *cb_remember_userpwd;
 
     void setupUi(QDialog *login_dlg)
     {
@@ -45,7 +47,7 @@ public:
         login_dlg->resize(543, 436);
         layoutWidget = new QWidget(login_dlg);
         layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
-        layoutWidget->setGeometry(QRect(50, 250, 351, 33));
+        layoutWidget->setGeometry(QRect(50, 270, 351, 33));
         hboxLayout = new QHBoxLayout(layoutWidget);
         hboxLayout->setSpacing(6);
         hboxLayout->setObjectName(QStringLiteral("hboxLayout"));
@@ -88,6 +90,9 @@ public:
         font1.setPointSize(16);
         font1.setStyleStrategy(QFont::PreferAntialias);
         label_3->setFont(font1);
+        cb_remember_userpwd = new QCheckBox(login_dlg);
+        cb_remember_userpwd->setObjectName(QStringLiteral("cb_remember_userpwd"));
+        cb_remember_userpwd->setGeometry(QRect(230, 240, 71, 16));
 
         retranslateUi(login_dlg);
         QObject::connect(cancelButton, SIGNAL(clicked()), login_dlg, SLOT(reject()));
@@ -103,6 +108,7 @@ public:
         label_2->setText(QApplication::translate("login_dlg", " \345\257\206\347\240\201:", 0));
         label->setText(QApplication::translate("login_dlg", "\347\224\250\346\210\267\345\220\215:", 0));
         label_3->setText(QApplication::translate("login_dlg", "TradeWinner\350\202\241\347\245\250\350\207\252\345\212\250\345\214\226\344\272\244\346\230\223\347\263\273\347\273\237", 0));
+        cb_remember_userpwd->setText(QApplication::translate("login_dlg", "\350\207\252\345\212\250\344\277\235\345\255\230", 0));
     } // retranslateUi
 
 };

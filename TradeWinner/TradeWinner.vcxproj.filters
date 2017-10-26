@@ -161,6 +161,9 @@
     <ClCompile Include="eqsection_task_win.cpp">
       <Filter>win</Filter>
     </ClCompile>
+    <ClCompile Include="rwini.cpp">
+      <Filter>moudle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="trade_winner.ui">
@@ -269,6 +272,9 @@
     </ClInclude>
     <ClInclude Include="equal_section_task.h">
       <Filter>task</Filter>
+    </ClInclude>
+    <ClInclude Include="rwini.h">
+      <Filter>moudle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -6,11 +6,12 @@
 *.lo
 *.o
 *.obj
+*.suo
 
 # Precompiled Headers
 *.gch
 *.pch
-*.suo
+
 
 # Compiled Dynamic libraries
 *.so
@@ -25,6 +26,8 @@
 *.unsuccessfulbuild
 *.opensdf
 *.kd
+*.idb
+
 
 # Fortran module files
 *.mod

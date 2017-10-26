@@ -233,6 +233,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="message_win.cpp" />
     <ClCompile Include="MySpinBox.cpp" />
+    <ClCompile Include="rwini.cpp" />
     <ClCompile Include="sell_task_win.cpp" />
     <ClCompile Include="stock_ticker.cpp" />
     <ClCompile Include="strategy_task.cpp" />
@@ -371,6 +372,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets"</Command>
     </CustomBuild>
     <ClInclude Include="MySpinBox.h" />
+    <ClInclude Include="rwini.h" />
     <ClInclude Include="stk_quoter_api.h" />
     <ClInclude Include="stock_ticker.h" />
     <ClInclude Include="strategy_task.h" />
