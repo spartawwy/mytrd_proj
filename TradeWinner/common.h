@@ -106,6 +106,7 @@ enum class TaskCurrentState : char
     TORUN,   
     WAITTING, /* not stop, and is not in between start time and end time*/
     RUNNING,
+    REST, // exchange is in rest time
 };
 
   

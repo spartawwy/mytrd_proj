@@ -65,6 +65,8 @@ QString ToQString(TaskCurrentState val)
         return QString::fromLocal8Bit("等待");
     case TaskCurrentState::RUNNING:
         return QString::fromLocal8Bit("运行");
+    case TaskCurrentState::REST:
+        return QString::fromLocal8Bit("休市");
     default: assert(0);
     }
     return "";

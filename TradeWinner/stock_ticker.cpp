@@ -149,7 +149,9 @@ void StockTicker::Procedure()
     {
         qDebug() << ErrInfo.data() << endl;
         logger_.LogLocal(std::string("StockTicker::Procedure TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
-        TdxHq_Disconnect();
+        if( !strstr(ErrInfo.data(), "请重新连接") )
+            TdxHq_Disconnect();
+        logger_.LogLocal(utility::FormatStr("StockTicker::Procedure TdxHq_Connect %s : %d ", cst_hq_server, cst_hq_port) );
         ret = TdxHq_Connect(cst_hq_server, cst_hq_port, Result.data(), ErrInfo.data());
         if ( !ret )
         {

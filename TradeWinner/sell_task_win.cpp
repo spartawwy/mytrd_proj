@@ -235,6 +235,8 @@ void WinnerWin::DoAddTask()
         });
         // add to task list ui
         InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+        app_->msg_win().ShowUI(QString::fromLocal8Bit("提示!"), QString::fromLocal8Bit("破位卖出任务添加成功!"));
+        app_->AppendLog2Ui("添加破位卖出任务 : %d 成功\n", task_info->id);
 
     }else if( ui.combox_sell_type->currentText() == cst_str_inflection_sell )
     {
@@ -265,6 +267,8 @@ void WinnerWin::DoAddTask()
         });
         // add to task list ui
         InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+        app_->msg_win().ShowUI(QString::fromLocal8Bit("提示!"), QString::fromLocal8Bit("拐点卖出任务添加成功!"));
+        app_->AppendLog2Ui("添加拐点卖出任务 : %d 成功\n", task_info->id);
 
     }else if( ui.combox_sell_type->currentText() == cst_str_follow_sell )
     {
@@ -294,6 +298,9 @@ void WinnerWin::DoAddTask()
         });
         // add to task list ui
         InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+        app_->msg_win().ShowUI(QString::fromLocal8Bit("提示!"), QString::fromLocal8Bit("跟踪止盈任务添加成功!"));
+        app_->AppendLog2Ui("添加跟踪止盈任务 : %d 成功\n", task_info->id);
+
     }else if( ui.combox_sell_type->currentText() == cst_str_batches_sell )
     {
         if( !check_le_stock(TypeTask::BATCHES_SELL) )
@@ -321,12 +328,13 @@ void WinnerWin::DoAddTask()
         });
         // add to task list ui
         InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+        app_->msg_win().ShowUI(QString::fromLocal8Bit("提示!"), QString::fromLocal8Bit("分批卖出任务添加成功!"));
+        app_->AppendLog2Ui("添加分批卖出任务 : %d 成功\n", task_info->id);
     }
 
     ui.timeEdit_begin->setTime(QTime(9, 30, 0));
     ui.timeEdit_end->setTime(QTime(15, 30, 0));
-      
-    app_->msg_win().ShowUI(QString::fromLocal8Bit("提示!"), QString::fromLocal8Bit("任务添加成功!"));
+       
 }
 
 void WinnerWin::DoAlertPercentChanged(double val)
