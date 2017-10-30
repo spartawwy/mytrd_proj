@@ -4,9 +4,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <QTDIR>C:\Qt32\Qt5.2.1\5.2.1\msvc2012</QTDIR>
     <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin%3b$(PATH)</LocalDebuggerEnvironment>
-    <LocalDebuggerWorkingDirectory>C:\Users\wwang.ZDST\Desktop\TradeWinner_run\TradeWinner</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommand>C:\Users\wwang.ZDST\Desktop\TradeWinner_run\TradeWinner\TradeWinner_D.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>$(OutDir)\TradeWinner_D.exe</LocalDebuggerCommand>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <QTDIR>C:\Qt32\Qt5.2.1\5.2.1\msvc2012</QTDIR>

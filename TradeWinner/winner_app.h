@@ -88,7 +88,7 @@ public:
     std::shared_ptr<StrategyTask> FindStrategyTask(int task_id);
 
     void Emit(StrategyTask* p, int type) { emit SigTaskStatChange(p, type); }
-    void EmitSigRemoveTask(int id) { emit SigRemoveTask(id);}
+    //void EmitSigRemoveTask(int id) { emit SigRemoveTask(id);}
     // memory will be delete by this function 
     void EmitSigShowUi(std::string *str) { emit SigShowUi(str); }
 
@@ -111,7 +111,7 @@ signals:
     //(StrategyTask*, change kind)
     void SigTaskStatChange(StrategyTask*, int);
     void SigAppendLog(char*);
-    void SigRemoveTask(int);
+    //void SigRemoveTask(int);
     //void SigShowUi(std::shared_ptr<std::string>); //cause can't invoke so use raw point
     void SigShowUi(std::string*);
 

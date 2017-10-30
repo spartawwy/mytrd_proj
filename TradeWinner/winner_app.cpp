@@ -47,9 +47,9 @@ WinnerApp::WinnerApp(int argc, char* argv[])
     , strategy_tasks_timer_(std::make_shared<QTimer>())
     , normal_timer_(std::make_shared<QTimer>())
     , stocks_position_(256)
-	, stk_quoter_moudle_(nullptr)
-	, StkQuote_GetQuote(nullptr)
-	, stocks_price_info_(256)
+    , stk_quoter_moudle_(nullptr)
+    , StkQuote_GetQuote(nullptr)
+    , stocks_price_info_(256)
     , p_user_account_info_(nullptr)
     , p_user_broker_info_(nullptr)
 { 
@@ -62,8 +62,8 @@ WinnerApp::WinnerApp(int argc, char* argv[])
 
 WinnerApp::~WinnerApp()
 {
-	if( stk_quoter_moudle_ ) 
-		FreeLibrary(stk_quoter_moudle_);
+    if( stk_quoter_moudle_ ) 
+        FreeLibrary(stk_quoter_moudle_);
     if( msg_win_ )
     {
         msg_win_->close();
@@ -74,10 +74,10 @@ WinnerApp::~WinnerApp()
 bool WinnerApp::Init()
 {
     option_dir_type(AppBase::DirType::STAND_ALONE_APP);
-	option_validate_app(false);
+    option_validate_app(false);
 
     std::string cur_dir(".//");
-	work_dir(cur_dir);
+    work_dir(cur_dir);
     local_logger_.SetDir(cur_dir);
 
     int ret = 0;
@@ -91,10 +91,10 @@ bool WinnerApp::Init()
         }
         return false;
     }
-     
+
 #if 1
     db_moudle_.Init();
-    
+
 #endif
 
 #if 1
@@ -115,7 +115,7 @@ bool WinnerApp::Init()
 
 #endif
 #ifdef USE_TRADE_FLAG
-    
+
     BrokerCfgWin  bcf_win(this);
     bcf_win.Init();
     ret = bcf_win.exec();
@@ -124,7 +124,7 @@ bool WinnerApp::Init()
         Stop();
         return false;
     }
-    
+
 #endif
 
 #ifdef USE_TRADE_FLAG
@@ -162,31 +162,32 @@ bool WinnerApp::Init()
     winner_win_.Init(); // inner use task_info
     winner_win_.show();
     bool ret1 = QObject::connect(this, SIGNAL(SigTaskStatChange(StrategyTask*, int)), &winner_win_, SLOT(DoTaskStatChangeSignal(StrategyTask*, int)));
-    ret1 = QObject::connect(this, SIGNAL(SigRemoveTask(int)), &winner_win_, SLOT(RemoveByTaskId(int)));
+
+    //ret1 = QObject::connect(this, SIGNAL(SigRemoveTask(int)), &winner_win_, SLOT(RemoveByTaskId(int)));
     //ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::shared_ptr<std::string>)), this, SLOT(DoShowUi(std::shared_ptr<std::string>)));
     ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::string *)), this, SLOT(DoShowUi(std::string *)));
-     
+
 #endif
-     
+
 #if 1 
 
     stock_ticker_ = std::make_shared<StockTicker>(this->local_logger());
     stock_ticker_->Init();
 
-	//-----------------------StkQuoter-------------
+    //-----------------------StkQuoter-------------
     //SetCurrentEnvPath();
     char chBuf[1024] = {0};
     if( !::GetModuleFileName(NULL, chBuf, MAX_PATH) )  
-       return false;   
-   std::string strAppPath(chBuf);  
+        return false;   
+    std::string strAppPath(chBuf);  
 
-   auto nPos = strAppPath.rfind('\\');
-   if( nPos > 0 )
-   {   
-       strAppPath = strAppPath.substr(0, nPos+1);  
-   }  
-   std::string stk_quote_full_path = strAppPath + "StkQuoter.dll";
-   stk_quoter_moudle_ = LoadLibrary(stk_quote_full_path.c_str());
+    auto nPos = strAppPath.rfind('\\');
+    if( nPos > 0 )
+    {   
+        strAppPath = strAppPath.substr(0, nPos+1);  
+    }  
+    std::string stk_quote_full_path = strAppPath + "StkQuoter.dll";
+    stk_quoter_moudle_ = LoadLibrary(stk_quote_full_path.c_str());
     if( !stk_quoter_moudle_ )
     {
         auto erro = GetLastError();
@@ -210,7 +211,7 @@ bool WinnerApp::Init()
             Delay(cst_ticker_update_interval);
 
             if( !this->stock_ticker_enable_flag_ )
-               continue;
+                continue;
 
             ticker_strand_.PostTask([this]()
             {
@@ -240,7 +241,7 @@ void WinnerApp::RemoveTask(unsigned int task_id)
     ticker_strand().PostTask([task_id, this]()
     {
         this->stock_ticker_->UnRegister(task_id);
-        this->EmitSigRemoveTask(task_id); // invoke WinnerWin::RemoveByTaskId
+        //this->EmitSigRemoveTask(task_id); // invoke WinnerWin::RemoveByTaskId
         DelTaskById(task_id);
 
         /*auto strategy_task = this->FindStrategyTask(task_id);
@@ -249,11 +250,11 @@ void WinnerApp::RemoveTask(unsigned int task_id)
     });
 }
 
- int WinnerApp::Cookie_NextTaskId()
- {
-     std::lock_guard<std::mutex> locker(cookie_mutex_);
-     return ++ cookie_.data_->max_task_id;
- }
+int WinnerApp::Cookie_NextTaskId()
+{
+    std::lock_guard<std::mutex> locker(cookie_mutex_);
+    return ++ cookie_.data_->max_task_id;
+}
 
 int WinnerApp::Cookie_MaxTaskId()
 {
@@ -272,26 +273,26 @@ bool WinnerApp::LoginBroker(int broker_id, int depart_id, const std::string& acc
     assert(trade_agent_.IsInited());
 
     char error_info[256] = {0};
-     
+
     auto p_broker_info = db_moudle_.FindUserBrokerByBroker(broker_id);
     if( !p_broker_info) 
         return false;
     auto p_user_account_info = db_moudle_.FindUserAccountInfo(user_info_.id); 
-   //assert(p_user_account_info && p_user_broker_info);
+    //assert(p_user_account_info && p_user_broker_info);
 
     /*trade_client_id_ = trade_agent_.Logon("122.224.113.121"
-        , 7708, "2.20", 1, "32506627"
-        , "32506627", "626261", "", error_info);*/
+    , 7708, "2.20", 1, "32506627"
+    , "32506627", "626261", "", error_info);*/
     //p_user_account_info->comm_pwd_;
     trade_client_id_ = trade_agent_.Logon(const_cast<char*>(p_broker_info->ip.c_str())
-            , p_broker_info->port
-            , const_cast<char*>(p_broker_info->com_ver.c_str())
-            , 1
-            , const_cast<char*>(account.c_str())
-            , const_cast<char*>(account.c_str())  // default trade no is account no  
-            , const_cast<char*>(password.c_str())
-            , p_broker_info->type == TypeBroker::ZHONGYGJ ? password.c_str() : ""// communication password 
-            , error_info);
+        , p_broker_info->port
+        , const_cast<char*>(p_broker_info->com_ver.c_str())
+        , 1
+        , const_cast<char*>(account.c_str())
+        , const_cast<char*>(account.c_str())  // default trade no is account no  
+        , const_cast<char*>(password.c_str())
+        , p_broker_info->type == TypeBroker::ZHONGYGJ ? password.c_str() : ""// communication password 
+        , error_info);
     if( trade_client_id_ == -1 ) 
     {
         // QMessageBox::information(nullptr, "alert", "login fail!");
@@ -344,13 +345,13 @@ bool WinnerApp::DelTaskById(int task_id)
         this->stock_ticker_->UnRegister(task_id);
     });
 
-	TypeTask  task_type;
+    TypeTask  task_type;
     {
-    ReadLock  locker(task_infos_mutex_);
-    auto iter = task_infos_.find(task_id);
-    assert(iter != task_infos_.end());
-	task_type = iter->second->type;
-    db_moudle().AddHisTask(iter->second);
+        ReadLock  locker(task_infos_mutex_);
+        auto iter = task_infos_.find(task_id);
+        assert(iter != task_infos_.end());
+        task_type = iter->second->type;
+        db_moudle().AddHisTask(iter->second);
     }
 
     // del database related records
@@ -384,7 +385,7 @@ std::shared_ptr<StrategyTask> WinnerApp::FindStrategyTask(int task_id)
 std::unordered_map<std::string, T_PositionData> WinnerApp::QueryPosition()
 { 
     auto result = std::make_shared<Buffer>(5*1024);
-     
+
     char error[1024] = {0};
 #ifdef USE_TRADE_FLAG
     trade_agent_.QueryData(trade_client_id_, (int)TypeQueryCategory::STOCK, result->data(), error);
@@ -396,7 +397,7 @@ std::unordered_map<std::string, T_PositionData> WinnerApp::QueryPosition()
     qDebug() << QString::fromLocal8Bit( result->data() ) << "\n";
 #endif
     std::string str_result = result->c_data();
-     
+
     /*TSystem::utility::replace_all_distinct(str_result, "\n\t", "\t");
     TSystem::utility::replace_all_distinct(str_result, "\t\n", "\t");
     qDebug() << " line 378" << "\n";
@@ -406,10 +407,10 @@ std::unordered_map<std::string, T_PositionData> WinnerApp::QueryPosition()
     /*qDebug() << " line 382" << "\n";
     qDebug() << str_result.c_str() << " ----\n";*/
     auto result_array = TSystem::utility::split(str_result, "\t");
-    
+
     std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
 
-    
+
     int start = 14;
     int content_col = 13;
     if( p_user_broker_info_->type == TypeBroker::ZHONGYGJ )
@@ -428,13 +429,13 @@ std::unordered_map<std::string, T_PositionData> WinnerApp::QueryPosition()
             double qty_can_sell = 0;
             try
             {
-               pos_data.pinyin = result_array.at( start + n * content_col + 1);
-               pos_data.total = boost::lexical_cast<double>(result_array.at( start + n * content_col + 2 ));
-               pos_data.avaliable = boost::lexical_cast<double>(result_array.at(start + n * content_col + 3));
-               pos_data.cost = boost::lexical_cast<double>(result_array.at(start + n * content_col + 4));
-               pos_data.value = boost::lexical_cast<double>(result_array.at(start + n * content_col + 6));
-               pos_data.profit = boost::lexical_cast<double>(result_array.at(start + n * content_col + 7));
-               pos_data.profit_percent = boost::lexical_cast<double>(result_array.at(start + n * content_col + 8));
+                pos_data.pinyin = result_array.at( start + n * content_col + 1);
+                pos_data.total = boost::lexical_cast<double>(result_array.at( start + n * content_col + 2 ));
+                pos_data.avaliable = boost::lexical_cast<double>(result_array.at(start + n * content_col + 3));
+                pos_data.cost = boost::lexical_cast<double>(result_array.at(start + n * content_col + 4));
+                pos_data.value = boost::lexical_cast<double>(result_array.at(start + n * content_col + 6));
+                pos_data.profit = boost::lexical_cast<double>(result_array.at(start + n * content_col + 7));
+                pos_data.profit_percent = boost::lexical_cast<double>(result_array.at(start + n * content_col + 8));
 
             }catch(boost::exception &e)
             { 
@@ -449,7 +450,7 @@ std::unordered_map<std::string, T_PositionData> WinnerApp::QueryPosition()
                 iter->second = pos_data;
         }
     } 
-      
+
     return stocks_position_;
 }
 
@@ -471,7 +472,7 @@ int WinnerApp::QueryPosAvaliable_LazyMode(const std::string& code)
     auto iter = stocks_position_.find(code);
     if( iter == stocks_position_.end() )
         return 0;
-     
+
     return iter->second.avaliable;
 }
 
@@ -515,9 +516,9 @@ void WinnerApp::SubPosition(const std::string& code, int pos)
 T_Capital WinnerApp::QueryCapital()
 {
     T_Capital capital = {0};
-      
+
     auto result = std::make_shared<Buffer>(5*1024);
-     
+
     char error[1024] = {0};
 #ifdef USE_TRADE_FLAG
     trade_agent_.QueryData(trade_client_id_, (int)TypeQueryCategory::CAPITAL, result->data(), error);
@@ -529,7 +530,7 @@ T_Capital WinnerApp::QueryCapital()
 #endif
     std::string str_result = result->c_data();
     TSystem::utility::replace_all_distinct(str_result, "\n", "\t");
-     
+
     auto result_array = TSystem::utility::split(str_result, "\t");
     if( result_array.size() < 13 )
         return capital;
@@ -542,31 +543,31 @@ T_Capital WinnerApp::QueryCapital()
             capital.total = boost::lexical_cast<double>(result_array.at(25));
         }else
         {
-         capital.remain = boost::lexical_cast<double>(result_array.at(11));
-         capital.available = boost::lexical_cast<double>(result_array.at(12));
-         capital.total = boost::lexical_cast<double>(result_array.at(15));
+            capital.remain = boost::lexical_cast<double>(result_array.at(11));
+            capital.available = boost::lexical_cast<double>(result_array.at(12));
+            capital.total = boost::lexical_cast<double>(result_array.at(15));
         }
     }catch(boost::exception &e)
     { 
     }
-     
+
     return capital;
 }
 
 T_StockPriceInfo * WinnerApp::GetStockPriceInfo(const std::string& code)
 {
     assert(StkQuote_GetQuote);
-	char stocks[1][16];
-	auto iter = stocks_price_info_.find(code);
-	if( iter != stocks_price_info_.end() )
-		return std::addressof(iter->second);
+    char stocks[1][16];
+    auto iter = stocks_price_info_.find(code);
+    if( iter != stocks_price_info_.end() )
+        return std::addressof(iter->second);
 
-	strcpy_s(stocks[0], code.c_str());
+    strcpy_s(stocks[0], code.c_str());
 #if 1
-	T_StockPriceInfo price_info[1];
-	auto num = StkQuote_GetQuote(stocks, 1, price_info);
-	if( num < 1 )
-		return nullptr;
+    T_StockPriceInfo price_info[1];
+    auto num = StkQuote_GetQuote(stocks, 1, price_info);
+    if( num < 1 )
+        return nullptr;
 #endif
 
     T_StockPriceInfo& info = stocks_price_info_.insert(std::make_pair(code, price_info[0])).first->second;
@@ -594,10 +595,10 @@ void WinnerApp::DoStrategyTasksTimeout()
             && (cur_time < entry->tp_start() || cur_time > entry->tp_end())
             )
         {
-             this->ticker_strand_.PostTask([entry, this]()
+            this->ticker_strand_.PostTask([entry, this]()
             {
                 this->stock_ticker_->UnRegister(entry->task_id());
-				this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+                this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
             });
         }
     });
@@ -631,7 +632,7 @@ void WinnerApp::SlotStopAllTasks(bool)
 void WinnerApp::DoNormalTimer()
 { 
     AjustTickFlag(stock_ticker_enable_flag_);
-     
+
     if( stock_ticker_enable_flag_ )
     {
         if( ++stock_ticker_life_count_ > 10 )
@@ -641,7 +642,7 @@ void WinnerApp::DoNormalTimer()
         }else
             winner_win_.DoStatusBar("Õý³£");
     }
-      
+
     static int count_query = 0;
     // 30 second do a position query
     assert( 30000 / cst_normal_timer_interval > 0 );
@@ -657,59 +658,59 @@ void WinnerApp::DoNormalTimer()
 
 void WinnerApp::AppendLog2Ui(const char *fmt, ...)
 {
-	va_list ap;
+    va_list ap;
 
-	const int cst_buf_len = 1024;
-	char szContent[cst_buf_len] = {0};
-	char *p_buf = new char[cst_buf_len]; 
-	memset(p_buf, 0, cst_buf_len);
+    const int cst_buf_len = 1024;
+    char szContent[cst_buf_len] = {0};
+    char *p_buf = new char[cst_buf_len]; 
+    memset(p_buf, 0, cst_buf_len);
 
-	va_start(ap, fmt);
-	vsprintf_s(szContent, sizeof(szContent), fmt, ap);
-	va_end(ap);
+    va_start(ap, fmt);
+    vsprintf_s(szContent, sizeof(szContent), fmt, ap);
+    va_end(ap);
 
-	time_t rawtime;
-	struct tm * timeinfo;
-	time( &rawtime );
-	timeinfo = localtime( &rawtime );
+    time_t rawtime;
+    struct tm * timeinfo;
+    time( &rawtime );
+    timeinfo = localtime( &rawtime );
 
-	sprintf_s( p_buf, cst_buf_len, "[%d %02d:%02d:%02d] %s \n"
+    sprintf_s( p_buf, cst_buf_len, "[%d %02d:%02d:%02d] %s \n"
         , (timeinfo->tm_year+1900)*10000 + (timeinfo->tm_mon+1)*100 + timeinfo->tm_mday
         , timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, szContent ); 
 
-	emit SigAppendLog(p_buf); //will invoke SlotAppendLog
+    emit SigAppendLog(p_buf); //will invoke SlotAppendLog
 }
 
 bool SetCurrentEnvPath()  
 {  
-   char chBuf[0x8000]={0};  
-   DWORD dwSize = GetEnvironmentVariable("path", chBuf, 0x10000);  
-   std::string strEnvPaths(chBuf);  
-    
-   if(!::GetModuleFileName(NULL, chBuf, MAX_PATH))  
-       return false;   
-   std::string strAppPath(chBuf);  
+    char chBuf[0x8000]={0};  
+    DWORD dwSize = GetEnvironmentVariable("path", chBuf, 0x10000);  
+    std::string strEnvPaths(chBuf);  
 
-   auto nPos = strAppPath.rfind('\\');
-   if( nPos > 0 )
-   {   
-       strAppPath = strAppPath.substr(0, nPos+1);  
-   }  
-    
-   strEnvPaths += ";" + strAppPath +";";  
-   bool bRet = SetEnvironmentVariable("path",strEnvPaths.c_str());  
+    if(!::GetModuleFileName(NULL, chBuf, MAX_PATH))  
+        return false;   
+    std::string strAppPath(chBuf);  
 
-   return bRet;  
+    auto nPos = strAppPath.rfind('\\');
+    if( nPos > 0 )
+    {   
+        strAppPath = strAppPath.substr(0, nPos+1);  
+    }  
+
+    strEnvPaths += ";" + strAppPath +";";  
+    bool bRet = SetEnvironmentVariable("path",strEnvPaths.c_str());  
+
+    return bRet;  
 }  
 
 
 void AjustTickFlag(bool & enable_flag)
 {
     time_t rawtime;
-	struct tm * timeinfo;
-	time( &rawtime );
-	timeinfo = localtime( &rawtime ); // from 1900 year
-    
+    struct tm * timeinfo;
+    time( &rawtime );
+    timeinfo = localtime( &rawtime ); // from 1900 year
+
     struct tm tm_trade_beg; 
     tm_trade_beg.tm_year = timeinfo->tm_year;
     tm_trade_beg.tm_mon = timeinfo->tm_mon;
