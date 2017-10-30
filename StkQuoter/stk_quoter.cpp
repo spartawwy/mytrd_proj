@@ -7,7 +7,7 @@
 #include <iostream>  
 //#include <fstream>  
 #include "afxinet.h"  
- 
+
 #include <memory>
 #include <string>
 
@@ -36,14 +36,14 @@ extern "C" int STKQUOTER_IMEXPORT  StkQuoteGetQuote(char stocks[][16], const uns
             sinaurl += "sz";
         sinaurl += stocks[i];
     }
-      
+
     try
     {  
         sessionfile = session.OpenURL((LPCTSTR)sinaurl.c_str());  
     }catch(CInternetException& ex)
     {  
         std::cout << "error" << " open request faile:"  
-        <<"dwcontext:" << ex.m_dwContext << "\tdwErrorCode:" << ex.m_dwError << std::endl;  
+            <<"dwcontext:" << ex.m_dwContext << "\tdwErrorCode:" << ex.m_dwError << std::endl;  
         ex.Delete();  
     }
 
@@ -59,7 +59,7 @@ extern "C" int STKQUOTER_IMEXPORT  StkQuoteGetQuote(char stocks[][16], const uns
         pos += getlen;
 
     }while (getlen > 0);
- 
+
     //std::cout << p_buffer << std::endl;
 
     auto stock_raw_lines = split(p_buffer, ";");
@@ -85,11 +85,11 @@ extern "C" int STKQUOTER_IMEXPORT  StkQuoteGetQuote(char stocks[][16], const uns
         }
         ++ index;
     });
-    
+
 #endif
     delete [] p_buffer;
 
 #endif
-  
+
     return size;
 }

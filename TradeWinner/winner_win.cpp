@@ -310,12 +310,8 @@ void WinnerWin::SlotTbvTasksContextMenu(QPoint p)
 }
 
 void WinnerWin::SlotTbvTasksActionStart(bool)
-{
-    // todo:
+{ 
     auto task_id = TbvTasksCurRowTaskId();
-
-    /*auto iter = app_->task_infos().find(task_id);
-    assert(iter != app_->task_infos().end());*/
      
     auto strategy_task = app_->FindStrategyTask(task_id); 
     assert(strategy_task); 
@@ -325,6 +321,7 @@ void WinnerWin::SlotTbvTasksActionStart(bool)
      
     app_->ticker_strand().PostTask([strategy_task, this]()
     {
+        this->app_->local_logger().LogLocal(utility::FormatStr("SlotTbvTasksActionStart %d", strategy_task->task_id()));
         this->app_->stock_ticker().Register(strategy_task);
     });
 }
@@ -338,10 +335,11 @@ void WinnerWin::SlotTbvTasksActionStop(bool)
     assert(strategy_task);
     strategy_task->SetOriginalState(TaskCurrentState::STOP);
     app_->db_moudle().UpdateTaskInfo(strategy_task->task_info());
-
+    this->app_->local_logger().LogLocal(utility::FormatStr("SlotTbvTasksActionStop step1 %d", task_id));
     auto p_strategy_task = strategy_task.get();
     app_->ticker_strand().PostTask([p_strategy_task, task_id, this]()
     {
+        this->app_->local_logger().LogLocal(utility::FormatStr("SlotTbvTasksActionStop step2 %d", task_id));
         this->app_->stock_ticker().UnRegister(task_id);
         this->app_->Emit(p_strategy_task, static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
     });

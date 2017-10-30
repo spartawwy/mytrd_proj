@@ -102,14 +102,25 @@ EqualSectionTask::EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app)
 		if( task_info.assistant_field.empty() )
 		{
              auto str = new std::string(utility::FormatStr("error EqualSectionTask::EqualSectionTask task %d is not is_original but assistant_field is empty ", task_info.id));
-             
-			 app_->local_logger().LogLocal(*str);
+             app_->local_logger().LogLocal(*str);
              this->app_->EmitSigShowUi(str);
-			 ThrowTException( TSystem::CoreErrorCategory::ErrorCode::BAD_CONTENT
+
+             auto p_stk_price = app->GetStockPriceInfo(task_info.stock);
+			 if( p_stk_price )
+             {
+                 task_info.assistant_field = utility::FormatStr("%.2f", p_stk_price->open_price);
+                 CalculateSections(std::stod(task_info.assistant_field), task_info, sections_);
+             }else
+             {
+                 task_info.state = static_cast<int>(TaskCurrentState::EXCEPT);
+                 is_waitting_removed_ = true;
+             }
+             
+			 /*ThrowTException( TSystem::CoreErrorCategory::ErrorCode::BAD_CONTENT
                 , "EqualSectionTask::EqualSectionTask"
-                , "is not original but assistant_field is empty!");
-		}
-		CalculateSections(std::stod(task_info.assistant_field), task_info, sections_);
+                , "is not original but assistant_field is empty!");*/
+		}else
+		  CalculateSections(std::stod(task_info.assistant_field), task_info, sections_);
 	}
 	 
 }

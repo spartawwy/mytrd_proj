@@ -158,7 +158,7 @@ void StockTicker::Procedure()
             logger_.LogLocal(std::string("StockTicker::Procedure retry TdxHq_Connect fail:") + ErrInfo.data());
             return;
         }
-
+        logger_.LogLocal(utility::FormatStr("StockTicker::Procedure TdxHq_Connect ok!"));
         ret = TdxHq_GetSecurityQuotes(markets, stock_codes, stock_count, Result.data(), ErrInfo.data());
         if ( !ret )
         {

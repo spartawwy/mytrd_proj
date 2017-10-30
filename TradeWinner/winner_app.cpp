@@ -165,9 +165,7 @@ bool WinnerApp::Init()
     ret1 = QObject::connect(this, SIGNAL(SigRemoveTask(int)), &winner_win_, SLOT(RemoveByTaskId(int)));
     //ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::shared_ptr<std::string>)), this, SLOT(DoShowUi(std::shared_ptr<std::string>)));
     ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::string *)), this, SLOT(DoShowUi(std::string *)));
-    
-    TaskFactory::CreateAllTasks(task_infos_, strategy_tasks_, this);
-
+     
 #endif
      
 #if 1 
@@ -189,7 +187,7 @@ bool WinnerApp::Init()
    }  
    std::string stk_quote_full_path = strAppPath + "StkQuoter.dll";
    stk_quoter_moudle_ = LoadLibrary(stk_quote_full_path.c_str());
-	if( !stk_quoter_moudle_ )
+    if( !stk_quoter_moudle_ )
     {
         auto erro = GetLastError();
         QString info_str = QString("load %1 fail! error:%2").arg(stk_quote_full_path.c_str()).arg(erro);
@@ -197,8 +195,9 @@ bool WinnerApp::Init()
         //throw excepton;
         return false;
     }
-	StkQuote_GetQuote = (StkQuoteGetQuoteDelegate)GetProcAddress(stk_quoter_moudle_, "StkQuoteGetQuote");
-	assert(StkQuote_GetQuote);
+    StkQuote_GetQuote = (StkQuoteGetQuoteDelegate)GetProcAddress(stk_quoter_moudle_, "StkQuoteGetQuote");
+    assert(StkQuote_GetQuote);
+    TaskFactory::CreateAllTasks(task_infos_, strategy_tasks_, this);
 
     QueryPosition();
     AjustTickFlag(stock_ticker_enable_flag_);
@@ -556,6 +555,7 @@ T_Capital WinnerApp::QueryCapital()
 
 T_StockPriceInfo * WinnerApp::GetStockPriceInfo(const std::string& code)
 {
+    assert(StkQuote_GetQuote);
 	char stocks[1][16];
 	auto iter = stocks_price_info_.find(code);
 	if( iter != stocks_price_info_.end() )

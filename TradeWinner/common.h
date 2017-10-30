@@ -107,6 +107,7 @@ enum class TaskCurrentState : char
     WAITTING, /* not stop, and is not in between start time and end time*/
     RUNNING,
     REST, // exchange is in rest time
+    EXCEPT, 
 };
 
   
@@ -332,7 +333,7 @@ struct T_TaskInformation
 	int start_time; 
 	int end_time;
 	bool is_loop;
-    int  state;               // 0-- stop    1-- to run
+    int  state;               // TaskCurrentState  
     int  bs_times;            // Âô³ö´ÎÊý, used by batches sell batches buy
     std::string  assistant_field;       // used by batches sell; batches buy
     T_TaskInformation() : id(0), type(TypeTask::BREAK_SELL), alert_price(0),back_alert_trigger(0), rebounce(0), continue_second(0), step(0), quantity(0), target_price_level(0), start_time(0), end_time(0), is_loop(0), state(0), bs_times(0), assistant_field() {} 
