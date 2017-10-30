@@ -285,9 +285,8 @@ void StockTicker::UnRegister(unsigned int task_id)
     std::lock_guard<std::mutex>  locker(tasks_list_mutex_);
     auto iter = registered_tasks_.find(task_id);
     if( iter == registered_tasks_.end() )
-    {
-        // logger error
-        logger_.LogLocal(utility::FormatStr("error StockTicker::UnRegister can't find task %d", task_id));
+    { 
+        //logger_.LogLocal(utility::FormatStr("error StockTicker::UnRegister can't find task %d", task_id));
         return;
     } 
 
