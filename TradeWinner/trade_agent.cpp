@@ -37,7 +37,7 @@ void FreeDynamic()
     
 }
 
-void TradeAgent::Setup(TypeBroker broker_type, std::string &account_no)
+bool TradeAgent::Setup(TypeBroker broker_type, std::string &account_no)
 {
     assert(account_no.length() > 0);
     broker_type_ = broker_type;
@@ -53,7 +53,7 @@ void TradeAgent::Setup(TypeBroker broker_type, std::string &account_no)
     {
         QMessageBox::information(nullptr, "info", "load trade.dll fail");
         //throw excepton;
-        return;
+        return false;
     }
      
     OpenTdx = (OpenTdxDelegate)GetProcAddress(TdxApiHMODULE, "OpenTdx");
@@ -81,6 +81,7 @@ void TradeAgent::Setup(TypeBroker broker_type, std::string &account_no)
 	//GetMultiAccountsQuotesDelegate GetMultiAccountsQuotes = (GetMultiAccountsQuotesDelegate)GetProcAddress(TdxApiHMODULE, "GetMultiAccountsQuotes");
     
     OpenTdx();
+	return true;
 }
 
 bool TradeAgent::IsInited() const

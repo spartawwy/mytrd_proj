@@ -45,7 +45,7 @@ public:
     TradeAgent(/*WinnerApp* app*/);
     ~TradeAgent();
 
-    void Setup(TypeBroker broker_type, std::string &account_no);
+    bool Setup(TypeBroker broker_type, std::string &account_no);
     bool IsInited() const;
      
 	 CloseTdxDelegate CloseTdx;

@@ -76,12 +76,14 @@ void BrokerCfgWin::DoOkBtnClicked()
     std::string acc_no_input = ui_.le_account->text().trimmed().toLocal8Bit().data();
     auto p_broker_info = app_->db_moudle().FindUserBrokerByBroker(ui_.cb_broker->currentData().toInt());
     assert(p_broker_info);
-    app_->trade_agent().Setup(p_broker_info->type, acc_no_input); 
+    if( !app_->trade_agent().Setup(p_broker_info->type, acc_no_input) )
+		return;
     //int department_id = ui_.cb_department->currentData().toInt();
     auto ret = app_->LoginBroker(ui_.cb_broker->currentData().toInt()
             , ui_.cb_department->currentData().toInt()
             , ui_.le_account->text().toLocal8Bit().data()
             , ui_.le_pwd->text().toLocal8Bit().data());
+ 
     if( !ret )
     {
         // todo : information
