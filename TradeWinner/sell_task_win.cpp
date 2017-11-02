@@ -339,12 +339,12 @@ void WinnerWin::DoAddTask()
 
 void WinnerWin::DoAlertPercentChanged(double val)
 {
-    if( pre_close_price_ > 0 )
+    if( cur_price_ > 0 )
     {
         if( ui.combox_sell_type->currentText() == cst_str_breakout_sell )
         {
             if( val < 100 )
-                ui.dbspbox_alert_price->setValue(pre_close_price_ * (100 - val ) / 100);
+                ui.dbspbox_alert_price->setValue(cur_price_ * (100 - val ) / 100);
             else
                 ui.dbspbox_alert_price->setValue(0.0);
         }
@@ -352,7 +352,7 @@ void WinnerWin::DoAlertPercentChanged(double val)
             || ui.combox_sell_type->currentText() == cst_str_follow_sell
             || ui.combox_sell_type->currentText() == cst_str_batches_sell
             ) 
-            ui.dbspbox_alert_price->setValue(pre_close_price_ * (100 + val ) / 100);
+            ui.dbspbox_alert_price->setValue(cur_price_ * (100 + val ) / 100);
          
     }
 

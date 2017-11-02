@@ -88,7 +88,7 @@ public slots:
     void OnClickedListWidget(QModelIndex index);
     void ChangeFromStationText(QString text);
 
-    void AssignHintListAndLineEdit(HintList *& p_list, QLineEdit *&p_edit, QDoubleSpinBox *&p_dbspinbox);
+    void AssignHintListAndLineEdit(HintList *& p_list, QLineEdit *&p_edit, QDoubleSpinBox *&p_dbspb_alert_price, QDoubleSpinBox *&p_dbspb_percent);
 
 signals:
 
@@ -127,9 +127,9 @@ private:
 
     QLabel  *status_label_;
 
-    double pre_close_price_;
-    double buytask_pre_close_price_;
-    double eqsec_task_pre_close_price_;
+    double cur_price_;
+    double buytask_cur_price_;
+    double eqsec_task_cur_price_;
 };
 
 #endif // TRADE_WINNER_H

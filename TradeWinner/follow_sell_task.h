@@ -17,10 +17,6 @@ public:
     double  window_up_price_;
 
     __int64 time_point_dropdown_bottom_; // if val is 0, means not in warning
- /*   __int64 time_point_top_price_;  
-
-    double top_price_;
-    double pre_close_price_;*/
 
     bool is_out_warn_;
    

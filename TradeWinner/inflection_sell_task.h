@@ -16,8 +16,7 @@ public:
     __int64 time_point_top_price_;  
     __int64 time_point_half_ready_;
     double top_price_;
-    double pre_close_price_;
-    //double pre_price_;
+    //double cur_price_;
    
 };
 

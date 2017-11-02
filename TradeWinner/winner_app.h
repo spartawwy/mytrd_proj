@@ -101,7 +101,7 @@ public:
     void AddPosition(const std::string& code, int pos);
     void SubPosition(const std::string& code, int pos);
 
-	T_StockPriceInfo * GetStockPriceInfo(const std::string& code);
+	T_StockPriceInfo * GetStockPriceInfo(const std::string& code, bool is_lazy=true);
 
 
     void AppendLog2Ui(const char *fmt, ...);

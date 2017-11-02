@@ -159,10 +159,22 @@ void StockTicker::Procedure()
             return;
         }
         logger_.LogLocal(utility::FormatStr("StockTicker::Procedure TdxHq_Connect ok!"));
-        ret = TdxHq_GetSecurityQuotes(markets, stock_codes, stock_count, Result.data(), ErrInfo.data());
-        if ( !ret )
+        Result.reset(); 
+        ErrInfo.reset();
+        try
         {
-            logger_.LogLocal(std::string("StockTicker::Procedure retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
+            for( int i = 0; i < stock_count; ++i )
+               logger_.LogLocal(utility::FormatStr("StockTicker::Procedure stock_codes[%d]:%s", i, stock_codes[i]));
+
+            ret = TdxHq_GetSecurityQuotes(markets, stock_codes, stock_count, Result.data(), ErrInfo.data());
+            if ( !ret )
+            {
+                logger_.LogLocal(std::string("StockTicker::Procedure retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
+                return;
+            }
+        }catch(...)
+        {
+            logger_.LogLocal("StockTicker::Procedure exception");
             return;
         }
          
@@ -285,8 +297,9 @@ void StockTicker::UnRegister(unsigned int task_id)
     std::lock_guard<std::mutex>  locker(tasks_list_mutex_);
     auto iter = registered_tasks_.find(task_id);
     if( iter == registered_tasks_.end() )
-    { 
-        //logger_.LogLocal(utility::FormatStr("error StockTicker::UnRegister can't find task %d", task_id));
+    {
+        // logger error
+        logger_.LogLocal(utility::FormatStr("error StockTicker::UnRegister can't find task %d", task_id));
         return;
     } 
 

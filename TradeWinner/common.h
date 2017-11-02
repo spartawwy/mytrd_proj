@@ -227,7 +227,7 @@ public:
     explicit Buffer(unsigned int size=64) : size_(size), p_data_(nullptr) 
     {
         p_data_ = new char[size + 1];
-        p_data_[size] = '\0';
+        memset(p_data_, 0, size + 1); 
     }
     explicit Buffer(const char* p_str, unsigned int size) 
     {
@@ -238,11 +238,12 @@ public:
         p_data_[size] = '\0';
     } 
 
-    ~Buffer(){ if( p_data_ ) delete p_data_; p_data_ = nullptr;};
+    ~Buffer(){ if( p_data_ ) delete[] p_data_; p_data_ = nullptr;};
 
     char * data() { return p_data_; }
     const char *c_data() const {return p_data_;}
     unsigned int size() const {return size_;}
+    void reset() { memset(p_data_, 0, size_ + 1); }
 
 private:
 

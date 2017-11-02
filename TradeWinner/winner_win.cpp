@@ -49,9 +49,9 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
 	, is_open_hint_(true)
     , m_bt_list_hint_(nullptr)
 	, m_eqsec_list_hint_(nullptr)
-    , pre_close_price_(0.0)
-    , buytask_pre_close_price_(0.0)
-	, eqsec_task_pre_close_price_(0.0)
+    , cur_price_(0.0)
+    , buytask_cur_price_(0.0)
+	, eqsec_task_cur_price_(0.0)
 {
     ui.setupUi(this);
 
@@ -379,14 +379,14 @@ void WinnerWin::SlotTbvTasksActionDetail(bool)
     case TypeTask::INFLECTION_SELL:
     case TypeTask::FOLLOW_SELL:
     case TypeTask::BATCHES_SELL:
-        pre_close_price_ = 0.0;
+        cur_price_ = 0.0;
         FillSellTaskWin(p_tskinfo->type, *p_tskinfo);
 		ui.tabwid_holder->setCurrentIndex(cst_tab_index_sell_task);
         break;
     case TypeTask::BREAKUP_BUY:
     case TypeTask::INFLECTION_BUY:
     case TypeTask::BATCHES_BUY:
-        buytask_pre_close_price_ = 0.0;
+        buytask_cur_price_ = 0.0;
         FillBuyTaskWin(p_tskinfo->type, *p_tskinfo);
 		ui.tabwid_holder->setCurrentIndex(cst_tab_index_buy_task);
         break;
@@ -580,8 +580,9 @@ void WinnerWin::FlushFromStationListWidget(QString str)
      
     HintList *p_list = nullptr;
     QLineEdit *p_edit = nullptr;
-    QDoubleSpinBox *p_dbspinbox = nullptr;
-    AssignHintListAndLineEdit(p_list, p_edit, p_dbspinbox);
+    QDoubleSpinBox *p_dbspb_price = nullptr;
+    QDoubleSpinBox *p_dbspb_percent = nullptr;
+    AssignHintListAndLineEdit(p_list, p_edit, p_dbspb_price, p_dbspb_percent);
 
     p_list->clear();
 	 
@@ -609,33 +610,22 @@ void WinnerWin::OnClickedListWidget(QModelIndex index)
 {
     HintList *p_list = nullptr;
     QLineEdit *p_edit = nullptr;
-    QDoubleSpinBox *p_dbspinbox = nullptr;
-    AssignHintListAndLineEdit(p_list, p_edit, p_dbspinbox);
+    QDoubleSpinBox *p_dbspb_price = nullptr;
+    QDoubleSpinBox *p_dbspb_percent = nullptr;
+    AssignHintListAndLineEdit(p_list, p_edit, p_dbspb_price, p_dbspb_percent);
 
     QString text = p_list->item(index.row())->text();
     ChangeFromStationText(text);
-
-   /* QString::SectionFlag flag = QString::SectionSkipEmpty;
-    QString tgt_tag = text.section('/', 0, 0, flag);
      
-    qDebug() << "OnClickedListWidget " << tgt_tag << "\n";
-
-    p_edit->setText(tgt_tag);
-    p_list->hide();
-     
-	T_StockPriceInfo *p_info = app_->GetStockPriceInfo(tgt_tag.toLocal8Bit().data());
-	if( p_info )
-    {
-        p_dbspinbox->setValue(p_info->pre_close_price);
-    }*/
 }
 
 void WinnerWin::ChangeFromStationText(QString text)
 {
     HintList *p_list = nullptr;
     QLineEdit *p_edit = nullptr;
-    QDoubleSpinBox *p_dbspinbox = nullptr;
-    AssignHintListAndLineEdit(p_list, p_edit, p_dbspinbox);
+    QDoubleSpinBox *p_dbspb_price = nullptr;
+    QDoubleSpinBox *p_dbspb_percent = nullptr;
+    AssignHintListAndLineEdit(p_list, p_edit, p_dbspb_price, p_dbspb_percent);
      
     p_edit->setText(text);
     p_list->hide();
@@ -643,44 +633,48 @@ void WinnerWin::ChangeFromStationText(QString text)
     //qDebug() << "ChangeFromStationText " << tgt_tag << "\n";
     QString::SectionFlag flag = QString::SectionSkipEmpty;
     QString tgt_tag = text.section('/', 0, 0, flag);
-	T_StockPriceInfo *p_info = app_->GetStockPriceInfo(tgt_tag.toLocal8Bit().data());
+	T_StockPriceInfo *p_info = app_->GetStockPriceInfo(tgt_tag.toLocal8Bit().data(), false);
 	if( p_info )
     {
-        p_dbspinbox->setValue(p_info->pre_close_price);
+        p_dbspb_price->setValue(p_info->cur_price);
+        p_dbspb_percent->setValue(0.0);
         if( ui.tabwid_holder->currentIndex() == cst_tab_index_sell_task )
-            pre_close_price_ = p_info->pre_close_price;
+            cur_price_ = p_info->cur_price;
         else if( ui.tabwid_holder->currentIndex() == cst_tab_index_buy_task )
-            buytask_pre_close_price_ = p_info->pre_close_price;
+            buytask_cur_price_ = p_info->cur_price;
 		else if( ui.tabwid_holder->currentIndex() == cst_tab_index_eqsec_task )
-			eqsec_task_pre_close_price_ = p_info->pre_close_price;
+			eqsec_task_cur_price_ = p_info->cur_price;
     }else
     {
         if( ui.tabwid_holder->currentIndex() == cst_tab_index_sell_task )
-            pre_close_price_ = 0.0;
+            cur_price_ = 0.0;
         else if( ui.tabwid_holder->currentIndex() == cst_tab_index_buy_task )
-            buytask_pre_close_price_ = 0.0;
+            buytask_cur_price_ = 0.0;
 		else if( ui.tabwid_holder->currentIndex() == cst_tab_index_eqsec_task )
-			eqsec_task_pre_close_price_ = 0.0;
+			eqsec_task_cur_price_ = 0.0;
     }
 }
 
-void WinnerWin::AssignHintListAndLineEdit(HintList *& p_list, QLineEdit *&p_edit, QDoubleSpinBox *&p_dbspinbox)
+void WinnerWin::AssignHintListAndLineEdit(HintList *& p_list, QLineEdit *&p_edit, QDoubleSpinBox *&p_dbspb_alert_price, QDoubleSpinBox *&p_dbspb_percent)
 {
     if( ui.tabwid_holder->currentIndex() == cst_tab_index_sell_task )
     {
         p_list = m_list_hint_;
         p_edit = ui.le_stock;
-        p_dbspinbox = ui.dbspbox_alert_price;
+        p_dbspb_alert_price = ui.dbspbox_alert_price;
+        p_dbspb_percent = ui.dbspbox_alert_percent;
     }else if( ui.tabwid_holder->currentIndex() == cst_tab_index_buy_task )
     {   
         p_list = m_bt_list_hint_;
         p_edit = ui.le_buytask_stock;
-        p_dbspinbox = ui.dbspbox_buytask_alert_price;
+        p_dbspb_alert_price = ui.dbspbox_buytask_alert_price;
+        p_dbspb_percent = ui.dbspbox_buytask_alert_percent;
     }else if( ui.tabwid_holder->currentIndex() == cst_tab_index_eqsec_task )
     {   
         p_list = m_eqsec_list_hint_;
         p_edit = ui.le_eqsec_stock;
-        p_dbspinbox = ui.dbspbox_eqsec_start_price;
+        p_dbspb_alert_price = ui.dbspbox_eqsec_start_price;
+        p_dbspb_percent = nullptr;
     }else
         assert(false);
 }

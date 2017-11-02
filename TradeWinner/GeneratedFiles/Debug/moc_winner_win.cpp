@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_WinnerWin_t {
-    QByteArrayData data[61];
-    char stringdata[975];
+    QByteArrayData data[62];
+    char stringdata[999];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -89,7 +89,8 @@ QT_MOC_LITERAL(56, 919, 6),
 QT_MOC_LITERAL(57, 926, 11),
 QT_MOC_LITERAL(58, 938, 6),
 QT_MOC_LITERAL(59, 945, 16),
-QT_MOC_LITERAL(60, 962, 11)
+QT_MOC_LITERAL(60, 962, 19),
+QT_MOC_LITERAL(61, 982, 15)
     },
     "WinnerWin\0DoQueryCapital\0\0SlotAppendLog\0"
     "char*\0SlotTabChanged\0SlotTbvTasksContextMenu\0"
@@ -117,7 +118,7 @@ QT_MOC_LITERAL(60, 962, 11)
     "ChangeFromStationText\0text\0"
     "AssignHintListAndLineEdit\0HintList*&\0"
     "p_list\0QLineEdit*&\0p_edit\0QDoubleSpinBox*&\0"
-    "p_dbspinbox\0"
+    "p_dbspb_alert_price\0p_dbspb_percent\0"
 };
 #undef QT_MOC_LITERAL
 
@@ -172,7 +173,7 @@ static const uint qt_meta_data_WinnerWin[] = {
       49,    1,  288,    2, 0x0a,
       50,    1,  291,    2, 0x0a,
       52,    1,  294,    2, 0x0a,
-      54,    3,  297,    2, 0x0a,
+      54,    4,  297,    2, 0x0a,
 
  // slots: parameters
     QMetaType::Void,
@@ -212,7 +213,7 @@ static const uint qt_meta_data_WinnerWin[] = {
     QMetaType::Void, QMetaType::QString,   16,
     QMetaType::Void, QMetaType::QModelIndex,   51,
     QMetaType::Void, QMetaType::QString,   53,
-    QMetaType::Void, 0x80000000 | 55, 0x80000000 | 57, 0x80000000 | 59,   56,   58,   60,
+    QMetaType::Void, 0x80000000 | 55, 0x80000000 | 57, 0x80000000 | 59, 0x80000000 | 59,   56,   58,   60,   61,
 
        0        // eod
 };
@@ -260,8 +261,19 @@ void WinnerWin::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 34: _t->FlushFromStationListWidget((*reinterpret_cast< QString(*)>(_a[1]))); break;
         case 35: _t->OnClickedListWidget((*reinterpret_cast< QModelIndex(*)>(_a[1]))); break;
         case 36: _t->ChangeFromStationText((*reinterpret_cast< QString(*)>(_a[1]))); break;
-        case 37: _t->AssignHintListAndLineEdit((*reinterpret_cast< HintList*(*)>(_a[1])),(*reinterpret_cast< QLineEdit*(*)>(_a[2])),(*reinterpret_cast< QDoubleSpinBox*(*)>(_a[3]))); break;
+        case 37: _t->AssignHintListAndLineEdit((*reinterpret_cast< HintList*(*)>(_a[1])),(*reinterpret_cast< QLineEdit*(*)>(_a[2])),(*reinterpret_cast< QDoubleSpinBox*(*)>(_a[3])),(*reinterpret_cast< QDoubleSpinBox*(*)>(_a[4]))); break;
         default: ;
+        }
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        switch (_id) {
+        default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+        case 21:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTableView* >(); break;
+            }
+            break;
         }
     }
 }
@@ -296,7 +308,7 @@ int WinnerWin::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         _id -= 38;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         if (_id < 38)
-            *reinterpret_cast<int*>(_a[0]) = -1;
+            qt_static_metacall(this, _c, _id, _a);
         _id -= 38;
     }
     return _id;

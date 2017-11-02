@@ -552,24 +552,36 @@ T_Capital WinnerApp::QueryCapital()
 	return capital;
 }
 
-T_StockPriceInfo * WinnerApp::GetStockPriceInfo(const std::string& code)
+T_StockPriceInfo * WinnerApp::GetStockPriceInfo(const std::string& code, bool is_lazy)
 {
 	assert(StkQuote_GetQuote);
 	char stocks[1][16];
+   
 	auto iter = stocks_price_info_.find(code);
 	if( iter != stocks_price_info_.end() )
-		return std::addressof(iter->second);
-
+    {
+        if( is_lazy )
+        {
+		    return std::addressof(iter->second);
+        }
+    }
 	strcpy_s(stocks[0], code.c_str());
-#if 1
+ 
 	T_StockPriceInfo price_info[1];
 	auto num = StkQuote_GetQuote(stocks, 1, price_info);
 	if( num < 1 )
 		return nullptr;
-#endif
-
-	T_StockPriceInfo& info = stocks_price_info_.insert(std::make_pair(code, price_info[0])).first->second;
-	return &info;
+ 
+    if( iter != stocks_price_info_.end() )
+    {
+        iter->second = price_info[0];
+        return std::addressof(iter->second);
+    }
+    else
+    {
+	    T_StockPriceInfo& info = stocks_price_info_.insert(std::make_pair(code, price_info[0])).first->second;
+	    return &info;
+    }
 }
 
 void WinnerApp::DoStrategyTasksTimeout()

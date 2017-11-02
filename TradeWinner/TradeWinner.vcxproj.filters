@@ -246,9 +246,6 @@
     <ClInclude Include="inflection_sell_task.h">
       <Filter>task</Filter>
     </ClInclude>
-    <ClInclude Include="stk_quoter_api.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="follow_sell_task.h">
       <Filter>task</Filter>
     </ClInclude>
@@ -275,6 +272,9 @@
     </ClInclude>
     <ClInclude Include="rwini.h">
       <Filter>moudle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\StkQuoter\stk_quoter_api.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

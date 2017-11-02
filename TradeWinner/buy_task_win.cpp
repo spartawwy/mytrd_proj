@@ -143,16 +143,16 @@ void WinnerWin::FillBuyTaskWin(TypeTask type, T_TaskInformation& info)
 
 void WinnerWin::DoBuyAlertPercentChanged(double val)
 {
-    if( buytask_pre_close_price_ > 0 )
+    if( buytask_cur_price_ > 0.0 )
     {
         if( ui.combox_buy_type->currentText() == cst_str_breakout_buy )
-            ui.dbspbox_buytask_alert_price->setValue(buytask_pre_close_price_ * (100 + val ) / 100);
+            ui.dbspbox_buytask_alert_price->setValue(buytask_cur_price_ * (100 + val ) / 100);
         else if( ui.combox_buy_type->currentText() == cst_str_inflection_buy 
             || ui.combox_buy_type->currentText() == cst_str_batches_buy
             )
         {
             if( val < 100 )
-                ui.dbspbox_buytask_alert_price->setValue(buytask_pre_close_price_ * (100 - val ) / 100);
+                ui.dbspbox_buytask_alert_price->setValue(buytask_cur_price_ * (100 - val ) / 100);
             else
                 ui.dbspbox_buytask_alert_price->setValue(0.0);
         }
