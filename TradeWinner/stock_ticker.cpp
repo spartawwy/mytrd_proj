@@ -151,7 +151,12 @@ void StockTicker::Procedure()
         logger_.LogLocal(std::string("StockTicker::Procedure TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
         if( !strstr(ErrInfo.data(), "请重新连接") )
             TdxHq_Disconnect();
+
         logger_.LogLocal(utility::FormatStr("StockTicker::Procedure TdxHq_Connect %s : %d ", cst_hq_server, cst_hq_port) );
+        Result.reset(); 
+        ErrInfo.reset();
+        try
+        {
         ret = TdxHq_Connect(cst_hq_server, cst_hq_port, Result.data(), ErrInfo.data());
         if ( !ret )
         {
@@ -161,17 +166,20 @@ void StockTicker::Procedure()
         logger_.LogLocal(utility::FormatStr("StockTicker::Procedure TdxHq_Connect ok!"));
         Result.reset(); 
         ErrInfo.reset();
-        try
+        // debug 
+        for( int i = 0; i < stock_count; ++i )
+            logger_.LogLocal(utility::FormatStr("StockTicker::Procedure stock_codes[%d]:%s", i, stock_codes[i]));
+        // end debug
+        ret = TdxHq_GetSecurityQuotes(markets, stock_codes, stock_count, Result.data(), ErrInfo.data());
+        if ( !ret )
         {
-            for( int i = 0; i < stock_count; ++i )
-               logger_.LogLocal(utility::FormatStr("StockTicker::Procedure stock_codes[%d]:%s", i, stock_codes[i]));
-
-            ret = TdxHq_GetSecurityQuotes(markets, stock_codes, stock_count, Result.data(), ErrInfo.data());
-            if ( !ret )
-            {
-                logger_.LogLocal(std::string("StockTicker::Procedure retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
-                return;
-            }
+            logger_.LogLocal(std::string("StockTicker::Procedure retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
+            return;
+        }
+        }catch(std::exception &e)
+        {
+            logger_.LogLocal(utility::FormatStr("StockTicker::Procedure exception:%s", e.what()));
+            return;
         }catch(...)
         {
             logger_.LogLocal("StockTicker::Procedure exception");
