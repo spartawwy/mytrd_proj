@@ -397,6 +397,6 @@ void WinnerWin::DoQueryQtyCanBuy()
 void WinnerWin::ResetBuyTabTaskTime()
 {
     ui.timeEdit_buytask_begin->setTime(QTime(9, 30, 0));
-    ui.timeEdit_buytask_end->setTime(QTime(15, 30, 0));
+    ui.timeEdit_buytask_end->setTime(QTime(15, 00, 0));
 }
  

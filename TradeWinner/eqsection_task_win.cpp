@@ -174,7 +174,7 @@ void WinnerWin::DoAddEqSectionTask()
 void WinnerWin::ResetEqSectionTaskTime()
 {
 	ui.timeEdit_eqsec_begin->setTime(QTime(9, 30, 0));
-    ui.timeEdit_eqsec_end->setTime(QTime(15, 30, 0));
+    ui.timeEdit_eqsec_end->setTime(QTime(15, 00, 0));
 }
 
 void WinnerWin::DoMaxStopTrigCheckBoxChanged(int stat)

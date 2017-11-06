@@ -333,7 +333,7 @@ void WinnerWin::DoAddTask()
     }
 
     ui.timeEdit_begin->setTime(QTime(9, 30, 0));
-    ui.timeEdit_end->setTime(QTime(15, 30, 0));
+    ui.timeEdit_end->setTime(QTime(15, 00, 0));
        
 }
 
@@ -452,5 +452,5 @@ void WinnerWin::DoSellTypeChanged(const QString&str)
 void WinnerWin::ResetSellTabTaskTime()
 {
     ui.timeEdit_begin->setTime(QTime(9, 30, 0));
-    ui.timeEdit_end->setTime(QTime(15, 30, 0));
+    ui.timeEdit_end->setTime(QTime(15, 00, 0));
 }
