@@ -104,7 +104,6 @@ bool StockTicker::Init()
 
 void StockTicker::Procedure()
 { 
-    
     Buffer Result(cst_result_len);
     Buffer ErrInfo(cst_error_len);
 
@@ -238,6 +237,7 @@ void StockTicker::Procedure()
                 task_iter->second->ObtainData(quote_data);
 				if( task_iter->second->cur_state() != TaskCurrentState::RUNNING )
 				{
+                    task_iter->second->life_count_ = 0;
 					task_iter->second->cur_state(TaskCurrentState::RUNNING);
 					task_iter->second->app()->Emit(task_iter->second.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
 				}
@@ -307,7 +307,7 @@ void StockTicker::UnRegister(unsigned int task_id)
     if( iter == registered_tasks_.end() )
     {
         // logger error
-        logger_.LogLocal(utility::FormatStr("error StockTicker::UnRegister can't find task %d", task_id));
+        logger_.LogLocal(utility::FormatStr("warning StockTicker::UnRegister can't find task %d", task_id));
         return;
     } 
 
@@ -329,13 +329,18 @@ void StockTicker::UnRegister(unsigned int task_id)
         }else
             ++list_iter;
     }
-    iter->second->cur_state(TaskCurrentState::STOP);
+    
 	registered_tasks_.erase(iter);
 }
 
-void StockTicker::UnRegisterAll()
+void StockTicker::ClearAllTask()
 {
     std::lock_guard<std::mutex>  locker(tasks_list_mutex_);
+    std::for_each( std::begin(registered_tasks_), std::end(registered_tasks_), [this](TTaskIdMapStrategyTask::reference entry)
+    {
+        entry.second->cur_state(TaskCurrentState::STOP);
+        entry.second->app()->Emit(entry.second.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+    });
     registered_tasks_.clear();
     codes_taskids_.clear();
 }

@@ -21,7 +21,8 @@
 #include "message_win.h"
 
 static bool SetCurrentEnvPath();
-static void AjustTickFlag(bool & enable_flag);
+
+//static void AjustTickFlag(bool & enable_flag);
 
 static const int cst_ticker_update_interval = 2000;  //ms :notice value have to be bigger than 1000
 static const int cst_normal_timer_interval = 2000;
@@ -149,8 +150,7 @@ bool WinnerApp::Init()
 
 	std::shared_ptr<StrategyTask> task1 = std::make_shared<BreakDownTask>(1, "600030", TypeMarket::SH, this);
 	std::shared_ptr<StrategyTask> task2 = std::make_shared<BreakDownTask>(2, "000959", TypeMarket::SZ, this);
-	task1->is_to_run(true);
-	task2->is_to_run(true);
+	 
 
 	strategy_tasks_.push_back(std::move(task0));
 	strategy_tasks_.push_back(std::move(task1));
@@ -201,7 +201,7 @@ bool WinnerApp::Init()
 	TaskFactory::CreateAllTasks(task_infos_, strategy_tasks_, this);
 
 	QueryPosition();
-	AjustTickFlag(stock_ticker_enable_flag_);
+    stock_ticker_enable_flag_ = IsNowTradeTime(); 
 
 	//-----------ticker main loop----------
 	task_pool().PostTask([this]()
@@ -240,12 +240,7 @@ void WinnerApp::RemoveTask(unsigned int task_id)
 {
 	DelTaskById(task_id);
 	EmitSigRemoveTask(task_id);
-	//ticker_strand().PostTask([task_id, this]()
-	//{   
-	//    /*auto strategy_task = this->FindStrategyTask(task_id);
-	//    assert(strategy_task);
-	//    this->Emit(strategy_task.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));*/
-	//});
+	 
 }
 
 int WinnerApp::Cookie_NextTaskId()
@@ -622,31 +617,100 @@ T_StockPriceInfo * WinnerApp::GetStockPriceInfo(const std::string& code, bool is
 
 void WinnerApp::DoStrategyTasksTimeout()
 {
-	auto cur_time = QTime::currentTime();
+    static auto is_in_task_time = [](const QTime &current, const QTime &start, const QTime &end) ->bool
+    {
+        return current >= start && current <= end;
+    };
+	
+    auto cur_time = QTime::currentTime();
 	// register 
 	ReadLock locker(strategy_tasks_mutex_);
 	std::for_each( std::begin(strategy_tasks_), std::end(strategy_tasks_), [&cur_time, this](std::shared_ptr<StrategyTask>& entry)
 	{
+        if( !entry->is_to_run()  )
+            return;
+        if( entry->cur_state() == TaskCurrentState::WAITTING ) // state: unregistered
+        {
+            if( is_in_task_time(cur_time, entry->tp_start(), entry->tp_end()) )
+            {
+                this->ticker_strand_.PostTask([entry, this]()
+			    {
+				    this->stock_ticker_->Register(entry);
+			    });
+                if( IsNowTradeTime() )
+                    entry->cur_state(TaskCurrentState::STARTING);
+                else
+                    entry->cur_state(TaskCurrentState::REST);
+				this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+            }
+        }else if( entry->cur_state() > TaskCurrentState::WAITTING ) // state:  registered
+        {
+            if( !is_in_task_time(cur_time, entry->tp_start(), entry->tp_end()) )
+            {
+                this->stock_ticker_->UnRegister(entry->task_id());
+                entry->cur_state(TaskCurrentState::WAITTING); 
+				this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+            }else if( entry->cur_state() != TaskCurrentState::REST )
+            {
+                if( !IsNowTradeTime() )
+                {
+                    entry->cur_state(TaskCurrentState::REST); 
+				    this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+                }
+            }
+
+            if( entry->cur_state() == TaskCurrentState::RUNNING )
+            {
+                if( entry->life_count_++ > 30 )
+                {
+                    this->local_logger().LogLocal(utility::FormatStr("error: task %d not in running", entry->task_id()));
+                    entry->cur_state(TaskCurrentState::EXCEPT);
+                    this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+                }
+            }
+        } 
+
+/*
 		/// qDebug() << "taskid" << entry->task_id() << "strategy_tasks_ size:" << strategy_tasks_.size() << " stock " << entry->stock_code() << " istorun:" << entry->is_to_run();
-		if( entry->is_to_run() 
-			&& (entry->cur_state() == TaskCurrentState::STOP || entry->cur_state() == TaskCurrentState::WAITTING)
-			&& cur_time >= entry->tp_start() && cur_time <= entry->tp_end()
+		if( entry->cur_state() == TaskCurrentState::WAITTING
+			&& is_in_task_time(cur_time, entry->tp_start(), entry->tp_end())
+            && IsNowTradeTime()
 			)
 		{
+            entry->cur_state(TaskCurrentState::STARTING);
+            this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
 			this->ticker_strand_.PostTask([entry, this]()
 			{
 				this->stock_ticker_->Register(entry);
 			});
-		}else if( entry->cur_state() == TaskCurrentState::RUNNING
-			&& (cur_time < entry->tp_start() || cur_time > entry->tp_end())
+        }else if( (entry->cur_state() != TaskCurrentState::STOP && entry->cur_state() != TaskCurrentState::WAITTING)
+			&& !is_in_task_time(cur_time, entry->tp_start(), entry->tp_end())
 			)
 		{
 			this->ticker_strand_.PostTask([entry, this]()
 			{
 				this->stock_ticker_->UnRegister(entry->task_id());
+
+                if( IsNowTradeTime() )
+                    entry->cur_state(TaskCurrentState::WAITTING);
+                else
+                    entry->cur_state(TaskCurrentState::REST);
 				this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
 			});
-		}
+        }else if( entry->cur_state() == TaskCurrentState::RUNNING )
+        {
+            if( entry->life_count_++ > 30 )
+            {
+                entry->cur_state(TaskCurrentState::EXCEPT);
+                this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+            }
+        }else if( entry->cur_state() == TaskCurrentState::REST
+            && !is_in_task_time(cur_time, entry->tp_start(), entry->tp_end())
+            && IsNowTradeTime())
+        { 
+            entry->cur_state(TaskCurrentState::WAITTING);
+            this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+        }*/
 	});
 
 }
@@ -663,7 +727,7 @@ void WinnerApp::SlotStopAllTasks(bool)
 {
 	ticker_strand().PostTask([this]()
 	{
-		this->stock_ticker().UnRegisterAll(); 
+		this->stock_ticker().ClearAllTask(); 
 
 		std::for_each( std::begin(strategy_tasks_), std::end(strategy_tasks_), [this](std::shared_ptr<StrategyTask> entry)
 		{
@@ -677,7 +741,7 @@ void WinnerApp::SlotStopAllTasks(bool)
 
 void WinnerApp::DoNormalTimer()
 { 
-	AjustTickFlag(stock_ticker_enable_flag_);
+	stock_ticker_enable_flag_ = IsNowTradeTime();
 
 	if( stock_ticker_enable_flag_ )
 	{
@@ -748,43 +812,3 @@ bool SetCurrentEnvPath()
 
 	return bRet;  
 }  
-
-
-void AjustTickFlag(bool & enable_flag)
-{
-	time_t rawtime;
-	struct tm * timeinfo;
-	time( &rawtime );
-	timeinfo = localtime( &rawtime ); // from 1900 year
-
-	struct tm tm_trade_beg; 
-	tm_trade_beg.tm_year = timeinfo->tm_year;
-	tm_trade_beg.tm_mon = timeinfo->tm_mon;
-	tm_trade_beg.tm_mday = timeinfo->tm_mday;
-	tm_trade_beg.tm_hour = 9;
-	tm_trade_beg.tm_min = 20;
-	tm_trade_beg.tm_sec = 59;
-	time_t sec_beg = mktime(&tm_trade_beg);
-
-	struct tm tm_trade_end; 
-	tm_trade_end.tm_year = timeinfo->tm_year;
-	tm_trade_end.tm_mon = timeinfo->tm_mon;
-	tm_trade_end.tm_mday = timeinfo->tm_mday;
-	tm_trade_end.tm_hour = 15;
-	tm_trade_end.tm_min = 32;
-	tm_trade_end.tm_sec = 59;
-	time_t sec_end = mktime(&tm_trade_end);
-
-	if( timeinfo->tm_wday == 6 || timeinfo->tm_wday == 0 ) // sunday: 0, monday : 1 ...
-		enable_flag = false;
-
-	if( !enable_flag )
-	{
-		if( rawtime >= sec_beg && rawtime <= sec_end )
-			enable_flag = true;
-	}else  
-	{
-		if( rawtime < sec_beg && rawtime > sec_end )
-			enable_flag = false;
-	}
-}

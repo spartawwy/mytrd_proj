@@ -59,14 +59,17 @@ QString ToQString(TaskCurrentState val)
     switch(val)
     {
     case TaskCurrentState::STOP:
-        return QString::fromLocal8Bit("停止");
-    case TaskCurrentState::TORUN:
+        return QString::fromLocal8Bit("停止"); 
     case TaskCurrentState::WAITTING:
         return QString::fromLocal8Bit("等待");
+    case TaskCurrentState::STARTING:
+        return QString::fromLocal8Bit("启动中");
     case TaskCurrentState::RUNNING:
         return QString::fromLocal8Bit("运行");
     case TaskCurrentState::REST:
         return QString::fromLocal8Bit("休市");
+    case TaskCurrentState::EXCEPT:
+        return QString::fromLocal8Bit("异常");
     default: assert(0);
     }
     return "";
@@ -156,4 +159,80 @@ std::tuple<int, std::string> CurrentDateTime()
     return std::make_tuple((timeinfo->tm_year + 1900) * 10000 + (timeinfo->tm_mon + 1) * 100 + timeinfo->tm_mday
                           , std::string(szContent));
 
+}
+
+bool IsNowTradeTime()
+{
+    static auto get_date = []()
+    {
+        time_t rawtime;
+	    struct tm * timeinfo;
+	    time( &rawtime );
+	    timeinfo = localtime( &rawtime ); // from 1900 year
+        return timeinfo->tm_year * 10000 + timeinfo->tm_mon *100 + timeinfo->tm_mday;
+    };
+     
+     
+    static int week_day = 0;  
+    static int ori_day = 0;
+    static time_t sec_beg = 0;
+    static time_t sec_rest_beg = 0;
+    static time_t sec_rest_end = 0;
+    static time_t sec_end = 0;
+
+    time_t rawtime = 0;
+    struct tm * timeinfo = nullptr;
+	time( &rawtime );
+	
+    auto cur_day = get_date();
+    if( ori_day != cur_day )
+    {
+        ori_day = cur_day;
+        
+        timeinfo = localtime( &rawtime ); // from 1900 year
+        week_day = timeinfo->tm_wday;
+
+        struct tm tm_trade_beg;
+	    tm_trade_beg.tm_year = timeinfo->tm_year;
+	    tm_trade_beg.tm_mon = timeinfo->tm_mon;
+	    tm_trade_beg.tm_mday = timeinfo->tm_mday;
+	    tm_trade_beg.tm_hour = 9;
+	    tm_trade_beg.tm_min = 25;
+	    tm_trade_beg.tm_sec = 59;
+	    sec_beg = mktime(&tm_trade_beg);
+
+        struct tm tm_rest_beg; 
+	    tm_rest_beg.tm_year = timeinfo->tm_year;
+	    tm_rest_beg.tm_mon = timeinfo->tm_mon;
+	    tm_rest_beg.tm_mday = timeinfo->tm_mday;
+	    tm_rest_beg.tm_hour = 11;
+	    tm_rest_beg.tm_min = 32;
+	    tm_rest_beg.tm_sec = 00;
+        sec_rest_beg = mktime(&tm_rest_beg);
+
+        struct tm tm_rest_end; 
+	    tm_rest_end.tm_year = timeinfo->tm_year;
+	    tm_rest_end.tm_mon = timeinfo->tm_mon;
+	    tm_rest_end.tm_mday = timeinfo->tm_mday;
+	    tm_rest_end.tm_hour = 12;
+	    tm_rest_end.tm_min = 58;
+	    tm_rest_end.tm_sec = 00;
+        sec_rest_end = mktime(&tm_rest_end);
+
+	    struct tm tm_trade_end; 
+	    tm_trade_end.tm_year = timeinfo->tm_year;
+	    tm_trade_end.tm_mon = timeinfo->tm_mon;
+	    tm_trade_end.tm_mday = timeinfo->tm_mday;
+	    tm_trade_end.tm_hour = 15;
+	    tm_trade_end.tm_min = 32;
+	    tm_trade_end.tm_sec = 59;
+	    sec_end = mktime(&tm_trade_end);
+    }
+
+	if( week_day == 6 || week_day == 0 ) // sunday: 0, monday : 1 ...
+		return false; 
+	if( (rawtime >= sec_beg && rawtime <= sec_rest_beg) || (rawtime >= sec_rest_end && rawtime <= sec_end) )
+        return true;
+    else 
+        return false;
 }

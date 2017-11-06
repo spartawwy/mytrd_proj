@@ -1,5 +1,7 @@
 #include "strategy_task.h"
- 
+
+#include <TLib/core/tsystem_utility_functions.h>
+
 #include "common.h"
 
 #include "winner_app.h"
@@ -14,8 +16,9 @@ StrategyTask::StrategyTask(T_TaskInformation &task_info, WinnerApp *app)
     , tp_start_(Int2Qtime(task_info.start_time))
     , tp_end_(Int2Qtime(task_info.end_time))
     , cur_price_(0.0)
-    , cur_state_(TaskCurrentState::STOP)
+    , cur_state_(static_cast<TaskCurrentState>(task_info.state) != TaskCurrentState::STOP ? TaskCurrentState::WAITTING : TaskCurrentState::STOP)
     , is_waitting_removed_(false)
+    , life_count_(0)
 {
     
 }
@@ -82,4 +85,22 @@ void StrategyTask::ObtainData(std::shared_ptr<QuotesData> &data)
          app_->Emit(this, static_cast<int>(TaskStatChangeType::CUR_PRICE_CHANGE));
     }
     //std::chrono::system_clock::now().;
+}
+
+// notice: called in trade_strand
+int StrategyTask::HandleSellByStockPosition(double price, bool remove_task)
+{
+    int qty = this->app_->QueryPosAvaliable_LazyMode(para_.stock);
+    if( qty > para_.quantity ) qty = para_.quantity;
+    if( qty == 0 )
+    {
+        auto ret_str = new std::string(TSystem::utility::FormatStr("警告:触发任务:%d 破位卖出 %s 价格:%f 实际可用数量:0 ", para_.id, this->code_data(), price));
+        this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str); 
+        this->app_->AppendLog2Ui(ret_str->c_str()); 
+        this->app_->EmitSigShowUi(ret_str);
+
+        if( remove_task )
+            this->app_->RemoveTask(this->task_id());
+    }
+    return qty;
 }

@@ -35,7 +35,10 @@ public:
     TypeMarket  market_type() const { return market_type_; }
 
     void SetOriginalState(TaskCurrentState val) { para_.state = static_cast<int>(val); }
-    bool is_to_run() const { return para_.state > static_cast<int>(TaskCurrentState::STOP); }
+    bool is_to_run() const 
+    { 
+        return para_.state != static_cast<int>(TaskCurrentState::STOP);
+    }
 
     double GetQuoteTargetPrice(const QuotesData& data, bool is_buy);
 
@@ -47,8 +50,12 @@ public:
     QTime tp_start() { return tp_start_; }
     QTime tp_end() { return tp_end_; }
 
+    unsigned int life_count_;
+    
 protected:
      
+   int HandleSellByStockPosition(double price, bool remove_task = true);
+
    WinnerApp  *app_;
    T_TaskInformation  para_;
     
@@ -63,6 +70,7 @@ protected:
    
    volatile TaskCurrentState cur_state_;
    bool is_waitting_removed_;
+     
 };
 
 #endif

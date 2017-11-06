@@ -101,14 +101,17 @@ enum class TaskStatChangeType : char
     CUR_STATE_CHANGE,
 };
 
+// in database, STOP and WAITING is enough
 enum class TaskCurrentState : char
 {
-    STOP = 0,
-    TORUN,   
-    WAITTING, /* not stop, and is not in between start time and end time*/
+    STOP = 0,  // not to run
+    WAITTING, // means: not in tasktime, hasn't been register 
+
+    // follow state is used for task which is registered
+    STARTING,
     RUNNING,
-    REST, // exchange is in rest time
-    EXCEPT, 
+    REST,     // exchange is in rest time
+    EXCEPT,   // exception : in running time but not in running state
 };
 
   
@@ -405,6 +408,7 @@ std::string TagOfOrderLog();
 
 
 std::tuple<int, std::string> CurrentDateTime();
+bool IsNowTradeTime();
 
 #define USE_TRADE_FLAG
 

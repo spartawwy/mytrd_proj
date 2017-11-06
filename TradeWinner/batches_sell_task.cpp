@@ -72,11 +72,13 @@ void BatchesSellTask::HandleQuoteData()
         // send order 
         char result[1024] = {0};
         char error_info[1024] = {0};
-	    int qty = this->app_->QueryPosAvaliable_LazyMode(para_.stock);
-        if( qty > para_.quantity ) qty = para_.quantity;        
-
+	    
         // to choice price to sell
         const auto price = GetQuoteTargetPrice(*iter, false);
+        int qty = HandleSellByStockPosition(price, is_to_remove);
+        if( qty == 0 )
+            return;
+
 #ifdef USE_TRADE_FLAG
         assert(this->app_->trade_agent().account_data(market_type_));
 
