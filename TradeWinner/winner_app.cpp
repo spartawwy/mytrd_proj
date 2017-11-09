@@ -661,7 +661,7 @@ void WinnerApp::DoStrategyTasksTimeout()
 
             if( entry->cur_state() == TaskCurrentState::RUNNING )
             {
-                if( entry->life_count_++ > 30 )
+                if( entry->life_count_++ > 50 )
                 {
                     this->local_logger().LogLocal(utility::FormatStr("error: task %d not in running", entry->task_id()));
                     entry->cur_state(TaskCurrentState::EXCEPT);
