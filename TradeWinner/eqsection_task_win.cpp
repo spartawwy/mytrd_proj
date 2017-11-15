@@ -36,8 +36,13 @@ void WinnerWin::InitEqSectionTaskWin()
      
 	ui.dbspbox_eqsec_max_price->setDisabled(true);
 	ui.dbspbox_eqsec_min_price->setDisabled(true);
+
+    ui.spinBox_max_qty->setValue(EQSEC_MAX_POSITION);
+    ui.spinBox_min_qty->setValue(EQSEC_MAX_POSITION);
+    ui.cb_max_qty->setChecked(false);
+    ui.cb_min_qty->setChecked(false);
 	ui.cb_max_stop_trigger->setChecked(false);
-	 
+	
 	bool ret = QObject::connect(ui.le_eqsec_stock, SIGNAL(textChanged(QString)), this, SLOT(FlushFromStationListWidget(QString)));
     m_eqsec_list_hint_ = new HintList(this, ui.le_eqsec_stock);
     m_eqsec_list_hint_->hide();
@@ -144,6 +149,10 @@ void WinnerWin::DoAddEqSectionTask()
         task_info->secton_task.max_trig_price = ui.dbspbox_eqsec_max_price->value();
     if( ui.cb_min_clear_trigger->isChecked() )
         task_info->secton_task.min_trig_price = ui.dbspbox_eqsec_min_price->value();
+    if( ui.cb_max_qty->isChecked() )
+        task_info->secton_task.max_position = ui.spinBox_max_qty->value();
+    if( ui.cb_min_qty->isChecked() )
+        task_info->secton_task.min_position = ui.spinBox_min_qty->value();
 
 	task_info->quantity = ui.spinBox_eqsec_quantity->value();
     task_info->target_price_level = ui.combox_eqsec_price_level->currentData().toInt();

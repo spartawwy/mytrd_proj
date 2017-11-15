@@ -184,13 +184,17 @@ BEFORE_TRADE:
     {
         char result[1024] = {0};
         char error_info[1024] = {0};
-	            
+	      
         // to choice price to order
 		auto price = 0.0;
         if( this->sections_[index].section_type == TypeEqSection::CLEAR )
             price = iter->price_b_1;
         else
             price = GetQuoteTargetPrice(*iter, order_type == TypeOrderCategory::BUY ? true : false);
+
+        int qty = HandleSellByStockPosition(price);
+        if( qty == 0 )
+            return;
 
 #ifdef USE_TRADE_FLAG
         assert(this->app_->trade_agent().account_data(market_type_));

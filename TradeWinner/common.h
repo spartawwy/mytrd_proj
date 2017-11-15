@@ -17,6 +17,9 @@
 #define  INOUT
 #endif
 
+#define EQSEC_MAX_POSITION 9999900
+#define EQSEC_MIN_POSITION 0
+
 #define EQSEC_MAX_STOP_PRICE 999.00
 #define EQSEC_MIN_CLEAR_PRICE 0.0
 
@@ -309,15 +312,17 @@ struct T_SectionTask
 	double fall_percent;
 	double raise_infection;
 	double fall_infection; 
-	int  multi_qty;
+	int    multi_qty;
+    int    max_position;
+    int    min_position;
 	double max_trig_price;
 	double min_trig_price;
 	std::string sections_info; //format: section0_type$section0_price#section1_type$section1_price
 	bool is_original;
 	T_SectionTask():raise_percent(0.0), fall_percent(0.0), raise_infection(0.0), fall_infection(0.0)
-		, multi_qty(0),max_trig_price(EQSEC_MAX_STOP_PRICE), min_trig_price(EQSEC_MIN_CLEAR_PRICE), sections_info(), is_original(true){}
+		, multi_qty(0),max_trig_price(EQSEC_MAX_STOP_PRICE), min_trig_price(EQSEC_MIN_CLEAR_PRICE), sections_info(), is_original(true), max_position(EQSEC_MAX_POSITION), min_position(EQSEC_MIN_POSITION){}
     T_SectionTask(const T_SectionTask&lh): raise_percent(lh.raise_percent), fall_percent(lh.fall_percent), raise_infection(lh.raise_infection), fall_infection(lh.fall_infection)
-        , multi_qty(lh.multi_qty),max_trig_price(lh.max_trig_price), min_trig_price(lh.min_trig_price), sections_info(lh.sections_info), is_original(lh.is_original){}
+        , multi_qty(lh.multi_qty),max_trig_price(lh.max_trig_price), min_trig_price(lh.min_trig_price), sections_info(lh.sections_info), is_original(lh.is_original), max_position(lh.max_position), min_position(lh.min_position) {}
 };
 
 struct T_TaskInformation

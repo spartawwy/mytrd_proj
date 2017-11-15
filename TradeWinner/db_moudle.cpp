@@ -76,6 +76,7 @@ CREATE TABLE EqualSectionTask(id INTEGER,
 								multi_qty INTEGER, 
 								max_trig_price DOUBLE, min_trig_price DOUBLE,
 								is_original BOOL,
+                                max_position INTEGER, min_position INTEGER,
 								PRIMARY KEY(id));
  */
 using namespace  TSystem;
@@ -260,7 +261,7 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
 	// equal section task
 	sql = utility::FormatStr("SELECT t.id, t.type, t.stock, t.stock_pinyin, t.alert_price, t.back_alert_trigger, t.continue_second, "
 		" t.quantity, t.target_price_level, t.start_time, t.end_time, t.state, t.user_id, "
-		" e.raise_percent, e.fall_percent, e.raise_infection, e.fall_infection, e.multi_qty, e.max_trig_price, e.min_trig_price, e.is_original, t.assistant_field "
+		" e.raise_percent, e.fall_percent, e.raise_infection, e.fall_infection, e.multi_qty, e.max_trig_price, e.min_trig_price, e.is_original, t.assistant_field, e.max_position, e.min_position "
         " FROM TaskInfo t INNER JOIN EqualSectionTask e ON t.id=e.id WHERE t.user_id=%d order by t.id ", app_->user_info().id);
     db_conn_->ExecuteSQL(sql.c_str(),[&taskinfos, this](int num_cols, char** vals, char** names)->int
     {
@@ -522,7 +523,7 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
     }
     if( ret && info->type == TypeTask::EQUAL_SECTION )
     {
-        sql = utility::FormatStr("INSERT INTO EqualSectionTask VALUES( %d, %.2f, %.2f, %.2f, %.2f, %d, %.2f, %.2f, %d) "
+        sql = utility::FormatStr("INSERT INTO EqualSectionTask VALUES( %d, %.2f, %.2f, %.2f, %.2f, %d, %.2f, %.2f, %d, %d, %d) "
             , app_->Cookie_MaxTaskId() + 1
             , info->secton_task.raise_percent 
             , info->secton_task.fall_percent 
@@ -531,7 +532,9 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
             , info->secton_task.multi_qty 
             , info->secton_task.max_trig_price 
             , info->secton_task.min_trig_price 
-            , (int)info->secton_task.is_original);
+            , (int)info->secton_task.is_original
+            , info->secton_task.max_position
+            , info->secton_task.min_position);
         {
             {
                 WriteLock locker(equalsection_table_mutex_);

@@ -55,6 +55,7 @@ public:
 protected:
      
    int HandleSellByStockPosition(double price, bool remove_task = true);
+   int GetTototalPosition();
 
    WinnerApp  *app_;
    T_TaskInformation  para_;

@@ -82,16 +82,15 @@ public:
     {
     TSystem::utility::ProjectTag("WZF");
 #ifdef PUBLISH
+    if( !ValidSerial() )
+        return -1;
 #else
 	QCoreApplication::addLibraryPath("D:\\Qt\\qt5.2.1_win32\\bin\\plugins");
 #endif
     QCoreApplication::addLibraryPath(".");
 	QCoreApplication::addLibraryPath("./plugins");
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("GBK"));
-
-    if( !ValidSerial() )
-        return -1;
-    //QApplication a(argc, argv);
+     
     //-------------test
     
     //---------------end
