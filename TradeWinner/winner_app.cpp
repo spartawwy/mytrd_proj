@@ -505,6 +505,16 @@ int WinnerApp::QueryPosAvaliable_LazyMode(const std::string& code)
 	return iter->second.avaliable;
 }
 
+T_PositionData* WinnerApp::QueryPosition_LazyMode(const std::string& code)
+{
+	std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
+	auto iter = stocks_position_.find(code);
+	if( iter == stocks_position_.end() )
+		return nullptr;
+
+	return std::addressof(iter->second);
+}
+
 void WinnerApp::AddPosition(const std::string& code, int pos)
 {
 	std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
@@ -538,6 +548,7 @@ void WinnerApp::SubPosition(const std::string& code, int pos)
 		}else
 		{
 			iter->second.avaliable -= pos; 
+			iter->second.total -= pos;
 		}
 	}
 }

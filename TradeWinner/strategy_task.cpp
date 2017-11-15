@@ -104,3 +104,9 @@ int StrategyTask::HandleSellByStockPosition(double price, bool remove_task)
     }
     return qty;
 }
+
+int StrategyTask::GetTototalPosition()
+{
+	auto p_pos = this->app_->QueryPosition_LazyMode(para_.stock);
+	return p_pos ? p_pos->total : 0;
+}

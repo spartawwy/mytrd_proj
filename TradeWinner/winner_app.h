@@ -97,6 +97,7 @@ public:
     //std::unordered_map<std::string, int>& stocks_position() { return stocks_position_; }
     std::unordered_map<std::string, T_PositionData> QueryPosition();
     int QueryPosAvaliable_LazyMode(const std::string& code);
+    T_PositionData* QueryPosition_LazyMode(const std::string& code);
 
     void AddPosition(const std::string& code, int pos);
     void SubPosition(const std::string& code, int pos);

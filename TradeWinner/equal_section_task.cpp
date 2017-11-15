@@ -143,7 +143,7 @@ void EqualSectionTask::HandleQuoteData()
     };
 
 	TypeOrderCategory order_type = TypeOrderCategory::SELL;
-    unsigned int qty = para_.quantity;
+    int qty = para_.quantity;
 	int index = 0;
 	for( ; index < sections_.size(); ++index )
 	{
@@ -153,15 +153,41 @@ void EqualSectionTask::HandleQuoteData()
 			if( iter->cur_price < sections_[index].represent_price ) 
             {
                 order_type = TypeOrderCategory::SELL; 
-                // todo: set qty to all avialable quantity
+                qty = this->app_->QueryPosAvaliable_LazyMode(para_.stock);
+				if( qty > para_.quantity ) qty = para_.quantity;
+				if( qty == 0 )
+				{
+					auto ret_str = new std::string(TSystem::utility::FormatStr("警告:触发任务:%d 区间破位卖出 %s 价格:%f 实际可用数量:0 ", para_.id, this->code_data(), iter->cur_price));
+					this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str); 
+					this->app_->AppendLog2Ui(ret_str->c_str()); 
+					this->app_->EmitSigShowUi(ret_str);
+					this->app_->RemoveTask(this->task_id());
+					return;
+				}  
                 goto BEFORE_TRADE; 
             } 
             break;
 		case TypeEqSection::BUY:
-			if( iter->cur_price <= sections_[index].represent_price ) { order_type = TypeOrderCategory::BUY; goto BEFORE_TRADE; }
+			if( iter->cur_price <= sections_[index].represent_price ) 
+			{  
+				if( EQSEC_MAX_POSITION != para_.secton_task.max_position && GetTototalPosition() >= para_.secton_task.max_position )
+				{
+					app_->local_logger().LogLocal(TSystem::utility::FormatStr("warning: %d EqualSectionTask %s switch section_type:%d, curprice:%.2f but position enough", para_.id, para_.stock.c_str(), (int)sections_[index].section_type, iter->cur_price));
+					return;
+				}
+				order_type = TypeOrderCategory::BUY; goto BEFORE_TRADE; 
+			}
 			break;
 		case TypeEqSection::SELL:
-			if( iter->cur_price >= sections_[index].represent_price ) { order_type = TypeOrderCategory::SELL; goto BEFORE_TRADE; }
+			if( iter->cur_price >= sections_[index].represent_price ) 
+			{  
+				if( EQSEC_MIN_POSITION != para_.secton_task.min_position && GetTototalPosition() <= para_.secton_task.min_position )
+				{
+					app_->local_logger().LogLocal(TSystem::utility::FormatStr("warning: %d EqualSectionTask %s switch section_type:%d, curprice:%.2f but position achieve min_position", para_.id, para_.stock.c_str(), (int)sections_[index].section_type, iter->cur_price));
+					return;
+				}
+				order_type = TypeOrderCategory::SELL;  goto BEFORE_TRADE; 
+			}
 			break;
 		case TypeEqSection::NOOP:
 			if( iter->cur_price < sections_[index].represent_price ) return; 

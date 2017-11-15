@@ -802,7 +802,7 @@ public:
 
         retranslateUi(TradeWinnerClass);
 
-        tabwid_holder->setCurrentIndex(3);
+        tabwid_holder->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(TradeWinnerClass);
