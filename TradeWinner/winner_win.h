@@ -76,6 +76,9 @@ public slots:
     //---------------eqsection task related----
 	void DoAddEqSectionTask();
 	void ResetEqSectionTaskTime();
+    void DoMaxQtyCheckBoxChanged(int);
+    void DoMinQtyCheckBoxChanged(int);
+
 	void DoMaxStopTrigCheckBoxChanged(int);
 	void DoMinClearTrigCheckBoxChanged(int);
 

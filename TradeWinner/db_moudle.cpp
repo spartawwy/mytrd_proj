@@ -303,6 +303,8 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
 			task_info->secton_task.is_original = boost::lexical_cast<bool>(*(vals + 20));
 			
             task_info->assistant_field = *(vals + 21);
+            task_info->secton_task.max_position = boost::lexical_cast<int>(*(vals + 22));
+            task_info->secton_task.min_position = boost::lexical_cast<int>(*(vals + 23));
         }catch(boost::exception& )
         {
             return 0;

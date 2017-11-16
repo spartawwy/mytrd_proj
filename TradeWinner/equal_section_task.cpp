@@ -185,7 +185,15 @@ void EqualSectionTask::HandleQuoteData()
 				{
 					app_->local_logger().LogLocal(TSystem::utility::FormatStr("warning: %d EqualSectionTask %s switch section_type:%d, curprice:%.2f but position achieve min_position", para_.id, para_.stock.c_str(), (int)sections_[index].section_type, iter->cur_price));
 					return;
-				}
+				} 
+                
+                auto val = this->app_->QueryPosAvaliable_LazyMode(para_.stock);
+				if( val < para_.quantity ) qty = val;
+                if( qty == 0 )
+                {
+                    app_->local_logger().LogLocal(TSystem::utility::FormatStr("warning: %d EqualSectionTask %s sell curprice:%.2f, but no available position", para_.id, para_.stock.c_str(), iter->cur_price));
+					return;
+                }
 				order_type = TypeOrderCategory::SELL;  goto BEFORE_TRADE; 
 			}
 			break;

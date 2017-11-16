@@ -694,6 +694,7 @@ public:
         spinBox_max_qty = new QSpinBox(tab_eq_section_trd);
         spinBox_max_qty->setObjectName(QStringLiteral("spinBox_max_qty"));
         spinBox_max_qty->setGeometry(QRect(170, 231, 101, 31));
+        spinBox_max_qty->setMaximum(999999999);
         lab_max_quantity = new QLabel(tab_eq_section_trd);
         lab_max_quantity->setObjectName(QStringLiteral("lab_max_quantity"));
         lab_max_quantity->setGeometry(QRect(70, 230, 91, 21));
@@ -710,6 +711,7 @@ public:
         spinBox_min_qty = new QSpinBox(tab_eq_section_trd);
         spinBox_min_qty->setObjectName(QStringLiteral("spinBox_min_qty"));
         spinBox_min_qty->setGeometry(QRect(170, 271, 101, 31));
+        spinBox_min_qty->setMaximum(999999999);
         cb_min_qty = new QCheckBox(tab_eq_section_trd);
         cb_min_qty->setObjectName(QStringLiteral("cb_min_qty"));
         cb_min_qty->setGeometry(QRect(280, 280, 61, 21));
@@ -802,7 +804,7 @@ public:
 
         retranslateUi(TradeWinnerClass);
 
-        tabwid_holder->setCurrentIndex(0);
+        tabwid_holder->setCurrentIndex(3);
 
 
         QMetaObject::connectSlotsByName(TradeWinnerClass);
@@ -888,7 +890,7 @@ public:
         label_price_level_3->setText(QApplication::translate("TradeWinnerClass", "\344\272\244\346\230\223\344\273\267\346\240\274:", 0));
         label_buytask_monitor_time_2->setText(QApplication::translate("TradeWinnerClass", "\347\233\221\346\216\247\346\227\266\351\227\264:", 0));
         label_23->setText(QApplication::translate("TradeWinnerClass", "---", 0));
-        lab_buytask_quantity_2->setText(QApplication::translate("TradeWinnerClass", "\344\271\260\345\205\245\346\225\260\351\207\217:", 0));
+        lab_buytask_quantity_2->setText(QApplication::translate("TradeWinnerClass", "\344\271\260\345\215\226\346\225\260\351\207\217:", 0));
         pbtn_add_eqsection_task->setText(QApplication::translate("TradeWinnerClass", "\346\267\273\345\212\240\344\273\273\345\212\241", 0));
         label_eqsec_maxprice->setText(QApplication::translate("TradeWinnerClass", "\347\240\264\351\241\266\345\201\234\346\255\242\344\273\267\346\240\274:", 0));
         label_eqsec_maxprice_2->setText(QApplication::translate("TradeWinnerClass", "\347\240\264\345\272\225\346\270\205\344\273\223\344\273\267\346\240\274:", 0));

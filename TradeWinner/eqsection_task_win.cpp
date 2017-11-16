@@ -38,7 +38,10 @@ void WinnerWin::InitEqSectionTaskWin()
 	ui.dbspbox_eqsec_min_price->setDisabled(true);
 
     ui.spinBox_max_qty->setValue(EQSEC_MAX_POSITION);
-    ui.spinBox_min_qty->setValue(EQSEC_MAX_POSITION);
+    ui.spinBox_min_qty->setValue(EQSEC_MIN_POSITION);
+    ui.spinBox_max_qty->setDisabled(true);
+	ui.spinBox_min_qty->setDisabled(true);
+
     ui.cb_max_qty->setChecked(false);
     ui.cb_min_qty->setChecked(false);
 	ui.cb_max_stop_trigger->setChecked(false);
@@ -49,8 +52,12 @@ void WinnerWin::InitEqSectionTaskWin()
     ret = QObject::connect(m_eqsec_list_hint_, SIGNAL(clicked(QModelIndex)), this, SLOT(OnClickedListWidget(QModelIndex)));
     ret = QObject::connect(m_eqsec_list_hint_, SIGNAL(choiceStr(QString)), this, SLOT(ChangeFromStationText(QString)));
      
+    ret = QObject::connect(ui.cb_max_qty, SIGNAL(stateChanged(int)), SLOT(DoMaxQtyCheckBoxChanged(int)));
+	ret = QObject::connect(ui.cb_min_qty, SIGNAL(stateChanged(int)), SLOT(DoMinQtyCheckBoxChanged(int)));
+
 	ret = QObject::connect(ui.cb_max_stop_trigger, SIGNAL(stateChanged(int)), SLOT(DoMaxStopTrigCheckBoxChanged(int)));
 	ret = QObject::connect(ui.cb_min_clear_trigger, SIGNAL(stateChanged(int)), SLOT(DoMinClearTrigCheckBoxChanged(int)));
+
 
 	ui.combox_eqsec_price_level->addItem(QString::fromLocal8Bit("即时价"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_CUR)));
     ui.combox_eqsec_price_level->addItem(QString::fromLocal8Bit("买一和卖一"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_1)));
@@ -184,6 +191,32 @@ void WinnerWin::ResetEqSectionTaskTime()
 {
 	ui.timeEdit_eqsec_begin->setTime(QTime(9, 30, 0));
     ui.timeEdit_eqsec_end->setTime(QTime(15, 00, 0));
+}
+
+void WinnerWin::DoMaxQtyCheckBoxChanged(int stat)
+{
+    switch( stat )
+	{
+		case Qt::Unchecked:
+			ui.spinBox_max_qty->setDisabled(true);
+			break;
+		case Qt::Checked:
+			ui.spinBox_max_qty->setEnabled(true);
+			break;
+	}
+}
+
+void WinnerWin::DoMinQtyCheckBoxChanged(int stat)
+{
+     switch( stat )
+	{
+		case Qt::Unchecked:
+			ui.spinBox_min_qty->setDisabled(true);
+			break;
+		case Qt::Checked:
+			ui.spinBox_min_qty->setEnabled(true);
+			break;
+	}
 }
 
 void WinnerWin::DoMaxStopTrigCheckBoxChanged(int stat)

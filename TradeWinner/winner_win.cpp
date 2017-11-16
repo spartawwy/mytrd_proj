@@ -426,6 +426,17 @@ void WinnerWin::SlotTbvTasksActionDetail(bool)
             ui.dbspbox_eqsec_fall_percent->setValue(p_tskinfo->secton_task.fall_percent);
             ui.spinBox_eqsec_quantity->setValue(p_tskinfo->quantity);
              
+            if( p_tskinfo->secton_task.max_position == EQSEC_MAX_POSITION )
+                ui.cb_max_qty->setChecked(false);
+            else
+                ui.cb_max_qty->setChecked(true);
+            if( p_tskinfo->secton_task.min_position == EQSEC_MIN_POSITION )
+                ui.cb_min_qty->setChecked(false);
+            else
+                ui.cb_min_qty->setChecked(true);
+            ui.spinBox_max_qty->setValue(p_tskinfo->secton_task.max_position);
+            ui.spinBox_min_qty->setValue(p_tskinfo->secton_task.min_position);
+
             if( Equal(p_tskinfo->secton_task.max_trig_price, EQSEC_MAX_STOP_PRICE) )
                 ui.cb_max_stop_trigger->setChecked(false);
             else
@@ -434,6 +445,7 @@ void WinnerWin::SlotTbvTasksActionDetail(bool)
                 ui.cb_min_clear_trigger->setChecked(false);
             else
                 ui.cb_min_clear_trigger->setChecked(true);
+             
             ui.dbspbox_eqsec_max_price->setValue(p_tskinfo->secton_task.max_trig_price);
             ui.dbspbox_eqsec_min_price->setValue(p_tskinfo->secton_task.min_trig_price);
 
