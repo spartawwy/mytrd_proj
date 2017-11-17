@@ -19,6 +19,7 @@ StrategyTask::StrategyTask(T_TaskInformation &task_info, WinnerApp *app)
     , cur_state_(static_cast<TaskCurrentState>(task_info.state) != TaskCurrentState::STOP ? TaskCurrentState::WAITTING : TaskCurrentState::STOP)
     , is_waitting_removed_(false)
     , life_count_(0)
+    , is_handing_(false)
 {
     
 }

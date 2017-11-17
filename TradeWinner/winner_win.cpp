@@ -231,8 +231,7 @@ void WinnerWin::Init()
 }
 
 void WinnerWin::keyPressEvent(QKeyEvent *event)
-{
-    qDebug() << "WinnerWin::keyPressEvent"; 
+{ 
     if( event->key() == Qt::Key_Escape )
     {
         if( ui.le_stock->hasFocus() )

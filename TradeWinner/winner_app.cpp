@@ -634,6 +634,7 @@ void WinnerApp::DoStrategyTasksTimeout()
     };
 	
     auto cur_time = QTime::currentTime();
+    qDebug() << "DoStrategyTasksTimeout: " << cur_time.toString() << "\n";
 	// register 
 	ReadLock locker(strategy_tasks_mutex_);
 	std::for_each( std::begin(strategy_tasks_), std::end(strategy_tasks_), [&cur_time, this](std::shared_ptr<StrategyTask>& entry)
@@ -672,7 +673,7 @@ void WinnerApp::DoStrategyTasksTimeout()
 
             if( entry->cur_state() == TaskCurrentState::RUNNING )
             {
-                if( entry->life_count_++ > 65 )
+                if( entry->life_count_++ > 60 )
                 {
                     this->local_logger().LogLocal(utility::FormatStr("error: task %d not in running", entry->task_id()));
                     entry->cur_state(TaskCurrentState::EXCEPT);
@@ -680,48 +681,7 @@ void WinnerApp::DoStrategyTasksTimeout()
                 }
             }
         } 
-
-/*
-		/// qDebug() << "taskid" << entry->task_id() << "strategy_tasks_ size:" << strategy_tasks_.size() << " stock " << entry->stock_code() << " istorun:" << entry->is_to_run();
-		if( entry->cur_state() == TaskCurrentState::WAITTING
-			&& is_in_task_time(cur_time, entry->tp_start(), entry->tp_end())
-            && IsNowTradeTime()
-			)
-		{
-            entry->cur_state(TaskCurrentState::STARTING);
-            this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
-			this->ticker_strand_.PostTask([entry, this]()
-			{
-				this->stock_ticker_->Register(entry);
-			});
-        }else if( (entry->cur_state() != TaskCurrentState::STOP && entry->cur_state() != TaskCurrentState::WAITTING)
-			&& !is_in_task_time(cur_time, entry->tp_start(), entry->tp_end())
-			)
-		{
-			this->ticker_strand_.PostTask([entry, this]()
-			{
-				this->stock_ticker_->UnRegister(entry->task_id());
-
-                if( IsNowTradeTime() )
-                    entry->cur_state(TaskCurrentState::WAITTING);
-                else
-                    entry->cur_state(TaskCurrentState::REST);
-				this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
-			});
-        }else if( entry->cur_state() == TaskCurrentState::RUNNING )
-        {
-            if( entry->life_count_++ > 30 )
-            {
-                entry->cur_state(TaskCurrentState::EXCEPT);
-                this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
-            }
-        }else if( entry->cur_state() == TaskCurrentState::REST
-            && !is_in_task_time(cur_time, entry->tp_start(), entry->tp_end())
-            && IsNowTradeTime())
-        { 
-            entry->cur_state(TaskCurrentState::WAITTING);
-            this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
-        }*/
+         
 	});
 
 }

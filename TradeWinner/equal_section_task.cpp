@@ -129,7 +129,7 @@ void EqualSectionTask::HandleQuoteData()
 {
 	if( is_waitting_removed_ )
         return;
-
+    
     assert( !quote_data_queue_.empty() );
     auto data_iter = quote_data_queue_.rbegin();
     std::shared_ptr<QuotesData> & iter = *data_iter;
@@ -141,6 +141,12 @@ void EqualSectionTask::HandleQuoteData()
         app_->local_logger().LogLocal(TSystem::utility::FormatStr("%d EqualSectionTask price jump %.2f to %.2f", para_.id, pre_price, iter->cur_price));
         return;
     };
+
+    if( is_handing_ )
+    {
+        app_->local_logger().LogLocal(TSystem::utility::FormatStr("warning: %d EqualSectionTask price: %.2f, handing return", para_.id, iter->cur_price));
+        return;
+    }
 
 	TypeOrderCategory order_type = TypeOrderCategory::SELL;
     int qty = para_.quantity;
@@ -212,8 +218,11 @@ void EqualSectionTask::HandleQuoteData()
 		}
 	}
 	
+    return;
+
 BEFORE_TRADE:
 
+    is_handing_ = true;
 	app_->trade_strand().PostTask([iter, index, order_type, qty, this]()
     {
         char result[1024] = {0};
@@ -228,8 +237,10 @@ BEFORE_TRADE:
 
         int qty = HandleSellByStockPosition(price);
         if( qty == 0 )
+        {
+            this->is_handing_ = false;
             return;
-
+        }
 #ifdef USE_TRADE_FLAG
         assert(this->app_->trade_agent().account_data(market_type_));
 
@@ -249,7 +260,7 @@ BEFORE_TRADE:
         // judge result 
         if( strlen(error_info) > 0 )
         {
-            auto ret_str = new std::string(utility::FormatStr("error %d %s %s %.2f %d error:%s"
+           auto ret_str = new std::string(utility::FormatStr("error %d %s %s %.2f %d error:%s"
                         , para_.id, cn_order_str.c_str(), para_.stock.c_str(), price, para_.quantity, error_info));
            this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
            this->app_->AppendLog2Ui(ret_str->c_str());
@@ -277,6 +288,7 @@ BEFORE_TRADE:
             is_waitting_removed_ = true;
             this->app_->RemoveTask(this->task_id());
         }
+        this->is_handing_ = false;
     });
 
 }

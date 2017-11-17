@@ -71,6 +71,7 @@ protected:
    
    volatile TaskCurrentState cur_state_;
    bool is_waitting_removed_;
+   bool is_handing_;
      
 };
 

@@ -233,11 +233,12 @@ void StockTicker::Procedure()
             TTaskIdMapStrategyTask::iterator  task_iter = registered_tasks_.find(id);
             if( task_iter != registered_tasks_.end() )
             { 
-                qDebug() << task_iter->second->stock_code() << " cur_pric:" << task_iter->second->cur_price() << "\n";
+                //qDebug() << std::get<1>(CurrentDateTime()).c_str() << " " << task_iter->second->stock_code() << " cur_pric:" << task_iter->second->cur_price() << "\n";
                 task_iter->second->ObtainData(quote_data);
+
+                task_iter->second->life_count_ = 0;
 				if( task_iter->second->cur_state() != TaskCurrentState::RUNNING )
 				{
-                    task_iter->second->life_count_ = 0;
 					task_iter->second->cur_state(TaskCurrentState::RUNNING);
 					task_iter->second->app()->Emit(task_iter->second.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
 				}
@@ -251,8 +252,7 @@ void StockTicker::Procedure()
         //===================
 #if 0
         auto cur_price = result_array.at(3 + n * 44);
-        auto active_degree = result_array.at(42 + n * 44);
-
+        auto active_degree = result_array.at(42 + n * 44); 
         auto price_b_1 = result_array.at(17 + n * 44);
         auto price_s_1 = result_array.at(18 + n * 44);
         auto price_b_2 = result_array.at(21 + n * 44);
