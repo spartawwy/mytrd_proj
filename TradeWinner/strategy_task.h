@@ -5,8 +5,12 @@
 //#include <queue>
 #include <list>
 #include <chrono>
+#include <mutex>
+
+#include <TLib/core/tsystem_task_service.h>
 
 #include "common.h"
+
 
 class WinnerApp;
 class StrategyTask
@@ -15,7 +19,10 @@ public:
     
     StrategyTask(T_TaskInformation &task_info, WinnerApp *app);
 
-    virtual ~StrategyTask(){}
+    virtual ~StrategyTask()
+    { 
+        //timed_mutex_.unlock(); 
+    }
 
     virtual void HandleQuoteData() = 0;
 	virtual std::string Detail(){ return "";}
@@ -70,9 +77,11 @@ protected:
    double  cur_price_;
    
    volatile TaskCurrentState cur_state_;
-   bool is_waitting_removed_;
-   bool is_handing_;
+   bool is_waitting_removed_; 
+
+   TSystem::TaskStrand   strand_;
      
+   std::timed_mutex  timed_mutex_;
 };
 
 #endif

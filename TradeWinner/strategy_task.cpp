@@ -19,7 +19,8 @@ StrategyTask::StrategyTask(T_TaskInformation &task_info, WinnerApp *app)
     , cur_state_(static_cast<TaskCurrentState>(task_info.state) != TaskCurrentState::STOP ? TaskCurrentState::WAITTING : TaskCurrentState::STOP)
     , is_waitting_removed_(false)
     , life_count_(0)
-    , is_handing_(false)
+    , strand_(app->task_pool())
+    , timed_mutex_()
 {
     
 }
@@ -63,7 +64,7 @@ double StrategyTask::GetQuoteTargetPrice(const QuotesData& data, bool is_buy)
 
 void StrategyTask::ObtainData(std::shared_ptr<QuotesData> &data)
 {
-    app_->task_calc_strand().PostTask([data, this]()
+    strand_.PostTask([data, this]()
     {
         assert(data);
         if( quote_data_queue_.size() > cst_max_data_count)
@@ -77,9 +78,9 @@ void StrategyTask::ObtainData(std::shared_ptr<QuotesData> &data)
         quote_data_queue_.push_back(std::move(data));
 
         // calc and judge if trigger trade
+
         HandleQuoteData();
     });
-
     if( !Equal(cur_price_, data->cur_price) ) 
     {
          cur_price_ = data->cur_price;

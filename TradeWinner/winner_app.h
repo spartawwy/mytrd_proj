@@ -53,7 +53,7 @@ public:
     void Stop();
 
     TaskStrand& ticker_strand() { return ticker_strand_;}
-    TaskStrand& task_calc_strand() { return task_calc_strand_; }
+    //TaskStrand& task_calc_strand() { return task_calc_strand_; }
     TaskStrand& trade_strand() { return trade_strand_; }
 
     TradeAgent& trade_agent() { return trade_agent_; }
@@ -129,7 +129,7 @@ private:
 
     //QApplication  *qt_app_;
     TaskStrand  ticker_strand_;
-    TaskStrand  task_calc_strand_;
+    //TaskStrand  task_calc_strand_;
     TaskStrand  trade_strand_;
     //std::shared_ptr<MyThread>  thread_;
     std::shared_ptr<StockTicker>  stock_ticker_;
