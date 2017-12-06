@@ -28,6 +28,8 @@ void MessageWin::ShowUI(const QString &title_str, const QString &str)
 {
     setWindowIconText(title_str);
     ui.label_content->setText(str);
+    //::SetWindowPos(HWND(pMainForm->winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+    //::SetWindowPos(HWND(pMainForm->winId()), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW); 
     this->show();
 
     myTimer_->stop();

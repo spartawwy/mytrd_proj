@@ -124,7 +124,7 @@ private slots:
     void DoShowUi(std::string*);
 
     void SlotStopAllTasks(bool);
-
+     
 private:
 
     //QApplication  *qt_app_;

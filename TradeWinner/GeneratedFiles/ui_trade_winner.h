@@ -40,6 +40,7 @@ public:
     QAction *actionClose;
     QAction *actionRestart;
     QAction *actionStopAllTask;
+    QAction *actionOpenCalcWin;
     QWidget *centralWidget;
     QTabWidget *tabwid_holder;
     QWidget *tab_task_list;
@@ -179,6 +180,7 @@ public:
     QMenu *menu_system;
     QMenu *menu_help;
     QMenu *menu_operate;
+    QMenu *tool_menu;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
@@ -193,6 +195,8 @@ public:
         actionRestart->setObjectName(QStringLiteral("actionRestart"));
         actionStopAllTask = new QAction(TradeWinnerClass);
         actionStopAllTask->setObjectName(QStringLiteral("actionStopAllTask"));
+        actionOpenCalcWin = new QAction(TradeWinnerClass);
+        actionOpenCalcWin->setObjectName(QStringLiteral("actionOpenCalcWin"));
         centralWidget = new QWidget(TradeWinnerClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         tabwid_holder = new QTabWidget(centralWidget);
@@ -745,6 +749,8 @@ public:
         menu_help->setObjectName(QStringLiteral("menu_help"));
         menu_operate = new QMenu(menuBar);
         menu_operate->setObjectName(QStringLiteral("menu_operate"));
+        tool_menu = new QMenu(menuBar);
+        tool_menu->setObjectName(QStringLiteral("tool_menu"));
         TradeWinnerClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(TradeWinnerClass);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -797,10 +803,12 @@ public:
 
         menuBar->addAction(menu_system->menuAction());
         menuBar->addAction(menu_operate->menuAction());
+        menuBar->addAction(tool_menu->menuAction());
         menuBar->addAction(menu_help->menuAction());
         menu_system->addAction(actionClose);
         menu_system->addAction(actionRestart);
         menu_operate->addAction(actionStopAllTask);
+        tool_menu->addAction(actionOpenCalcWin);
 
         retranslateUi(TradeWinnerClass);
 
@@ -816,6 +824,7 @@ public:
         actionClose->setText(QApplication::translate("TradeWinnerClass", "\351\200\200\345\207\272", 0));
         actionRestart->setText(QApplication::translate("TradeWinnerClass", "\351\207\215\346\226\260\345\220\257\345\212\250", 0));
         actionStopAllTask->setText(QApplication::translate("TradeWinnerClass", "\345\201\234\346\255\242\346\211\200\346\234\211\344\273\273\345\212\241", 0));
+        actionOpenCalcWin->setText(QApplication::translate("TradeWinnerClass", "\350\256\241\347\256\227\345\231\250", 0));
         tabwid_holder->setTabText(tabwid_holder->indexOf(tab_task_list), QApplication::translate("TradeWinnerClass", "\344\273\273\345\212\241\345\210\227\350\241\250", 0));
         label_buytask_alert_price->setText(QApplication::translate("TradeWinnerClass", "\350\202\241\347\245\250\344\275\216\344\272\216:", 0));
         label_buytask_stock->setText(QApplication::translate("TradeWinnerClass", "\350\202\241\347\245\250\344\273\243\347\240\201:", 0));
@@ -907,6 +916,7 @@ public:
         menu_system->setTitle(QApplication::translate("TradeWinnerClass", "\347\263\273\347\273\237", 0));
         menu_help->setTitle(QApplication::translate("TradeWinnerClass", "\345\270\256\345\212\251", 0));
         menu_operate->setTitle(QApplication::translate("TradeWinnerClass", "\346\223\215\344\275\234", 0));
+        tool_menu->setTitle(QApplication::translate("TradeWinnerClass", "\345\267\245\345\205\267", 0));
     } // retranslateUi
 
 };

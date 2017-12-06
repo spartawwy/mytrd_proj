@@ -167,6 +167,15 @@
     <ClCompile Include="mutex_wrapper.cpp">
       <Filter>moudle</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_calc_win.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_calc_win.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="calc_win.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="trade_winner.ui">
@@ -200,6 +209,12 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="message_win.h">
+      <Filter>win</Filter>
+    </CustomBuild>
+    <CustomBuild Include="calc.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="calc_win.h">
       <Filter>win</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -281,6 +296,9 @@
     </ClInclude>
     <ClInclude Include="mutex_wrapper.h">
       <Filter>moudle</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_calc.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2126,8 +2126,15 @@ background-color: rgb(255, 255,255);</string>
     </property>
     <addaction name="actionStopAllTask"/>
    </widget>
+   <widget class="QMenu" name="tool_menu">
+    <property name="title">
+     <string>工具</string>
+    </property>
+    <addaction name="actionOpenCalcWin"/>
+   </widget>
    <addaction name="menu_system"/>
    <addaction name="menu_operate"/>
+   <addaction name="tool_menu"/>
    <addaction name="menu_help"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -2152,6 +2159,11 @@ background-color: rgb(255, 255,255);</string>
   <action name="actionStopAllTask">
    <property name="text">
     <string>停止所有任务</string>
+   </property>
+  </action>
+  <action name="actionOpenCalcWin">
+   <property name="text">
+    <string>计算器</string>
    </property>
   </action>
  </widget>

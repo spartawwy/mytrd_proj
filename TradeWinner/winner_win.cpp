@@ -16,6 +16,7 @@
 #include "stock_ticker.h"
 #include "MySpinBox.h"
 #include "HintList.h"
+#include "calc_win.h"
 
 //static const QString cst_str_breakout_buy = QString::fromLocal8Bit("突破买入");
 //static const QString cst_str_Inflection_buy = QString::fromLocal8Bit("拐点买入");
@@ -52,6 +53,8 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     , cur_price_(0.0)
     , buytask_cur_price_(0.0)
 	, eqsec_task_cur_price_(0.0)
+    , status_label_(nullptr)
+    , calc_win_(nullptr)
 {
     ui.setupUi(this);
 
@@ -171,11 +174,12 @@ void WinnerWin::Init()
 
     //
     ret = connect(ui.actionStopAllTask, SIGNAL(triggered(bool)), this->app_, SLOT(SlotStopAllTasks(bool)));
-
+    // ndedt
+    ret = connect(ui.actionOpenCalcWin, SIGNAL(triggered(bool)), this, SLOT(SlotOpenCalcWin(bool)));
     ui.tbview_tasks->setContextMenuPolicy(Qt::CustomContextMenu);
     ui.tbview_tasks->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui.tbview_tasks->setSelectionMode(QAbstractItemView::SingleSelection);
-
+    ;
     //set menu context of tableview tasklist -------------------
     auto action_start = new QAction (this);
     action_start ->setText ( QStringLiteral( "启动" ));
@@ -717,4 +721,15 @@ void WinnerWin::AssignHintListAndLineEdit(HintList *& p_list, QLineEdit *&p_edit
         p_dbspb_percent = nullptr;
     }else
         assert(false);
+}
+
+void WinnerWin::SlotOpenCalcWin(bool)
+{
+    if( !calc_win_ )
+        calc_win_ = std::make_shared<CalcWin>();
+
+    ::SetWindowPos(HWND(calc_win_->winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+    //::SetWindowPos(HWND(calc_win_->winId()), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW); 
+    calc_win_->show();
+    calc_win_->activateWindow();
 }

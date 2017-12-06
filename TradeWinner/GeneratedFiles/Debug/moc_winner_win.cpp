@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_WinnerWin_t {
-    QByteArrayData data[64];
-    char stringdata[1047];
+    QByteArrayData data[65];
+    char stringdata[1063];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -92,7 +92,8 @@ QT_MOC_LITERAL(59, 974, 11),
 QT_MOC_LITERAL(60, 986, 6),
 QT_MOC_LITERAL(61, 993, 16),
 QT_MOC_LITERAL(62, 1010, 19),
-QT_MOC_LITERAL(63, 1030, 15)
+QT_MOC_LITERAL(63, 1030, 15),
+QT_MOC_LITERAL(64, 1046, 15)
     },
     "WinnerWin\0DoQueryCapital\0\0SlotAppendLog\0"
     "char*\0SlotTabChanged\0SlotTbvTasksContextMenu\0"
@@ -122,6 +123,7 @@ QT_MOC_LITERAL(63, 1030, 15)
     "AssignHintListAndLineEdit\0HintList*&\0"
     "p_list\0QLineEdit*&\0p_edit\0QDoubleSpinBox*&\0"
     "p_dbspb_alert_price\0p_dbspb_percent\0"
+    "SlotOpenCalcWin\0"
 };
 #undef QT_MOC_LITERAL
 
@@ -131,7 +133,7 @@ static const uint qt_meta_data_WinnerWin[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      40,   14, // methods
+      41,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -139,46 +141,47 @@ static const uint qt_meta_data_WinnerWin[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,  214,    2, 0x0a,
-       3,    1,  215,    2, 0x0a,
-       5,    1,  218,    2, 0x0a,
-       6,    1,  221,    2, 0x0a,
-       8,    1,  224,    2, 0x0a,
-       9,    1,  227,    2, 0x0a,
-      10,    1,  230,    2, 0x0a,
-      11,    1,  233,    2, 0x0a,
-      12,    1,  236,    2, 0x0a,
-      14,    1,  239,    2, 0x0a,
-      14,    2,  242,    2, 0x0a,
-      14,    1,  247,    2, 0x2a,
-      19,    1,  250,    2, 0x0a,
-      21,    1,  253,    2, 0x0a,
-      22,    1,  256,    2, 0x0a,
-      25,    0,  259,    2, 0x0a,
-      26,    1,  260,    2, 0x0a,
-      27,    0,  263,    2, 0x0a,
-      28,    0,  264,    2, 0x0a,
-      29,    2,  265,    2, 0x0a,
-      31,    0,  270,    2, 0x0a,
-      32,    2,  271,    2, 0x0a,
-      37,    0,  276,    2, 0x0a,
-      38,    1,  277,    2, 0x0a,
-      39,    1,  280,    2, 0x0a,
-      40,    0,  283,    2, 0x0a,
-      41,    0,  284,    2, 0x0a,
-      42,    0,  285,    2, 0x0a,
-      43,    0,  286,    2, 0x0a,
-      44,    0,  287,    2, 0x0a,
-      45,    1,  288,    2, 0x0a,
-      46,    1,  291,    2, 0x0a,
-      47,    1,  294,    2, 0x0a,
-      48,    1,  297,    2, 0x0a,
-      49,    1,  300,    2, 0x0a,
-      50,    0,  303,    2, 0x0a,
-      51,    1,  304,    2, 0x0a,
-      52,    1,  307,    2, 0x0a,
-      54,    1,  310,    2, 0x0a,
-      56,    4,  313,    2, 0x0a,
+       1,    0,  219,    2, 0x0a,
+       3,    1,  220,    2, 0x0a,
+       5,    1,  223,    2, 0x0a,
+       6,    1,  226,    2, 0x0a,
+       8,    1,  229,    2, 0x0a,
+       9,    1,  232,    2, 0x0a,
+      10,    1,  235,    2, 0x0a,
+      11,    1,  238,    2, 0x0a,
+      12,    1,  241,    2, 0x0a,
+      14,    1,  244,    2, 0x0a,
+      14,    2,  247,    2, 0x0a,
+      14,    1,  252,    2, 0x2a,
+      19,    1,  255,    2, 0x0a,
+      21,    1,  258,    2, 0x0a,
+      22,    1,  261,    2, 0x0a,
+      25,    0,  264,    2, 0x0a,
+      26,    1,  265,    2, 0x0a,
+      27,    0,  268,    2, 0x0a,
+      28,    0,  269,    2, 0x0a,
+      29,    2,  270,    2, 0x0a,
+      31,    0,  275,    2, 0x0a,
+      32,    2,  276,    2, 0x0a,
+      37,    0,  281,    2, 0x0a,
+      38,    1,  282,    2, 0x0a,
+      39,    1,  285,    2, 0x0a,
+      40,    0,  288,    2, 0x0a,
+      41,    0,  289,    2, 0x0a,
+      42,    0,  290,    2, 0x0a,
+      43,    0,  291,    2, 0x0a,
+      44,    0,  292,    2, 0x0a,
+      45,    1,  293,    2, 0x0a,
+      46,    1,  296,    2, 0x0a,
+      47,    1,  299,    2, 0x0a,
+      48,    1,  302,    2, 0x0a,
+      49,    1,  305,    2, 0x0a,
+      50,    0,  308,    2, 0x0a,
+      51,    1,  309,    2, 0x0a,
+      52,    1,  312,    2, 0x0a,
+      54,    1,  315,    2, 0x0a,
+      56,    4,  318,    2, 0x0a,
+      64,    1,  327,    2, 0x0a,
 
  // slots: parameters
     QMetaType::Void,
@@ -221,6 +224,7 @@ static const uint qt_meta_data_WinnerWin[] = {
     QMetaType::Void, QMetaType::QModelIndex,   53,
     QMetaType::Void, QMetaType::QString,   55,
     QMetaType::Void, 0x80000000 | 57, 0x80000000 | 59, 0x80000000 | 61, 0x80000000 | 61,   58,   60,   62,   63,
+    QMetaType::Void, QMetaType::Bool,    2,
 
        0        // eod
 };
@@ -271,7 +275,19 @@ void WinnerWin::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 37: _t->OnClickedListWidget((*reinterpret_cast< QModelIndex(*)>(_a[1]))); break;
         case 38: _t->ChangeFromStationText((*reinterpret_cast< QString(*)>(_a[1]))); break;
         case 39: _t->AssignHintListAndLineEdit((*reinterpret_cast< HintList*(*)>(_a[1])),(*reinterpret_cast< QLineEdit*(*)>(_a[2])),(*reinterpret_cast< QDoubleSpinBox*(*)>(_a[3])),(*reinterpret_cast< QDoubleSpinBox*(*)>(_a[4]))); break;
+        case 40: _t->SlotOpenCalcWin((*reinterpret_cast< bool(*)>(_a[1]))); break;
         default: ;
+        }
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        switch (_id) {
+        default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+        case 21:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTableView* >(); break;
+            }
+            break;
         }
     }
 }
@@ -301,13 +317,13 @@ int WinnerWin::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 40)
+        if (_id < 41)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 40;
+        _id -= 41;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 40)
-            *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 40;
+        if (_id < 41)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 41;
     }
     return _id;
 }
