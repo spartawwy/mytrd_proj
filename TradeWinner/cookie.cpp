@@ -32,7 +32,7 @@ Cookie::TRetCookie Cookie::Init()
     TRetCookie  ret = TRetCookie::OK;
 
     //const char* shared_name = "cookietrdw";
-    const char* shared_name = "cookietrdw6";
+    const char* shared_name = "cookietrdw7";
      
     _mkdir("c:\\trade_localf");
 
@@ -40,7 +40,7 @@ Cookie::TRetCookie Cookie::Init()
 
     mmfm_ = INVALID_HANDLE_VALUE;
     // create file
-    mmHandle_ = CreateFile("c:\\trade_localf\\my.cookie6",
+    mmHandle_ = CreateFile("c:\\trade_localf\\my.cookie7",
              GENERIC_READ | GENERIC_WRITE,  //access_mode
              FILE_SHARE_READ | FILE_SHARE_WRITE, //share_mode
              NULL,

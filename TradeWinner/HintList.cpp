@@ -53,6 +53,8 @@ void HintList::keyPressEvent(QKeyEvent *event)
     {
         if( this->count() > 0 )
             emit choiceStr(this->currentItem()->text()); // trigger ChangeFromStationText
+        else
+            emit choiceStr(le_stock_->text().trimmed());
         this->close();
     }else if( event->key() == Qt::Key_Backspace )
     {
