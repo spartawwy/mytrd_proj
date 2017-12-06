@@ -5,7 +5,7 @@
 //#include <queue>
 #include <list>
 #include <chrono>
-#include <mutex>
+#include "mutex_wrapper.h"
 
 #include <TLib/core/tsystem_task_service.h>
 
@@ -26,6 +26,7 @@ public:
 
     virtual void HandleQuoteData() = 0;
 	virtual std::string Detail(){ return "";}
+    virtual void UnReg(){ }
 
     bool IsPriceJumpUp(double pre_price, double cur_price);
     bool IsPriceJumpDown(double pre_price, double cur_price);
@@ -81,7 +82,7 @@ protected:
 
    TSystem::TaskStrand   strand_;
      
-   std::timed_mutex  timed_mutex_;
+   TimedMutexWrapper  timed_mutex_wrapper_;
 };
 
 #endif

@@ -164,6 +164,9 @@
     <ClCompile Include="rwini.cpp">
       <Filter>moudle</Filter>
     </ClCompile>
+    <ClCompile Include="mutex_wrapper.cpp">
+      <Filter>moudle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="trade_winner.ui">
@@ -275,6 +278,9 @@
     </ClInclude>
     <ClInclude Include="..\StkQuoter\stk_quoter_api.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mutex_wrapper.h">
+      <Filter>moudle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

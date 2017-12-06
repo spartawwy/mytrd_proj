@@ -329,7 +329,7 @@ void StockTicker::UnRegister(unsigned int task_id)
         }else
             ++list_iter;
     }
-    
+    iter->second->UnReg();
 	registered_tasks_.erase(iter);
 }
 

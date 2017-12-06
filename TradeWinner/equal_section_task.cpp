@@ -142,12 +142,13 @@ void EqualSectionTask::HandleQuoteData()
         return;
     };
 
-    if( !timed_mutex_.try_lock_for(std::chrono::milliseconds(1000)) )
+    if( !timed_mutex_wrapper_.try_lock_for(1000) )
     {
         app_->local_logger().LogLocal(TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
+        app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock fail"); 
         return;
     };
-
+    app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock ok");
     TypeOrderCategory order_type = TypeOrderCategory::SELL;
     int qty = para_.quantity;
     int index = 0;
@@ -159,15 +160,15 @@ void EqualSectionTask::HandleQuoteData()
             if( iter->cur_price < sections_[index].represent_price ) 
             {
                 order_type = TypeOrderCategory::SELL; 
-                qty = this->app_->QueryPosAvaliable_LazyMode(para_.stock);
-                if( qty > para_.quantity ) qty = para_.quantity;
+                qty = this->app_->QueryPosAvaliable_LazyMode(para_.stock); 
                 if( qty == 0 )
                 {
                     auto ret_str = new std::string(TSystem::utility::FormatStr("警告:触发任务:%d 区间破位卖出 %s 价格:%f 实际可用数量:0 ", para_.id, this->code_data(), iter->cur_price));
                     this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str); 
                     this->app_->AppendLog2Ui(ret_str->c_str()); 
                     this->app_->EmitSigShowUi(ret_str);
-                    timed_mutex_.unlock(); 
+                    app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
+                    timed_mutex_wrapper_.unlock(); 
                     this->app_->RemoveTask(this->task_id()); // invoke self destroy
                     return;
                 }  
@@ -220,8 +221,8 @@ void EqualSectionTask::HandleQuoteData()
     }
 
 NOT_TRADE:
-
-    timed_mutex_.unlock();
+    app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
+    timed_mutex_wrapper_.unlock();
     return;
 
 BEFORE_TRADE:
@@ -246,13 +247,15 @@ BEFORE_TRADE:
         this->app_->local_logger().LogLocal(TagOfOrderLog(), 
             TSystem::utility::FormatStr("区间任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, para_.quantity)); 
         this->app_->AppendLog2Ui("区间任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, para_.quantity);
-
+#if 0 //tmp nouse it
         // order the stock
         this->app_->trade_agent().SendOrder(this->app_->trade_client_id()
             , (int)order_type, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
             , price, qty
             , result, error_info); 
+#endif
+         
 #endif
         // judge result 
         if( strlen(error_info) > 0 )
@@ -266,6 +269,7 @@ BEFORE_TRADE:
         }else
         {
             auto ret_str = new std::string(utility::FormatStr("区间任务:%d %s %s %.2f %d 成功!", para_.id, cn_order_str.c_str(), para_.stock.c_str(), price, para_.quantity));
+            this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
             this->app_->EmitSigShowUi(ret_str);
         }
         para_.secton_task.is_original = false;
@@ -276,7 +280,8 @@ BEFORE_TRADE:
             CalculateSections(iter->cur_price, para_, sections_);
             // save to db: save cur_price as start_price in assistant_field 
             app_->db_moudle().UpdateEqualSection(para_.id, para_.secton_task.is_original, iter->cur_price);
-            this->timed_mutex_.unlock();
+            app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
+            this->timed_mutex_wrapper_.unlock();
         }else
         {
             auto ret_str = new std::string(utility::FormatStr("区间任务:%d %s 破底清仓!", para_.id, para_.stock.c_str()));
@@ -284,7 +289,8 @@ BEFORE_TRADE:
             this->app_->EmitSigShowUi(ret_str);
 
             is_waitting_removed_ = true;
-            this->timed_mutex_.unlock();
+            app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
+            this->timed_mutex_wrapper_.unlock();
             this->app_->RemoveTask(this->task_id()); // invoker delete self
         }
         

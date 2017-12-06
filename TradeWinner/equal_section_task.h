@@ -14,6 +14,7 @@ public:
 
     virtual ~EqualSectionTask(){}
     virtual void HandleQuoteData() override;
+    virtual void UnReg() override { timed_mutex_wrapper_.unlock(); } 
 
 private:
 

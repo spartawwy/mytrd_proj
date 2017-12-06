@@ -20,7 +20,7 @@ StrategyTask::StrategyTask(T_TaskInformation &task_info, WinnerApp *app)
     , is_waitting_removed_(false)
     , life_count_(0)
     , strand_(app->task_pool())
-    , timed_mutex_()
+    , timed_mutex_wrapper_()
 {
     
 }
