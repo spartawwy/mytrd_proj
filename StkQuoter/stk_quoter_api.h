@@ -31,8 +31,28 @@ struct T_StockPriceInfo
     }
 };
 
+struct T_StockHisDataItem
+{
+    int  date; 
+    double close_price;
+    double high_price;
+    double low_price;
+    double open_price;
+    double pre_close_price;
+    double vol;
+    double capital;
+};
+
 extern "C" int STKQUOTER_IMEXPORT StkQuoteGetQuote(char stocks[][16], const unsigned int size, T_StockPriceInfo price_info[]/*, unsigned int *ret_size*/);
 
 typedef int (__stdcall *StkQuoteGetQuoteDelegate)(char stocks[][16], const unsigned int size, T_StockPriceInfo price_info[]);
+
+extern "C" int STKQUOTER_IMEXPORT  StkHisData(char stocks[16], int start_date, int end_date, T_StockHisDataItem **price_info);
+
+typedef int (__stdcall *StkHisDataDelegate)(char stocks[16], int start_date, int end_date, T_StockHisDataItem **pp_items);
+
+extern "C" void STKQUOTER_IMEXPORT StkRelHisData(T_StockHisDataItem* p_items);
+
+typedef void (__stdcall *StkRelHisDataDelegate)(T_StockHisDataItem* p_items);
 
 #endif
