@@ -55,10 +55,12 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
 	, eqsec_task_cur_price_(0.0)
     , status_label_(nullptr)
     , calc_win_(nullptr)
+    , flash_win_timer_(nullptr)
 {
     ui.setupUi(this);
 
     connect(ui.pbtn_query_capital, SIGNAL(clicked()), this, SLOT(DoQueryCapital()));
+     
 #if 1
     //------------------tab task list 
     //QStandardItemModel * model = static_cast<QStandardItemModel *>(ui.tbview_tasks->model());
@@ -169,6 +171,11 @@ void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_
  
 void WinnerWin::Init()
 {
+    flash_win_timer_ = new QTimer(this);
+    flash_win_timer_->setSingleShot(false); 
+    flash_win_timer_->setInterval(600);
+    connect(flash_win_timer_, SIGNAL(timeout()), this, SLOT(DoFlashWin()));
+
     bool ret = connect(this->app_, SIGNAL(SigAppendLog(char*)), this, SLOT(SlotAppendLog(char*)));
 	connect(ui.tabwid_holder, SIGNAL(currentChanged(int)), this, SLOT(SlotTabChanged(int)));
 
@@ -499,6 +506,11 @@ void WinnerWin::DoStatusBar(std::string* str, bool is_delete)
         delete str;
 }
 
+void WinnerWin::DoFlashWin()
+{
+    FlashWindow( HWND(this->winId()), 1);
+}
+
 void WinnerWin::DoLeStockEditingFinished()
 {
     if( !ui.le_stock->isModified() )
@@ -553,6 +565,12 @@ void WinnerWin::closeEvent(QCloseEvent * event)
         event->ignore();
     else
         app_->Stop();
+}
+
+void WinnerWin::changeEvent(QEvent * event)
+{ // if( event->type() == QEvent::WindowStateChange )
+    if( flash_win_timer_ && flash_win_timer_->isActive() )  
+        flash_win_timer_->stop();
 }
 
 void WinnerWin::DoTaskStatChangeSignal(StrategyTask* p_task, int val)
@@ -732,4 +750,12 @@ void WinnerWin::SlotOpenCalcWin(bool)
     //::SetWindowPos(HWND(calc_win_->winId()), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW); 
     calc_win_->show();
     calc_win_->activateWindow();
+}
+
+void WinnerWin::TriggerFlashWinTimer(bool enable)
+{
+    if( enable )
+        flash_win_timer_->start();
+    else
+        flash_win_timer_->stop();
 }

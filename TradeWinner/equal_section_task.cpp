@@ -166,7 +166,7 @@ void EqualSectionTask::HandleQuoteData()
                     auto ret_str = new std::string(TSystem::utility::FormatStr("警告:触发任务:%d 区间破位卖出 %s 价格:%f 实际可用数量:0 ", para_.id, this->code_data(), iter->cur_price));
                     this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str); 
                     this->app_->AppendLog2Ui(ret_str->c_str()); 
-                    this->app_->EmitSigShowUi(ret_str);
+                    this->app_->EmitSigShowUi(ret_str, true);
                     app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
                     timed_mutex_wrapper_.unlock(); 
                     this->app_->RemoveTask(this->task_id()); // invoke self destroy
@@ -247,7 +247,7 @@ BEFORE_TRADE:
         this->app_->local_logger().LogLocal(TagOfOrderLog(), 
             TSystem::utility::FormatStr("区间任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, para_.quantity)); 
         this->app_->AppendLog2Ui("区间任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, para_.quantity);
-#if 0 //tmp nouse it
+#if 1
         // order the stock
         this->app_->trade_agent().SendOrder(this->app_->trade_client_id()
             , (int)order_type, 0
@@ -264,13 +264,13 @@ BEFORE_TRADE:
                 , para_.id, cn_order_str.c_str(), para_.stock.c_str(), price, para_.quantity, error_info));
             this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
             this->app_->AppendLog2Ui(ret_str->c_str());
-            this->app_->EmitSigShowUi(ret_str);
+            this->app_->EmitSigShowUi(ret_str, true);
 
         }else
         {
             auto ret_str = new std::string(utility::FormatStr("区间任务:%d %s %s %.2f %d 成功!", para_.id, cn_order_str.c_str(), para_.stock.c_str(), price, para_.quantity));
             this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
-            this->app_->EmitSigShowUi(ret_str);
+            this->app_->EmitSigShowUi(ret_str, true);
         }
         para_.secton_task.is_original = false;
 

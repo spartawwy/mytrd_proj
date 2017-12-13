@@ -90,7 +90,7 @@ public:
     void Emit(StrategyTask* p, int type) { emit SigTaskStatChange(p, type); }
     void EmitSigRemoveTask(int id) { emit SigRemoveTask(id);}
     // memory will be delete by this function 
-    void EmitSigShowUi(std::string *str) { emit SigShowUi(str); }
+    void EmitSigShowUi(std::string *str, bool flash_task_bar=false) { emit SigShowUi(str, flash_task_bar); }
 
     T_PositionData* QueryPosition(const std::string& code);
     T_Capital QueryCapital();
@@ -114,14 +114,14 @@ signals:
     void SigAppendLog(char*);
     void SigRemoveTask(int);
     //void SigShowUi(std::shared_ptr<std::string>); //cause can't invoke so use raw point
-    void SigShowUi(std::string*);
+    void SigShowUi(std::string*, bool);
 
 private slots:
 
     void DoStrategyTasksTimeout();
     void DoNormalTimer();
     //void DoShowUi(std::shared_ptr<std::string>);
-    void DoShowUi(std::string*);
+    void DoShowUi(std::string*, bool flash_taskbar = false);
 
     void SlotStopAllTasks(bool);
      

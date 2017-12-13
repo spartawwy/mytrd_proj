@@ -48,6 +48,8 @@ public slots:
     void DoStatusBar(const std::string& str);
     void DoStatusBar(std::string* str, bool is_delete=false);
 
+    void DoFlashWin();
+
     // sell task win--------------------
     void DoAlertPercentChanged(double val);
     void DoSellTypeChanged(const QString&);
@@ -96,6 +98,8 @@ public slots:
 
     void SlotOpenCalcWin(bool);
 
+    void TriggerFlashWinTimer(bool enable=true);
+
 signals:
 
     //void SigRemoveTask(int task_id);
@@ -103,7 +107,8 @@ signals:
 protected:
 
     virtual void closeEvent(QCloseEvent * event) override;
-      
+    virtual void changeEvent(QEvent * event) override;
+
 private:
 
     // sell task related 
@@ -137,6 +142,8 @@ private:
     double cur_price_;
     double buytask_cur_price_;
     double eqsec_task_cur_price_;
+
+    QTimer *flash_win_timer_;
 };
 
 #endif // TRADE_WINNER_H

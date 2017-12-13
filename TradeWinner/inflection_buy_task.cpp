@@ -150,12 +150,12 @@ void InflectionBuyTask::HandleQuoteData()
                         , para_.id, para_.stock.c_str(), price, para_.quantity, error_info));
             this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
             this->app_->AppendLog2Ui(ret_str->c_str());
-            this->app_->EmitSigShowUi(ret_str);
+            this->app_->EmitSigShowUi(ret_str, true);
              
         }else
         {
             auto ret_str = new std::string(utility::FormatStr("任务:%d 拐点买入 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, para_.quantity));
-            this->app_->EmitSigShowUi(ret_str);
+            this->app_->EmitSigShowUi(ret_str, true);
         }
 
         this->app_->RemoveTask(this->task_id());

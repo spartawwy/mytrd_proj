@@ -339,6 +339,7 @@ void WinnerWin::DoAddBuyTask()
         InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
         app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("拐点买入任务添加成功!"));
         app_->AppendLog2Ui("添加拐点买入任务 : %d 成功!\n", task_info->id);
+         
 #endif
     }else if( ui.combox_buy_type->currentText() == cst_str_batches_buy )
     {
@@ -373,7 +374,7 @@ void WinnerWin::DoAddBuyTask()
         InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
         app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("分批买入任务添加成功!"));
         app_->AppendLog2Ui("添加分批买入任务 : %d 成功!\n", task_info->id);
- 
+
 	}
 }
 

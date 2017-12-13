@@ -165,7 +165,8 @@ bool WinnerApp::Init()
 
 	ret1 = QObject::connect(this, SIGNAL(SigRemoveTask(int)), &winner_win_, SLOT(RemoveByTaskId(int)));
 	//ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::shared_ptr<std::string>)), this, SLOT(DoShowUi(std::shared_ptr<std::string>)));
-	ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::string *)), this, SLOT(DoShowUi(std::string *)));
+	//ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::string *)), this, SLOT(DoShowUi(std::string *)));
+	ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::string *, bool)), this, SLOT(DoShowUi(std::string *, bool)));
 
 #endif
 
@@ -687,11 +688,14 @@ void WinnerApp::DoStrategyTasksTimeout()
 }
 
 //void WinnerApp::DoShowUi(std::shared_ptr<std::string> str)
-void WinnerApp::DoShowUi(std::string* str)
+void WinnerApp::DoShowUi(std::string* str, bool flash_taskbar)
 {
 	assert(str);
 	msg_win().ShowUI("ÌבÊ¾", *str);
 	delete str; str = nullptr;
+
+    if( flash_taskbar )
+        winner_win_.TriggerFlashWinTimer(true);
 }
 
 void WinnerApp::SlotStopAllTasks(bool)
