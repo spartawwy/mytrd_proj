@@ -39,8 +39,9 @@ static const int cst_tab_index_task_list = 0;
 static const int cst_tab_index_buy_task = 1;
 static const int cst_tab_index_sell_task = 2;
 static const int cst_tab_index_eqsec_task = 3;
-static const int cst_tab_capital = 4;
-static const int cst_tab_index_log = 5;
+static const int cst_tab_index_stkindex_task = 4;
+static const int cst_tab_capital = 5;
+static const int cst_tab_index_log = 6;
 
 WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     : QMainWindow(parent)

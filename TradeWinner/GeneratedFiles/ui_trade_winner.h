@@ -16,6 +16,7 @@
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
@@ -24,6 +25,7 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QRadioButton>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
@@ -171,6 +173,32 @@ public:
     QLabel *lab_min_quantity;
     QSpinBox *spinBox_min_qty;
     QCheckBox *cb_min_qty;
+    QWidget *tab_stkindex_task;
+    QComboBox *combox_stkindex;
+    QLabel *label_index_kind;
+    QGroupBox *grp_reltrade;
+    QLabel *label_time_mid_2;
+    QTimeEdit *indtrd_timeEdit_begin;
+    QTimeEdit *indtrd_timeEdit_end;
+    QLabel *label_sell_num_2;
+    QSpinBox *spinBox_indtrd_quantity;
+    QLabel *label_stock_3;
+    QComboBox *indtrd_trd_price_level;
+    QLineEdit *le_indtrd_stock;
+    QLabel *label_monitor_2;
+    QLabel *label_price_level_4;
+    QGroupBox *grp_choice_bs;
+    QRadioButton *radioBtn_sell;
+    QRadioButton *radioBtn_buy;
+    QGroupBox *grp_updownkind;
+    QRadioButton *radiobtn_down;
+    QRadioButton *radiobtn_up;
+    QLabel *label_index_pos;
+    QDoubleSpinBox *dbspbox_index_val;
+    QGroupBox *groupBox_kind_choice;
+    QRadioButton *radiobtn_clearall;
+    QRadioButton *radiobtn_reltrade;
+    QPushButton *pbtn_add_indtrd_task;
     QWidget *tab_capital;
     QPlainTextEdit *pte_capital;
     QPushButton *pbtn_query_capital;
@@ -720,6 +748,102 @@ public:
         cb_min_qty->setObjectName(QStringLiteral("cb_min_qty"));
         cb_min_qty->setGeometry(QRect(280, 280, 61, 21));
         tabwid_holder->addTab(tab_eq_section_trd, QString());
+        tab_stkindex_task = new QWidget();
+        tab_stkindex_task->setObjectName(QStringLiteral("tab_stkindex_task"));
+        combox_stkindex = new QComboBox(tab_stkindex_task);
+        combox_stkindex->setObjectName(QStringLiteral("combox_stkindex"));
+        combox_stkindex->setGeometry(QRect(170, 40, 201, 31));
+        label_index_kind = new QLabel(tab_stkindex_task);
+        label_index_kind->setObjectName(QStringLiteral("label_index_kind"));
+        label_index_kind->setGeometry(QRect(90, 50, 71, 21));
+        label_index_kind->setFont(font1);
+        label_index_kind->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        grp_reltrade = new QGroupBox(tab_stkindex_task);
+        grp_reltrade->setObjectName(QStringLiteral("grp_reltrade"));
+        grp_reltrade->setGeometry(QRect(100, 190, 421, 211));
+        label_time_mid_2 = new QLabel(grp_reltrade);
+        label_time_mid_2->setObjectName(QStringLiteral("label_time_mid_2"));
+        label_time_mid_2->setGeometry(QRect(238, 160, 21, 21));
+        label_time_mid_2->setFont(font1);
+        label_time_mid_2->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        indtrd_timeEdit_begin = new QTimeEdit(grp_reltrade);
+        indtrd_timeEdit_begin->setObjectName(QStringLiteral("indtrd_timeEdit_begin"));
+        indtrd_timeEdit_begin->setGeometry(QRect(108, 160, 118, 31));
+        indtrd_timeEdit_end = new QTimeEdit(grp_reltrade);
+        indtrd_timeEdit_end->setObjectName(QStringLiteral("indtrd_timeEdit_end"));
+        indtrd_timeEdit_end->setGeometry(QRect(280, 160, 118, 31));
+        label_sell_num_2 = new QLabel(grp_reltrade);
+        label_sell_num_2->setObjectName(QStringLiteral("label_sell_num_2"));
+        label_sell_num_2->setGeometry(QRect(8, 69, 91, 21));
+        label_sell_num_2->setFont(font1);
+        label_sell_num_2->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        spinBox_indtrd_quantity = new QSpinBox(grp_reltrade);
+        spinBox_indtrd_quantity->setObjectName(QStringLiteral("spinBox_indtrd_quantity"));
+        spinBox_indtrd_quantity->setGeometry(QRect(108, 70, 101, 31));
+        label_stock_3 = new QLabel(grp_reltrade);
+        label_stock_3->setObjectName(QStringLiteral("label_stock_3"));
+        label_stock_3->setGeometry(QRect(28, 19, 71, 21));
+        label_stock_3->setFont(font1);
+        label_stock_3->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        indtrd_trd_price_level = new QComboBox(grp_reltrade);
+        indtrd_trd_price_level->setObjectName(QStringLiteral("indtrd_trd_price_level"));
+        indtrd_trd_price_level->setGeometry(QRect(108, 119, 291, 31));
+        le_indtrd_stock = new QLineEdit(grp_reltrade);
+        le_indtrd_stock->setObjectName(QStringLiteral("le_indtrd_stock"));
+        le_indtrd_stock->setGeometry(QRect(108, 19, 161, 31));
+        label_monitor_2 = new QLabel(grp_reltrade);
+        label_monitor_2->setObjectName(QStringLiteral("label_monitor_2"));
+        label_monitor_2->setGeometry(QRect(8, 160, 91, 21));
+        label_monitor_2->setFont(font1);
+        label_monitor_2->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        label_price_level_4 = new QLabel(grp_reltrade);
+        label_price_level_4->setObjectName(QStringLiteral("label_price_level_4"));
+        label_price_level_4->setGeometry(QRect(8, 119, 91, 21));
+        label_price_level_4->setFont(font1);
+        label_price_level_4->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        grp_choice_bs = new QGroupBox(grp_reltrade);
+        grp_choice_bs->setObjectName(QStringLiteral("grp_choice_bs"));
+        grp_choice_bs->setGeometry(QRect(240, 70, 141, 41));
+        radioBtn_sell = new QRadioButton(grp_choice_bs);
+        radioBtn_sell->setObjectName(QStringLiteral("radioBtn_sell"));
+        radioBtn_sell->setGeometry(QRect(10, 10, 61, 18));
+        radioBtn_buy = new QRadioButton(grp_choice_bs);
+        radioBtn_buy->setObjectName(QStringLiteral("radioBtn_buy"));
+        radioBtn_buy->setGeometry(QRect(80, 10, 51, 18));
+        grp_updownkind = new QGroupBox(tab_stkindex_task);
+        grp_updownkind->setObjectName(QStringLiteral("grp_updownkind"));
+        grp_updownkind->setGeometry(QRect(370, 80, 141, 41));
+        radiobtn_down = new QRadioButton(grp_updownkind);
+        radiobtn_down->setObjectName(QStringLiteral("radiobtn_down"));
+        radiobtn_down->setGeometry(QRect(10, 10, 82, 18));
+        radiobtn_down->setChecked(true);
+        radiobtn_up = new QRadioButton(grp_updownkind);
+        radiobtn_up->setObjectName(QStringLiteral("radiobtn_up"));
+        radiobtn_up->setGeometry(QRect(80, 10, 61, 18));
+        label_index_pos = new QLabel(tab_stkindex_task);
+        label_index_pos->setObjectName(QStringLiteral("label_index_pos"));
+        label_index_pos->setGeometry(QRect(90, 80, 71, 21));
+        label_index_pos->setFont(font1);
+        label_index_pos->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        dbspbox_index_val = new QDoubleSpinBox(tab_stkindex_task);
+        dbspbox_index_val->setObjectName(QStringLiteral("dbspbox_index_val"));
+        dbspbox_index_val->setGeometry(QRect(170, 80, 161, 31));
+        dbspbox_index_val->setDecimals(2);
+        dbspbox_index_val->setMaximum(999.99);
+        groupBox_kind_choice = new QGroupBox(tab_stkindex_task);
+        groupBox_kind_choice->setObjectName(QStringLiteral("groupBox_kind_choice"));
+        groupBox_kind_choice->setGeometry(QRect(100, 130, 181, 41));
+        radiobtn_clearall = new QRadioButton(groupBox_kind_choice);
+        radiobtn_clearall->setObjectName(QStringLiteral("radiobtn_clearall"));
+        radiobtn_clearall->setGeometry(QRect(100, 10, 71, 18));
+        radiobtn_reltrade = new QRadioButton(groupBox_kind_choice);
+        radiobtn_reltrade->setObjectName(QStringLiteral("radiobtn_reltrade"));
+        radiobtn_reltrade->setGeometry(QRect(10, 10, 82, 18));
+        radiobtn_reltrade->setChecked(true);
+        pbtn_add_indtrd_task = new QPushButton(tab_stkindex_task);
+        pbtn_add_indtrd_task->setObjectName(QStringLiteral("pbtn_add_indtrd_task"));
+        pbtn_add_indtrd_task->setGeometry(QRect(520, 410, 141, 23));
+        tabwid_holder->addTab(tab_stkindex_task, QString());
         tab_capital = new QWidget();
         tab_capital->setObjectName(QStringLiteral("tab_capital"));
         pte_capital = new QPlainTextEdit(tab_capital);
@@ -812,7 +936,7 @@ public:
 
         retranslateUi(TradeWinnerClass);
 
-        tabwid_holder->setCurrentIndex(0);
+        tabwid_holder->setCurrentIndex(4);
 
 
         QMetaObject::connectSlotsByName(TradeWinnerClass);
@@ -910,6 +1034,25 @@ public:
         lab_min_quantity->setText(QApplication::translate("TradeWinnerClass", "\345\272\225\344\273\223\346\225\260\351\207\217:", 0));
         cb_min_qty->setText(QString());
         tabwid_holder->setTabText(tabwid_holder->indexOf(tab_eq_section_trd), QApplication::translate("TradeWinnerClass", "\345\214\272\351\227\264\344\272\244\346\230\223", 0));
+        label_index_kind->setText(QApplication::translate("TradeWinnerClass", "\346\214\207\346\225\260\347\261\273\345\210\253:", 0));
+        grp_reltrade->setTitle(QString());
+        label_time_mid_2->setText(QApplication::translate("TradeWinnerClass", "---", 0));
+        label_sell_num_2->setText(QApplication::translate("TradeWinnerClass", "\345\215\226\345\207\272\346\225\260\351\207\217:", 0));
+        label_stock_3->setText(QApplication::translate("TradeWinnerClass", "\350\202\241\347\245\250\344\273\243\347\240\201:", 0));
+        label_monitor_2->setText(QApplication::translate("TradeWinnerClass", "\347\233\221\346\216\247\346\227\266\351\227\264:", 0));
+        label_price_level_4->setText(QApplication::translate("TradeWinnerClass", "\344\272\244\346\230\223\344\273\267\346\240\274:", 0));
+        grp_choice_bs->setTitle(QString());
+        radioBtn_sell->setText(QApplication::translate("TradeWinnerClass", "\345\215\226\345\207\272", 0));
+        radioBtn_buy->setText(QApplication::translate("TradeWinnerClass", "\344\271\260\345\205\245", 0));
+        grp_updownkind->setTitle(QString());
+        radiobtn_down->setText(QApplication::translate("TradeWinnerClass", "\344\270\213\347\251\277", 0));
+        radiobtn_up->setText(QApplication::translate("TradeWinnerClass", "\344\270\212\347\251\277", 0));
+        label_index_pos->setText(QApplication::translate("TradeWinnerClass", "\346\214\207\346\225\260\347\202\271\344\275\215:", 0));
+        groupBox_kind_choice->setTitle(QString());
+        radiobtn_clearall->setText(QApplication::translate("TradeWinnerClass", "\346\270\205\344\273\223", 0));
+        radiobtn_reltrade->setText(QApplication::translate("TradeWinnerClass", "\345\205\263\350\201\224\344\272\244\346\230\223", 0));
+        pbtn_add_indtrd_task->setText(QApplication::translate("TradeWinnerClass", "\346\267\273\345\212\240\344\273\273\345\212\241", 0));
+        tabwid_holder->setTabText(tabwid_holder->indexOf(tab_stkindex_task), QApplication::translate("TradeWinnerClass", "\346\214\207\346\225\260\351\243\216\346\216\247", 0));
         pbtn_query_capital->setText(QApplication::translate("TradeWinnerClass", "\346\237\245\350\257\242", 0));
         tabwid_holder->setTabText(tabwid_holder->indexOf(tab_capital), QApplication::translate("TradeWinnerClass", "\350\265\204\344\272\247\344\277\241\346\201\257", 0));
         tabwid_holder->setTabText(tabwid_holder->indexOf(tab_log), QApplication::translate("TradeWinnerClass", "\346\227\245\345\277\227\350\256\260\345\275\225", 0));

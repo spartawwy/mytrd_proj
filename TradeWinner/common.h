@@ -86,6 +86,7 @@ enum class TypeTask : char
     BATCHES_SELL,
 
 	EQUAL_SECTION,
+    INDEX_RISKMAN, // 8
 };
 
 enum class TypeQuoteLevel : char
