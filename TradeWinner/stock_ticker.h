@@ -10,6 +10,9 @@
 #include "strategy_task.h"
 #include "handler.h"
 
+#include <windows.h>
+#include "stk_quoter_api.h"
+
 class StrategyTask; 
 
 // <task id, task>
@@ -22,18 +25,18 @@ class StockTicker : public Handler
 public:
 
     StockTicker(TSystem::LocalLogger  &logger);
-    ~StockTicker();
+    virtual ~StockTicker();
 
     virtual void Procedure() override;
 
-    bool Init();
+    virtual bool Init();
     void Register(const std::shared_ptr<StrategyTask> & task);
     void UnRegister(unsigned int task_id);
     void ClearAllTask();
 
     bool GetSecurityBars(int Category, int Market, char* Zqdm, short Start, short& Count, char* Result, char* ErrInfo);
 
-private:
+protected:
       
     TTaskIdMapStrategyTask  registered_tasks_;
      
@@ -48,34 +51,24 @@ private:
 // IndexTicker
 //////////////////////////////////////////////////////////////////
 
-class IndexTicker : public Handler
+class IndexTicker : public StockTicker
 {
 public:
 
     IndexTicker(TSystem::LocalLogger  &logger);
     ~IndexTicker();
 
-    virtual void Procedure() override;
+    virtual void Procedure() override; 
 
-    bool Init();
-    void Register(const std::shared_ptr<StrategyTask> & task);
-    void UnRegister(unsigned int task_id);
-    void ClearAllTask();
-
-    bool GetSecurityBars(int Category, int Market, char* Zqdm, short Start, short& Count, char* Result, char* ErrInfo);
+    virtual bool Init() override;
+      
+	StkQuoteGetQuoteDelegate StkQuoteGetQuote_;
 
 private:
-     
-    // <task id, task>
-    typedef std::unordered_map<unsigned int, std::shared_ptr<StrategyTask> > TTaskIdMapStrategyTask;
-    TTaskIdMapStrategyTask  registered_tasks_;
+	
+	static const unsigned char max_index_count = 6;
+	HMODULE stk_quoter_moudle_;
 
-    // <stock code, task_id>
-    typedef std::unordered_map<std::string, std::list<unsigned int> > TCodeMapTasks;
-    TCodeMapTasks  codes_taskids_;
-
-    std::mutex  tasks_list_mutex_;
-    TSystem::LocalLogger  &logger_;
-
+	Buffer index_codes[max_index_count][1023];
 };
 #endif

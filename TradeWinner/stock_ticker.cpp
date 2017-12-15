@@ -4,7 +4,6 @@
 //#include <iostream>
 
 #include <qt_windows.h>
-#include <winbase.h>
 
 #include <iostream>
 #include <chrono>
@@ -362,44 +361,127 @@ bool StockTicker::GetSecurityBars(int Category, int Market, char* Zqdm, short St
 //////////////////////////////////////////////////////////////////
 
 IndexTicker::IndexTicker(TSystem::LocalLogger  &logger)
-    : registered_tasks_(cst_max_stock_code_count)
-    , codes_taskids_(cst_max_stock_code_count)
-    , tasks_list_mutex_()
-    , logger_(logger)
+    : StockTicker(logger)
+	, stk_quoter_moudle_(nullptr)
+	, StkQuoteGetQuote_(nullptr)
 {
 
 }
 
 IndexTicker::~IndexTicker()
 { 
+	if( stk_quoter_moudle_ ) 
+		FreeLibrary(stk_quoter_moudle_);
+	stk_quoter_moudle_ = nullptr;
 }
 
 bool IndexTicker::Init()
 {
-    // todo:
+    //-----------------------StkQuoter-------------
+	//SetCurrentEnvPath();
+	char chBuf[1024] = {0};
+	if( !::GetModuleFileName(NULL, chBuf, MAX_PATH) )  
+		return false;   
+	std::string strAppPath(chBuf);  
+
+	auto nPos = strAppPath.rfind('\\');
+	if( nPos > 0 )
+	{   
+		strAppPath = strAppPath.substr(0, nPos+1);  
+	}  
+	std::string stk_quote_full_path = strAppPath + "StkQuoter.dll";
+	stk_quoter_moudle_ = LoadLibrary(stk_quote_full_path.c_str());
+	if( !stk_quoter_moudle_ )
+	{
+		auto erro = GetLastError();
+		QString info_str = QString("load %1 fail! error:%2").arg(stk_quote_full_path.c_str()).arg(erro);
+		QMessageBox::information(nullptr, "info", info_str);
+		//throw excepton;
+		return false;
+	}
+	StkQuoteGetQuote_ = (StkQuoteGetQuoteDelegate)GetProcAddress(stk_quoter_moudle_, "StkQuoteGetQuote");
+	assert(StkQuoteGetQuote_);
     return true;
 }
 
 void IndexTicker::Procedure()
 { 
+	static auto are_codes_in = [](char stock_codes[max_index_count][16], const char *str)
+	{ 
+		for(int i = 0; i < max_index_count; ++i)
+		{
+			if( stock_codes[i] == nullptr )
+				return false;
+			if( !strcmp(stock_codes[i], str) )
+				return true;
+		}
+		return false;
+	};
     Buffer Result(cst_result_len);
     Buffer ErrInfo(cst_error_len);
 
-    char* stock_codes[cst_max_stock_code_count];
-    memset(stock_codes, 0, sizeof(char*)*cst_max_stock_code_count);
-    
-    byte markets[cst_max_stock_code_count] = {0};
-
-    short stock_count = 0;
-     
+    char stock_codes[max_index_count][16];
+    memset(stock_codes, 0, max_index_count*16);
+       
     auto  cur_time = QTime::currentTime();
-     
-    stock_count = GetRegisteredCodes(registered_tasks_, stock_codes, markets);
-    if( stock_count < 1 )
-        return;
+       
+    //---------------------------
+    int stock_count = 0; 
+    std::for_each( std::begin(registered_tasks_), std::end(registered_tasks_), [&](TTaskIdMapStrategyTask::reference entry)
+    {
+        if( entry.second->is_to_run() 
+            && cur_time >= entry.second->tp_start() && cur_time < entry.second->tp_end()
+            && !are_codes_in(stock_codes, entry.second->code_data()) )
+        { 
+            strcpy(stock_codes[stock_count], entry.second->code_data());
+            //markets[stock_count] = static_cast<byte>(entry.second->market_type());
+                 
+            ++stock_count;
+        }
+    });
+	if( stock_count < 1 )
+		return;
+	T_StockPriceInfo price_info[max_index_count];
+	auto num = StkQuoteGetQuote_(stock_codes, stock_count, price_info);
+	if( num < 1 )
+		return;
+    
+	auto tp_now = std::chrono::system_clock::now();
+    time_t t_t = std::chrono::system_clock::to_time_t(tp_now); 
+	for( int i = 0; i < num; ++i )
+	{
+		auto task_ids_iter = codes_taskids_.find(stock_codes[i]);
+        if( task_ids_iter == codes_taskids_.end() )
+            continue;
+        auto quote_data = std::make_shared<QuotesData>();
+		 
+		quote_data->cur_price = price_info[i].cur_price;  
+		quote_data->time_stamp = (__int64)t_t;
+		// throu id list which this stock code related  ----------------
+        std::for_each( std::begin(task_ids_iter->second), std::end(task_ids_iter->second), [&, this](unsigned int id)
+        {
+            TTaskIdMapStrategyTask::iterator  task_iter = registered_tasks_.find(id);
+            if( task_iter != registered_tasks_.end() )
+            { 
+                //qDebug() << std::get<1>(CurrentDateTime()).c_str() << " " << task_iter->second->stock_code() << " cur_pric:" << task_iter->second->cur_price() << "\n";
+                task_iter->second->ObtainData(quote_data);
 
-    // todo:
+                task_iter->second->life_count_ = 0;
+				if( task_iter->second->cur_state() != TaskCurrentState::RUNNING )
+				{
+					task_iter->second->cur_state(TaskCurrentState::RUNNING);
+					task_iter->second->app()->Emit(task_iter->second.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+				}
+
+            }else
+            {
+                // log error
+                logger_.LogLocal(utility::FormatStr("error IndexTicker::Procedure can't find task %d", id));
+            }
+        });
+	}
 }
+ 
 
 int GetRegisteredCodes(TTaskIdMapStrategyTask  &registered_tasks, char* stock_codes[cst_max_stock_code_count], byte markets[cst_max_stock_code_count])
 {

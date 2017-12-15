@@ -231,7 +231,7 @@ public:
 class Buffer
 {
 public:
-
+	// notice size + 1 == 1024 is suitable for avoid memory fragment
     explicit Buffer(unsigned int size=64) : size_(size), p_data_(nullptr) 
     {
         p_data_ = new char[size + 1];

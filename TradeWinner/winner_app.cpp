@@ -32,10 +32,11 @@ WinnerApp::WinnerApp(int argc, char* argv[])
 	, ServerClientAppBase("client", "trade_winner", "0.1")
 	, ticker_strand_(task_pool())
     , index_tick_strand_(task_pool())
-	//, task_calc_strand_(task_pool())
+	, stock_ticker_(nullptr)
+	, index_ticker_(std::make_shared<IndexTicker>(this->local_logger())) 
 	, stock_ticker_life_count_(0)
     , index_ticker_life_count_(0)
-	, stock_ticker_enable_flag_(false)
+	, ticker_enable_flag_(false)
 	, trade_strand_(task_pool())
 	, task_infos_(256)
 	, msg_win_(new MessageWin())
@@ -50,23 +51,17 @@ WinnerApp::WinnerApp(int argc, char* argv[])
 	, strategy_tasks_timer_(std::make_shared<QTimer>())
 	, normal_timer_(std::make_shared<QTimer>())
 	, stocks_position_(256)
-	, stk_quoter_moudle_(nullptr)
-	, StkQuote_GetQuote(nullptr)
 	, stocks_price_info_(256)
 	, p_user_account_info_(nullptr)
 	, p_user_broker_info_(nullptr)
-{ 
-	//msg_win_ = new MessageWin();
-
+{   
 	connect(strategy_tasks_timer_.get(), SIGNAL(timeout()), this, SLOT(DoStrategyTasksTimeout()));
 	connect(normal_timer_.get(), SIGNAL(timeout()), this, SLOT(DoNormalTimer()));
 
 }
 
 WinnerApp::~WinnerApp()
-{
-	if( stk_quoter_moudle_ ) 
-		FreeLibrary(stk_quoter_moudle_);
+{ 
 	if( msg_win_ )
 	{
 		msg_win_->close();
@@ -102,8 +97,7 @@ bool WinnerApp::Init()
 
 #if 1
 	login_win_.Init();
-	ret = login_win_.exec();
-	//login_win_.setWindowModality(Qt::ApplicationModal);
+	ret = login_win_.exec(); 
 	if( ret != QDialog::Accepted )
 	{
 		Stop();
@@ -132,7 +126,7 @@ bool WinnerApp::Init()
 
 #ifdef USE_TRADE_FLAG
 	//=========================trade account login =================
-	//char error_info[256] = {0};
+	 
 	Buffer result(1024);
 	char error[1024] = {0};
 
@@ -176,35 +170,13 @@ bool WinnerApp::Init()
 
 	stock_ticker_ = std::make_shared<StockTicker>(this->local_logger());
 	stock_ticker_->Init();
-
-	//-----------------------StkQuoter-------------
-	//SetCurrentEnvPath();
-	char chBuf[1024] = {0};
-	if( !::GetModuleFileName(NULL, chBuf, MAX_PATH) )  
-		return false;   
-	std::string strAppPath(chBuf);  
-
-	auto nPos = strAppPath.rfind('\\');
-	if( nPos > 0 )
-	{   
-		strAppPath = strAppPath.substr(0, nPos+1);  
-	}  
-	std::string stk_quote_full_path = strAppPath + "StkQuoter.dll";
-	stk_quoter_moudle_ = LoadLibrary(stk_quote_full_path.c_str());
-	if( !stk_quoter_moudle_ )
-	{
-		auto erro = GetLastError();
-		QString info_str = QString("load %1 fail! error:%2").arg(stk_quote_full_path.c_str()).arg(erro);
-		QMessageBox::information(nullptr, "info", info_str);
-		//throw excepton;
+	 
+	if( !index_ticker_->Init() )
 		return false;
-	}
-	StkQuote_GetQuote = (StkQuoteGetQuoteDelegate)GetProcAddress(stk_quoter_moudle_, "StkQuoteGetQuote");
-	assert(StkQuote_GetQuote);
 	TaskFactory::CreateAllTasks(task_infos_, strategy_tasks_, this);
 
 	QueryPosition();
-    stock_ticker_enable_flag_ = IsNowTradeTime(); 
+    ticker_enable_flag_ = IsNowTradeTime(); 
 
 	//-----------ticker main loop----------
 	task_pool().PostTask([this]()
@@ -213,7 +185,7 @@ bool WinnerApp::Init()
 		{
 			Delay(cst_ticker_update_interval);
 
-			if( !this->stock_ticker_enable_flag_ )
+			if( !this->ticker_enable_flag_ )
 				continue;
 
 			ticker_strand_.PostTask([this]()
@@ -340,11 +312,6 @@ bool WinnerApp::LoginBroker(int broker_id, int depart_id, const std::string& acc
 	p_user_account_info_  = p_user_account_info;
 	return true;
 }
-
-//QString WinnerApp::GetBrokerName(TypeBroker type)
-//{
-//    db_moudle_.FindBorkerIdByAccountID
-//}
 
 void WinnerApp::AppendTaskInfo(int id, std::shared_ptr<T_TaskInformation>& info)
 {
@@ -605,7 +572,7 @@ T_Capital WinnerApp::QueryCapital()
 
 T_StockPriceInfo * WinnerApp::GetStockPriceInfo(const std::string& code, bool is_lazy)
 {
-	assert(StkQuote_GetQuote);
+	assert(index_ticker_->StkQuoteGetQuote_);
 	char stocks[1][16];
    
 	auto iter = stocks_price_info_.find(code);
@@ -619,7 +586,7 @@ T_StockPriceInfo * WinnerApp::GetStockPriceInfo(const std::string& code, bool is
 	strcpy_s(stocks[0], code.c_str());
  
 	T_StockPriceInfo price_info[1];
-	auto num = StkQuote_GetQuote(stocks, 1, price_info);
+	auto num = index_ticker_->StkQuoteGetQuote_(stocks, 1, price_info);
 	if( num < 1 )
 		return nullptr;
  
@@ -656,7 +623,11 @@ void WinnerApp::DoStrategyTasksTimeout()
             {
                 if( entry->task_info().type == TypeTask::INDEX_RISKMAN )
                 {
-                    // todo: ticker register 
+                    // ticker register 
+					this->index_tick_strand_.PostTask([entry, this]()
+			        {
+						this->index_ticker_->Register(entry);
+			        });
                 }else
                 {
                     this->ticker_strand_.PostTask([entry, this]()
@@ -676,7 +647,8 @@ void WinnerApp::DoStrategyTasksTimeout()
             {
                 if( entry->task_info().type == TypeTask::INDEX_RISKMAN )
                 {
-                    // todo: index ticker unregister 
+                    // index ticker unregister 
+					this->index_ticker_->UnRegister(entry->task_id());
                 }else
                 {
                     this->stock_ticker_->UnRegister(entry->task_id());
@@ -737,9 +709,9 @@ void WinnerApp::SlotStopAllTasks(bool)
 
 void WinnerApp::DoNormalTimer()
 { 
-	stock_ticker_enable_flag_ = IsNowTradeTime();
+	ticker_enable_flag_ = IsNowTradeTime();
 
-	if( stock_ticker_enable_flag_ )
+	if( ticker_enable_flag_ )
 	{
         bool is_stopped = false;
 		if( ++stock_ticker_life_count_ > 10 )

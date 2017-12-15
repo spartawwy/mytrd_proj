@@ -27,6 +27,7 @@
 *.opensdf
 *.kd
 *.idb
+*.ipch
 
 
 # Fortran module files

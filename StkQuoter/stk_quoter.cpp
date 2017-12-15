@@ -31,7 +31,7 @@ extern "C" int STKQUOTER_IMEXPORT  StkQuoteGetQuote(char stocks[][16], const uns
         else
             sinaurl += ",";
 
-        if( stocks[i][0] == '6' || stocks[i][0] == '0')
+        if( stocks[i][0] == '6' || !strcmp(stocks[i], "000001") )
             sinaurl += "sh";
         else
             sinaurl += "sz";

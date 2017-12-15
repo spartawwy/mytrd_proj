@@ -9,12 +9,8 @@
 #include <boost/thread/mutex.hpp>
 
 #include <TLib/tool/tsystem_server_client_appbase.h>
-
-//#include <QtWidgets/QApplication>
-//#include <QtWidgets/qmainwindow.h>
-//#include <QObject>
-#include <QApplication>
-//#include <qmainwindow.h>
+ 
+#include <QApplication> 
 #include "login_win.h"
 #include "winner_win.h"
 #include "trade_agent.h"
@@ -53,8 +49,7 @@ public:
 
     void Stop();
 
-    TaskStrand& ticker_strand() { return ticker_strand_;}
-    //TaskStrand& task_calc_strand() { return task_calc_strand_; }
+    TaskStrand& ticker_strand() { return ticker_strand_;} 
     TaskStrand& trade_strand() { return trade_strand_; }
 
     TradeAgent& trade_agent() { return trade_agent_; }
@@ -127,20 +122,20 @@ private slots:
     void SlotStopAllTasks(bool);
      
 private:
-
+	 
     //QApplication  *qt_app_;
     TaskStrand  ticker_strand_;
     TaskStrand  index_tick_strand_;
    
     TaskStrand  trade_strand_;
-    //std::shared_ptr<MyThread>  thread_;
+   
     std::shared_ptr<StockTicker>  stock_ticker_;
     std::shared_ptr<IndexTicker>  index_ticker_;
 
     int stock_ticker_life_count_;
     int index_ticker_life_count_;
 
-    bool stock_ticker_enable_flag_;
+    bool ticker_enable_flag_;
 
     TradeAgent  trade_agent_;
 
@@ -154,15 +149,12 @@ private:
     WRMutex  task_infos_mutex_;  
     // (task_id, task_info)   // just insert but never erase
     T_IdMapTaskInfo task_infos_;
-
-    //std::shared_ptr<MessageWin> msg_win_;
+	 
     MessageWin  *msg_win_;
     LoginWin  login_win_;
     WinnerWin  winner_win_;
     bool  exit_flag_;
 
-    //std::string account_no_;
-    //int user_id_;
     T_UserInformation  user_info_;
 
     int trade_client_id_;
@@ -176,10 +168,7 @@ private:
 
     std::unordered_map<std::string, T_PositionData> stocks_position_;
     std::mutex  stocks_position_mutex_;
-
-	HMODULE stk_quoter_moudle_;
-	StkQuoteGetQuoteDelegate StkQuote_GetQuote;
-
+	  
 	std::unordered_map<std::string, T_StockPriceInfo> stocks_price_info_;
      
     T_UserAccountInfo *p_user_account_info_;
