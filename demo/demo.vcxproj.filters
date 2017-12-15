@@ -50,6 +50,9 @@
     <ClCompile Include="GeneratedFiles\qrc_demo.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="ticker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="demo.h">
@@ -65,6 +68,9 @@
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_demo.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ticker.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

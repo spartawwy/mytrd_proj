@@ -11,12 +11,49 @@
 #include "handler.h"
 
 class StrategyTask; 
+
+// <task id, task>
+typedef std::unordered_map<unsigned int, std::shared_ptr<StrategyTask> > TTaskIdMapStrategyTask;
+// <stock code, task_id>
+typedef std::unordered_map<std::string, std::list<unsigned int> > TCodeMapTasks;
+
 class StockTicker : public Handler
 {
 public:
 
     StockTicker(TSystem::LocalLogger  &logger);
     ~StockTicker();
+
+    virtual void Procedure() override;
+
+    bool Init();
+    void Register(const std::shared_ptr<StrategyTask> & task);
+    void UnRegister(unsigned int task_id);
+    void ClearAllTask();
+
+    bool GetSecurityBars(int Category, int Market, char* Zqdm, short Start, short& Count, char* Result, char* ErrInfo);
+
+private:
+      
+    TTaskIdMapStrategyTask  registered_tasks_;
+     
+    TCodeMapTasks  codes_taskids_;
+
+    std::mutex  tasks_list_mutex_;
+    TSystem::LocalLogger  &logger_;
+
+};
+
+//////////////////////////////////////////////////////////////////
+// IndexTicker
+//////////////////////////////////////////////////////////////////
+
+class IndexTicker : public Handler
+{
+public:
+
+    IndexTicker(TSystem::LocalLogger  &logger);
+    ~IndexTicker();
 
     virtual void Procedure() override;
 
@@ -41,5 +78,4 @@ private:
     TSystem::LocalLogger  &logger_;
 
 };
-
 #endif

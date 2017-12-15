@@ -45,6 +45,11 @@ using namespace TSystem;
 
 static char cst_hq_server[] = "122.224.66.108";
 static int  cst_hq_port = 7709;
+
+
+static bool is_codes_in(char* stock_codes[cst_max_stock_code_count], const char *str);
+static int GetRegisteredCodes(TTaskIdMapStrategyTask  &registered_tasks, char* stock_codes[cst_max_stock_code_count], byte markets[cst_max_stock_code_count]);
+
 StockTicker::StockTicker(TSystem::LocalLogger  &logger)
     : registered_tasks_(cst_max_stock_code_count)
     , codes_taskids_(cst_max_stock_code_count)
@@ -88,7 +93,6 @@ bool StockTicker::Init()
 
     Buffer Result(cst_result_len);
     Buffer ErrInfo(cst_error_len);
-    // 
     
     bool bool1 = TdxHq_Connect(cst_hq_server, cst_hq_port, Result.data(), ErrInfo.data());
     if (!bool1)
@@ -110,7 +114,7 @@ void StockTicker::Procedure()
     char* stock_codes[cst_max_stock_code_count];
     memset(stock_codes, 0, sizeof(char*)*cst_max_stock_code_count);
      
-    static auto is_codes_in = [](char* stock_codes[cst_max_stock_code_count], const char *str) ->bool
+    /*static auto is_codes_in = [](char* stock_codes[cst_max_stock_code_count], const char *str) ->bool
     { 
         for(int i = 0; i < cst_max_stock_code_count; ++i)
         {
@@ -120,27 +124,29 @@ void StockTicker::Procedure()
                 return true;
         }
         return false;
-    };
+    };*/
     byte markets[cst_max_stock_code_count];
 
     short stock_count = 0;
+     
     auto  cur_time = QTime::currentTime();
     //---------------------------
-    {
-        //std::lock_guard<std::mutex>  locker(tasks_list_mutex_);
-        std::for_each( std::begin(registered_tasks_), std::end(registered_tasks_), [&, this](TTaskIdMapStrategyTask::reference entry)
-        {
-            if( entry.second->is_to_run() 
-                && cur_time >= entry.second->tp_start() && cur_time < entry.second->tp_end()
-                && !is_codes_in(stock_codes, entry.second->code_data()) )
-            { 
-                stock_codes[stock_count] = entry.second->code_data();
-                markets[stock_count] = static_cast<byte>(entry.second->market_type());
-                 
-                ++stock_count;
-            }
-        });
-    }
+    //{
+    //    //std::lock_guard<std::mutex>  locker(tasks_list_mutex_);
+    //    std::for_each( std::begin(registered_tasks_), std::end(registered_tasks_), [&, this](TTaskIdMapStrategyTask::reference entry)
+    //    {
+    //        if( entry.second->is_to_run() 
+    //            && cur_time >= entry.second->tp_start() && cur_time < entry.second->tp_end()
+    //            && !is_codes_in(stock_codes, entry.second->code_data()) )
+    //        { 
+    //            stock_codes[stock_count] = entry.second->code_data();
+    //            markets[stock_count] = static_cast<byte>(entry.second->market_type());
+    //             
+    //            ++stock_count;
+    //        }
+    //    });
+    //}
+    stock_count = GetRegisteredCodes(registered_tasks_, stock_codes, markets);
     if( stock_count < 1 )
         return;
     auto ret = TdxHq_GetSecurityQuotes(markets, stock_codes, stock_count, Result.data(), ErrInfo.data());
@@ -349,3 +355,81 @@ bool StockTicker::GetSecurityBars(int Category, int Market, char* Zqdm, short St
 {
     return TdxHq_GetSecurityBars(Category, Market, Zqdm, Start, Count, Result, ErrInfo);
 }
+
+
+//////////////////////////////////////////////////////////////////
+// IndexTicker
+//////////////////////////////////////////////////////////////////
+
+IndexTicker::IndexTicker(TSystem::LocalLogger  &logger)
+    : registered_tasks_(cst_max_stock_code_count)
+    , codes_taskids_(cst_max_stock_code_count)
+    , tasks_list_mutex_()
+    , logger_(logger)
+{
+
+}
+
+IndexTicker::~IndexTicker()
+{ 
+}
+
+bool IndexTicker::Init()
+{
+    // todo:
+    return true;
+}
+
+void IndexTicker::Procedure()
+{ 
+    Buffer Result(cst_result_len);
+    Buffer ErrInfo(cst_error_len);
+
+    char* stock_codes[cst_max_stock_code_count];
+    memset(stock_codes, 0, sizeof(char*)*cst_max_stock_code_count);
+    
+    byte markets[cst_max_stock_code_count] = {0};
+
+    short stock_count = 0;
+     
+    auto  cur_time = QTime::currentTime();
+     
+    stock_count = GetRegisteredCodes(registered_tasks_, stock_codes, markets);
+    if( stock_count < 1 )
+        return;
+
+    // todo:
+}
+
+int GetRegisteredCodes(TTaskIdMapStrategyTask  &registered_tasks, char* stock_codes[cst_max_stock_code_count], byte markets[cst_max_stock_code_count])
+{
+    auto  cur_time = QTime::currentTime();
+    //---------------------------
+    int stock_count = 0;
+    //std::lock_guard<std::mutex>  locker(tasks_list_mutex_);
+    std::for_each( std::begin(registered_tasks), std::end(registered_tasks), [&](TTaskIdMapStrategyTask::reference entry)
+    {
+        if( entry.second->is_to_run() 
+            && cur_time >= entry.second->tp_start() && cur_time < entry.second->tp_end()
+            && !is_codes_in(stock_codes, entry.second->code_data()) )
+        { 
+            stock_codes[stock_count] = entry.second->code_data();
+            markets[stock_count] = static_cast<byte>(entry.second->market_type());
+                 
+            ++stock_count;
+        }
+    });
+    return stock_count;
+}
+
+bool is_codes_in(char* stock_codes[cst_max_stock_code_count], const char *str)
+{ 
+    for(int i = 0; i < cst_max_stock_code_count; ++i)
+    {
+        if( stock_codes[i] == nullptr )
+            return false;
+        if( !strcmp(stock_codes[i], str) )
+            return true;
+    }
+    return false;
+};

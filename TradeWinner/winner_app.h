@@ -28,6 +28,7 @@
 using namespace TSystem;
  
 class StockTicker;
+class IndexTicker;
 class StrategyTask; 
  
 class WinnerApp : public QApplication, public TSystem::ServerClientAppBase
@@ -129,11 +130,16 @@ private:
 
     //QApplication  *qt_app_;
     TaskStrand  ticker_strand_;
-    //TaskStrand  task_calc_strand_;
+    TaskStrand  index_tick_strand_;
+   
     TaskStrand  trade_strand_;
     //std::shared_ptr<MyThread>  thread_;
     std::shared_ptr<StockTicker>  stock_ticker_;
+    std::shared_ptr<IndexTicker>  index_ticker_;
+
     int stock_ticker_life_count_;
+    int index_ticker_life_count_;
+
     bool stock_ticker_enable_flag_;
 
     TradeAgent  trade_agent_;

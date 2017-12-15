@@ -31,8 +31,10 @@ WinnerApp::WinnerApp(int argc, char* argv[])
 	: QApplication(argc, argv)
 	, ServerClientAppBase("client", "trade_winner", "0.1")
 	, ticker_strand_(task_pool())
+    , index_tick_strand_(task_pool())
 	//, task_calc_strand_(task_pool())
 	, stock_ticker_life_count_(0)
+    , index_ticker_life_count_(0)
 	, stock_ticker_enable_flag_(false)
 	, trade_strand_(task_pool())
 	, task_infos_(256)
@@ -219,6 +221,12 @@ bool WinnerApp::Init()
 				this->stock_ticker_->Procedure();
 				this->stock_ticker_life_count_ = 0;
 			});
+
+            index_tick_strand_.PostTask([this]()
+            {
+                this->index_ticker_->Procedure();
+				this->index_ticker_life_count_ = 0;
+            });
 		}
 		qDebug() << "out loop \n";
 	});
@@ -646,10 +654,16 @@ void WinnerApp::DoStrategyTasksTimeout()
         {
             if( is_in_task_time(cur_time, entry->tp_start(), entry->tp_end()) )
             {
-                this->ticker_strand_.PostTask([entry, this]()
-			    {
-				    this->stock_ticker_->Register(entry);
-			    });
+                if( entry->task_info().type == TypeTask::INDEX_RISKMAN )
+                {
+                    // todo: ticker register 
+                }else
+                {
+                    this->ticker_strand_.PostTask([entry, this]()
+			        {
+				        this->stock_ticker_->Register(entry);
+			        });
+                }
                 if( IsNowTradeTime() )
                     entry->cur_state(TaskCurrentState::STARTING);
                 else
@@ -660,9 +674,16 @@ void WinnerApp::DoStrategyTasksTimeout()
         {
             if( !is_in_task_time(cur_time, entry->tp_start(), entry->tp_end()) )
             {
-                this->stock_ticker_->UnRegister(entry->task_id());
+                if( entry->task_info().type == TypeTask::INDEX_RISKMAN )
+                {
+                    // todo: index ticker unregister 
+                }else
+                {
+                    this->stock_ticker_->UnRegister(entry->task_id());
+                }
                 entry->cur_state(TaskCurrentState::WAITTING); 
 				this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+
             }else if( entry->cur_state() != TaskCurrentState::REST )
             {
                 if( !IsNowTradeTime() )
@@ -720,11 +741,20 @@ void WinnerApp::DoNormalTimer()
 
 	if( stock_ticker_enable_flag_ )
 	{
+        bool is_stopped = false;
 		if( ++stock_ticker_life_count_ > 10 )
 		{
 			local_logger().LogLocal("thread stock_ticker procedure stoped!");
-			winner_win_.DoStatusBar("异常: 内部报价停止!");
-		}else
+			winner_win_.DoStatusBar("异常: 股票内部报价停止!");
+            is_stopped = true;
+		}
+        if(++index_ticker_life_count_ > 10 )
+		{
+			local_logger().LogLocal("thread stock_ticker procedure stoped!");
+			winner_win_.DoStatusBar("异常: 指数内部报价停止!");
+            is_stopped = true;
+		}
+        if( !is_stopped )
 			winner_win_.DoStatusBar("正常");
 	}
 
