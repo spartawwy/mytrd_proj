@@ -326,11 +326,28 @@ struct T_SectionTask
         , multi_qty(lh.multi_qty),max_trig_price(lh.max_trig_price), min_trig_price(lh.min_trig_price), sections_info(lh.sections_info), is_original(lh.is_original), max_position(lh.max_position), min_position(lh.min_position) {}
 };
 
+enum class TindexTaskType : char
+{
+	ALERT,
+	RELSTOCK,
+	CLEAR,
+};
+
+struct T_IndexRelateTask
+{ 
+	TindexTaskType rel_type; // releate type
+	bool is_down_trigger;
+	std::string stock_code;  // sub related stock 
+	bool is_buy; // if false means sell
+	T_IndexRelateTask() : rel_type(TindexTaskType::ALERT), is_down_trigger(true), stock_code(), is_buy(false){}
+	T_IndexRelateTask(const T_IndexRelateTask &lh) : rel_type(lh.rel_type), is_down_trigger(lh.is_down_trigger), stock_code(lh.stock_code), is_buy(lh.is_buy){}
+};
+
 struct T_TaskInformation
 {
     unsigned int id;
     TypeTask  type;
-    std::string stock;        // TEXT not null,
+    std::string stock;        // TEXT not null, alse can be index code--when type is INDEX_RISKMAN 
     std::string stock_pinyin; // TEXT 
 
 	double alert_price;       // DOUBLE, 
@@ -340,6 +357,7 @@ struct T_TaskInformation
 	double step;              // 阶梯幅度(以后每涨,以后每降) 百分值
 	unsigned int quantity;    // 买入数量, 每次数量
 	T_SectionTask secton_task;
+	T_IndexRelateTask index_rel_task;
 	int target_price_level;   // 0--即时价  1--买一和卖一 2--买二和卖二 3--买三和卖三 ...
 	int start_time; 
 	int end_time;
@@ -350,8 +368,9 @@ struct T_TaskInformation
     T_TaskInformation() : id(0), type(TypeTask::BREAK_SELL), alert_price(0),back_alert_trigger(0), rebounce(0), continue_second(0), step(0), quantity(0), target_price_level(0), start_time(0), end_time(0), is_loop(0), state(0), bs_times(0), assistant_field() {} 
      
     T_TaskInformation(const T_TaskInformation& lh) : id(lh.id), type(lh.type), stock(lh.stock), stock_pinyin(lh.stock_pinyin), alert_price(lh.alert_price), back_alert_trigger(lh.back_alert_trigger)
-        , rebounce(lh.rebounce), continue_second(lh.continue_second), step(lh.step), quantity(lh.quantity), secton_task(lh.secton_task), target_price_level(lh.target_price_level)
-        , start_time(lh.start_time), end_time(lh.end_time), is_loop(lh.is_loop), state(lh.state), bs_times(lh.bs_times), assistant_field(lh.assistant_field) { }
+		, rebounce(lh.rebounce), continue_second(lh.continue_second), step(lh.step), quantity(lh.quantity), secton_task(lh.secton_task), index_rel_task(lh.index_rel_task)
+		, target_price_level(lh.target_price_level), start_time(lh.start_time), end_time(lh.end_time), is_loop(lh.is_loop), state(lh.state), bs_times(lh.bs_times)
+		, assistant_field(lh.assistant_field) { }
 
 };
 

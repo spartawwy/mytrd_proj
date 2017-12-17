@@ -39,9 +39,9 @@ static const int cst_tab_index_task_list = 0;
 static const int cst_tab_index_buy_task = 1;
 static const int cst_tab_index_sell_task = 2;
 static const int cst_tab_index_eqsec_task = 3;
-static const int cst_tab_index_stkindex_task = 4;
-static const int cst_tab_capital = 5;
-static const int cst_tab_index_log = 6;
+static const int cst_tab_capital = 4;
+static const int cst_tab_index_log = 5;
+static const int cst_tab_index_stkindex_task = 6;
 
 WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     : QMainWindow(parent)
@@ -51,6 +51,7 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
 	, is_open_hint_(true)
     , m_bt_list_hint_(nullptr)
 	, m_eqsec_list_hint_(nullptr)
+	, m_indtrd_list_hint_(nullptr)
     , cur_price_(0.0)
     , buytask_cur_price_(0.0)
 	, eqsec_task_cur_price_(0.0)
@@ -64,7 +65,6 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
      
 #if 1
     //------------------tab task list 
-    //QStandardItemModel * model = static_cast<QStandardItemModel *>(ui.tbview_tasks->model());
     QStandardItemModel * model = new QStandardItemModel(0, cst_col_count, this);
     model->setHorizontalHeaderItem(cst_tbview_tasks_rowindex_task_id, new QStandardItem(QString::fromLocal8Bit("任务号")));
     model->horizontalHeaderItem(cst_tbview_tasks_rowindex_task_id)->setTextAlignment(Qt::AlignCenter);
@@ -75,7 +75,7 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     model->setHorizontalHeaderItem(cst_tbview_tasks_rowindex_task_name, new QStandardItem(QString::fromLocal8Bit("任务名称")));
     model->horizontalHeaderItem(cst_tbview_tasks_rowindex_task_name)->setTextAlignment(Qt::AlignCenter);
     
-    model->setHorizontalHeaderItem(cst_tbview_tasks_rowindex_stock_name, new QStandardItem(QString::fromLocal8Bit("股票")));
+    model->setHorizontalHeaderItem(cst_tbview_tasks_rowindex_stock_name, new QStandardItem(QString::fromLocal8Bit("股票或指数")));
     model->horizontalHeaderItem(cst_tbview_tasks_rowindex_stock_name)->setTextAlignment(Qt::AlignCenter);
     
     model->setHorizontalHeaderItem(cst_tbview_tasks_rowindex_cur_price, new QStandardItem(QString::fromLocal8Bit("当前价格")));
@@ -110,11 +110,15 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
 
     //------------------tab equal section task----------------
 	InitEqSectionTaskWin();
+	 
+    //------------------tab index trade task----------------
+	InitIndexTradeWin();
 
-    status_label_ = new QLabel("");
+	status_label_ = new QLabel("");
     status_label_->setIndent(3);
     statusBar()->addWidget(status_label_, 1);
 	statusBar()->update();
+
 }
 
 WinnerWin::~WinnerWin()
@@ -134,13 +138,34 @@ void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_
 	item = new QStandardItem(ToQString(static_cast<TaskCurrentState>(task_info.state)));
     model->setItem(row_index, cst_tbview_tasks_rowindex_state, item);
     model->item(row_index, cst_tbview_tasks_rowindex_state)->setTextAlignment(align_way);
+
+	QString stock_str; 
     // task name
-    item = new QStandardItem(ToQString(task_info.type));
+	if( task_info.type == TypeTask::INDEX_RISKMAN )
+	{
+		if( task_info.index_rel_task.rel_type == TindexTaskType::ALERT )
+		{
+			item = new QStandardItem(QString::fromLocal8Bit("指数关联预警"));
+			stock_str = QString("%1/%2").arg(task_info.stock.c_str()).arg(QString::fromLocal8Bit(task_info.stock.c_str()));
+		}else if( task_info.index_rel_task.rel_type == TindexTaskType::CLEAR )
+		{
+			item = new QStandardItem(QString::fromLocal8Bit("指数关联清仓"));
+			stock_str = QString("%1/%2").arg(task_info.stock.c_str()).arg(QString::fromLocal8Bit(task_info.stock.c_str()));
+		}else if( task_info.index_rel_task.rel_type == TindexTaskType::RELSTOCK )
+		{
+			//QString name_str = QString::fromLocal8Bit("指数关联") + task_info.index_rel_task.stock_code.c_str();
+			item = new QStandardItem(QString::fromLocal8Bit("指数关联个股") + task_info.index_rel_task.stock_code.c_str());
+			stock_str = QString("%1").arg(task_info.index_rel_task.stock_code.c_str());
+		}
+	}else
+	{
+		item = new QStandardItem(ToQString(task_info.type));
+		stock_str = QString("%1/%2").arg(task_info.stock.c_str()).arg(QString::fromLocal8Bit(task_info.stock_pinyin.c_str()));
+	}
     model->setItem(row_index, cst_tbview_tasks_rowindex_task_name, item);
     model->item(row_index, cst_tbview_tasks_rowindex_task_name)->setTextAlignment(align_way);
     //  stock name 
-	QString stock_str = QString("%1/%2").arg(task_info.stock.c_str()).arg(QString::fromLocal8Bit(task_info.stock_pinyin.c_str()));
-    item = new QStandardItem(stock_str);
+	item = new QStandardItem(stock_str);
     model->setItem(row_index, cst_tbview_tasks_rowindex_stock_name, item);
     model->item(row_index, cst_tbview_tasks_rowindex_stock_name)->setTextAlignment(align_way);
     // current price
@@ -151,10 +176,12 @@ void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_
     item = new QStandardItem( utility::FormatStr("%.2f", task_info.alert_price).c_str() );
     model->setItem(row_index, cst_tbview_tasks_rowindex_trigger_price, item);
     model->item(row_index, cst_tbview_tasks_rowindex_trigger_price)->setTextAlignment(align_way);
+
     // quntity
     item = new QStandardItem( utility::FormatStr("%d", task_info.quantity).c_str() );
     model->setItem(row_index, cst_tbview_tasks_rowindex_quantity, item);
     model->item(row_index, cst_tbview_tasks_rowindex_quantity)->setTextAlignment(align_way);
+
     // price level
     item = new QStandardItem( ToQString(static_cast<TypeQuoteLevel>(task_info.target_price_level)) );
     model->setItem(row_index, cst_tbview_tasks_rowindex_price_level, item);
@@ -467,7 +494,21 @@ void WinnerWin::SlotTbvTasksActionDetail(bool)
             ui.tabwid_holder->setCurrentIndex(cst_tab_index_eqsec_task);
         }
         break;
-
+	case TypeTask::INDEX_RISKMAN:
+        {
+			ui.combox_stkindex->setCurrentText(IndexCode2IndexName(p_tskinfo->stock.c_str()));
+             
+			ui.dbspbox_index_val->setValue(p_tskinfo->alert_price);
+			ui.radiobtn_cross_down->setChecked( p_tskinfo->index_rel_task.is_down_trigger );
+			switch(p_tskinfo->index_rel_task.rel_type)
+			{
+			case TindexTaskType::ALERT: ui.radiobtn_alert->setChecked(true); DoTrdIndexAlertBtnBtnChecked(true);break;
+			case TindexTaskType::RELSTOCK: ui.radiobtn_reltrade->setChecked(true); DoTrdIndexRelBtnBtnChecked(true); break;
+			case TindexTaskType::CLEAR: ui.radiobtn_clearall->setChecked(true); DoTrdIndexClearBtnChecked(true);break;
+			default: assert(false);
+			}
+		}
+		break;
     }
      
 
@@ -692,12 +733,15 @@ void WinnerWin::ChangeFromStationText(QString text)
     p_list->hide();
 
     //qDebug() << "ChangeFromStationText " << tgt_tag << "\n";
+	if( ui.tabwid_holder->currentIndex() == cst_tab_index_eqsec_task )
+		return;
     QString::SectionFlag flag = QString::SectionSkipEmpty;
     QString tgt_tag = text.section('/', 0, 0, flag);
 	T_StockPriceInfo *p_info = app_->GetStockPriceInfo(tgt_tag.toLocal8Bit().data(), false);
 	if( p_info )
     {
-        p_dbspb_price->setValue(p_info->cur_price);
+		if( p_dbspb_price )
+			p_dbspb_price->setValue(p_info->cur_price);
         if( p_dbspb_percent )
             p_dbspb_percent->setValue(0.0);
 
@@ -705,8 +749,7 @@ void WinnerWin::ChangeFromStationText(QString text)
             cur_price_ = p_info->cur_price;
         else if( ui.tabwid_holder->currentIndex() == cst_tab_index_buy_task )
             buytask_cur_price_ = p_info->cur_price;
-		else if( ui.tabwid_holder->currentIndex() == cst_tab_index_eqsec_task )
-			eqsec_task_cur_price_ = p_info->cur_price;
+		 
     }else
     {
         if( ui.tabwid_holder->currentIndex() == cst_tab_index_sell_task )
@@ -738,7 +781,12 @@ void WinnerWin::AssignHintListAndLineEdit(HintList *& p_list, QLineEdit *&p_edit
         p_edit = ui.le_eqsec_stock;
         p_dbspb_alert_price = ui.dbspbox_eqsec_start_price;
         p_dbspb_percent = nullptr;
-    }else
+    }else if( ui.tabwid_holder->currentIndex() == cst_tab_index_stkindex_task )
+    {   
+        p_list = m_indtrd_list_hint_;
+        p_edit = ui.le_indtrd_stock;
+        
+    }else 
         assert(false);
 }
 

@@ -76,6 +76,7 @@ public slots:
     void DoQueryQtyCanBuy();
 
 	void ResetBuyTabTaskTime();
+
     //---------------eqsection task related----
 	void DoAddEqSectionTask();
 	void ResetEqSectionTaskTime();
@@ -84,6 +85,15 @@ public slots:
 
 	void DoMaxStopTrigCheckBoxChanged(int);
 	void DoMinClearTrigCheckBoxChanged(int);
+
+    //---------------index trade task related----
+	void DoAddIndexTradeTask();
+	void DoTrdIndexRadioCrossDownChecked(bool);
+	void DoTrdIndexRadioCrossUpChecked(bool);
+
+	void DoTrdIndexAlertBtnBtnChecked(bool);
+	void DoTrdIndexRelBtnBtnChecked(bool);
+	void DoTrdIndexClearBtnChecked(bool);
 
     //------------------
 	
@@ -123,6 +133,10 @@ private:
     // equal section task related
     void InitEqSectionTaskWin();
 
+	// index trade task related 
+	void InitIndexTradeWin();
+	QString IndexCode2IndexName(const QString& code);
+
     Ui::TradeWinnerClass ui;
     WinnerApp *app_;
     QMenu *tbv_tasks_popMenu_;
@@ -135,6 +149,9 @@ private:
 
 	// eqsection task related
     HintList *m_eqsec_list_hint_; 
+
+	// index trade task related
+    HintList *m_indtrd_list_hint_; 
 
     QLabel  *status_label_;
     std::shared_ptr<CalcWin> calc_win_;

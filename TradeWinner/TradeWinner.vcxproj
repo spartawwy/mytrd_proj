@@ -239,6 +239,7 @@
     </ClCompile>
     <ClCompile Include="HintList.cpp" />
     <ClCompile Include="index_task.cpp" />
+    <ClCompile Include="index_trade_win.cpp" />
     <ClCompile Include="inflection_buy_task.cpp" />
     <ClCompile Include="inflection_sell_task.cpp" />
     <ClCompile Include="login_win.cpp" />

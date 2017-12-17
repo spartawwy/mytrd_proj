@@ -179,6 +179,9 @@
     <ClCompile Include="index_task.cpp">
       <Filter>task</Filter>
     </ClCompile>
+    <ClCompile Include="index_trade_win.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="trade_winner.ui">

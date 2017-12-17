@@ -28,6 +28,8 @@ QString ToQString(TypeTask val)
         return QString::fromLocal8Bit("分批出货");
     case TypeTask::EQUAL_SECTION:
         return QString::fromLocal8Bit("等区间交易");
+	case TypeTask::INDEX_RISKMAN:
+        return QString::fromLocal8Bit("指数关联交易");
     default: assert(0);
     }
     return "";
