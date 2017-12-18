@@ -516,6 +516,9 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
     if( info->type == TypeTask::EQUAL_SECTION && !utility::ExistTable("EqualSectionTask", *db_conn_) )
     {  // throw exception
         return false; 
+    }else if( info->type == TypeTask::INDEX_RISKMAN && !utility::ExistTable("IndexRelateTask", *db_conn_) )
+    {   // throw exception
+        return false; 
     }
     bool ret = true;
      
@@ -523,37 +526,44 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
         WriteLock locker(taskinfo_table_mutex_);
         ret = db_conn_->ExecuteSQL(sql.c_str());
     }
-    if( ret && info->type == TypeTask::EQUAL_SECTION )
-    {
-        sql = utility::FormatStr("INSERT INTO EqualSectionTask VALUES( %d, %.2f, %.2f, %.2f, %.2f, %d, %.2f, %.2f, %d, %d, %d) "
-            , app_->Cookie_MaxTaskId() + 1
-            , info->secton_task.raise_percent 
-            , info->secton_task.fall_percent 
-            , info->secton_task.raise_infection 
-            , info->secton_task.fall_infection 
-            , info->secton_task.multi_qty 
-            , info->secton_task.max_trig_price 
-            , info->secton_task.min_trig_price 
-            , (int)info->secton_task.is_original
-            , info->secton_task.max_position
-            , info->secton_task.min_position);
-        {
-            {
-                WriteLock locker(equalsection_table_mutex_);
-                ret = db_conn_->ExecuteSQL(sql.c_str()); 
-            }
-            if( !ret )
-            { 
-                { 
-                    sql = utility::FormatStr("DELETE FROM TaskInfo WHERE id=%d", app_->Cookie_MaxTaskId() + 1);
-                    WriteLock locker(taskinfo_table_mutex_);
-                    db_conn_->ExecuteSQL(sql.c_str());
-                }
-            }  
-        } 
-    }
     if( ret )
-      info->id = app_->Cookie_NextTaskId();
+    {
+        if( info->type == TypeTask::EQUAL_SECTION )
+        {
+            sql = utility::FormatStr("INSERT INTO EqualSectionTask VALUES( %d, %.2f, %.2f, %.2f, %.2f, %d, %.2f, %.2f, %d, %d, %d) "
+                , app_->Cookie_MaxTaskId() + 1
+                , info->secton_task.raise_percent 
+                , info->secton_task.fall_percent 
+                , info->secton_task.raise_infection 
+                , info->secton_task.fall_infection 
+                , info->secton_task.multi_qty 
+                , info->secton_task.max_trig_price 
+                , info->secton_task.min_trig_price 
+                , (int)info->secton_task.is_original
+                , info->secton_task.max_position
+                , info->secton_task.min_position);
+             WriteLock locker(equalsection_table_mutex_);
+             ret = db_conn_->ExecuteSQL(sql.c_str()); 
+        }else if( info->type == TypeTask::INDEX_RISKMAN )
+        {
+            sql = utility::FormatStr("INSERT INTO IndexRelateTask VALUES( %d, %d, '%s', %d, %d )"
+                , app_->Cookie_MaxTaskId() + 1
+                , info->index_rel_task.rel_type
+                , info->index_rel_task.stock_code.c_str()
+                , (int)info->index_rel_task.is_down_trigger
+                , (int)info->index_rel_task.is_buy);
+            WriteLock locker(index_rel_table_mutex_);
+            ret = db_conn_->ExecuteSQL(sql.c_str());  
+        }
+         
+        if( !ret )
+        {  
+            sql = utility::FormatStr("DELETE FROM TaskInfo WHERE id=%d", app_->Cookie_MaxTaskId() + 1);
+            WriteLock locker(taskinfo_table_mutex_);
+            db_conn_->ExecuteSQL(sql.c_str());
+        }else
+            info->id = app_->Cookie_NextTaskId();
+    }
     return ret;
 }
 
@@ -583,6 +593,15 @@ bool DBMoudle::DelTaskInfo(int task_id, TypeTask type)
 		// del related recorde in table EqualSectionTask
 		std::string sql = utility::FormatStr("DELETE FROM EqualSectionTask WHERE id=%d ", task_id);
 		WriteLock locker(equalsection_table_mutex_);
+		db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+        { 
+            return 0;
+        });
+    }else if( type == TypeTask::INDEX_RISKMAN )
+	{
+		// del related recorde in table IndexRelateTask
+		std::string sql = utility::FormatStr("DELETE FROM IndexRelateTask WHERE id=%d ", task_id);
+		WriteLock locker(index_rel_table_mutex_);
 		db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
         { 
             return 0;

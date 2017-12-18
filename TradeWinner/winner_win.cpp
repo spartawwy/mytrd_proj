@@ -507,6 +507,9 @@ void WinnerWin::SlotTbvTasksActionDetail(bool)
 			case TindexTaskType::CLEAR: ui.radiobtn_clearall->setChecked(true); DoTrdIndexClearBtnChecked(true);break;
 			default: assert(false);
 			}
+            ui.indtrd_timeEdit_begin->setTime(Int2Qtime(p_tskinfo->start_time));
+            ui.indtrd_timeEdit_end->setTime(Int2Qtime(p_tskinfo->end_time));
+            ui.tabwid_holder->setCurrentIndex(cst_tab_index_stkindex_task);
 		}
 		break;
     }

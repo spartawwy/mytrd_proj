@@ -84,6 +84,7 @@ private:
 	typedef boost::shared_lock<WRMutex>    ReadLock;  
 	WRMutex  taskinfo_table_mutex_;
 	WRMutex  equalsection_table_mutex_;
+	WRMutex  index_rel_table_mutex_;
     // (broker id, broker info)
     std::unordered_map<int, T_BrokerInfo>  broker_info_map_;
     // (user id, account info) 
