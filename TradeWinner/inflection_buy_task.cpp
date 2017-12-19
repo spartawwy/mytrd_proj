@@ -158,7 +158,7 @@ void InflectionBuyTask::HandleQuoteData()
             this->app_->EmitSigShowUi(ret_str, true);
         }
 
-        this->app_->RemoveTask(this->task_id());
+        this->app_->RemoveTask(this->task_id(), TypeTask::INFLECTION_BUY);
 
         });
             

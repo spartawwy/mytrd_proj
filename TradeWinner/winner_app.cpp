@@ -217,9 +217,9 @@ void WinnerApp::Stop()
 	Shutdown();
 }
 
-void WinnerApp::RemoveTask(unsigned int task_id)
+void WinnerApp::RemoveTask(unsigned int task_id, TypeTask task_type)
 {
-	DelTaskById(task_id);
+	DelTaskById(task_id, task_type);
 	EmitSigRemoveTask(task_id);
 	 
 }
@@ -343,19 +343,21 @@ std::shared_ptr<T_TaskInformation> WinnerApp::FindTaskInfo(int task_id)
 	return p_info;
 }
 
-bool WinnerApp::DelTaskById(int task_id)
+bool WinnerApp::DelTaskById(int task_id, TypeTask task_type)
 { 
-	ticker_strand().PostTask([task_id, this]()
+	ticker_strand().PostTask([task_id, task_type, this]()
 	{
-		this->stock_ticker_->UnRegister(task_id);
+        if( task_type != TypeTask::INDEX_RISKMAN )
+		    this->stock_ticker_->UnRegister(task_id);
+        else
+		    this->index_ticker_->UnRegister(task_id);
 	});
-
-	TypeTask  task_type;
+     
 	{
 		ReadLock  locker(task_infos_mutex_);
 		auto iter = task_infos_.find(task_id);
 		assert(iter != task_infos_.end());
-		task_type = iter->second->type;
+		assert( task_type == iter->second->type );
 		db_moudle().AddHisTask(iter->second);
 	}
 

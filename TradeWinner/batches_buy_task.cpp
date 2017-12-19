@@ -137,7 +137,7 @@ void BatchesBuyTask::HandleQuoteData()
             this->app_->local_logger().LogLocal(info_str);
             this->app_->AppendLog2Ui(info_str.c_str());
 
-            this->app_->RemoveTask(this->task_id());
+            this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_BUY);
         }
 
         });

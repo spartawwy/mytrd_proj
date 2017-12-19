@@ -55,7 +55,7 @@ public:
     TradeAgent& trade_agent() { return trade_agent_; }
 
     int trade_client_id() { return trade_client_id_; }
-    void RemoveTask(unsigned int task_id);
+    void RemoveTask(unsigned int task_id, TypeTask task_type);
 
     int Cookie_NextTaskId();
     int Cookie_MaxTaskId();
@@ -68,6 +68,7 @@ public:
     bool LoginBroker(int broker_id, int depart_id, const std::string& account, const std::string& password);
     
     StockTicker& stock_ticker() { return *stock_ticker_; }
+    IndexTicker& index_ticker() { return *index_ticker_; }
 
     T_UserAccountInfo *user_account_info() { return p_user_account_info_; }
     T_BrokerInfo *user_broker_info() { return p_user_broker_info_; }
@@ -80,7 +81,7 @@ public:
 
     T_IdMapTaskInfo & task_infos() { return task_infos_; }
 
-    bool DelTaskById(int task_id);
+    bool DelTaskById(int task_id, TypeTask task_type);
     std::shared_ptr<StrategyTask> FindStrategyTask(int task_id);
 
     void Emit(StrategyTask* p, int type) { emit SigTaskStatChange(p, type); }

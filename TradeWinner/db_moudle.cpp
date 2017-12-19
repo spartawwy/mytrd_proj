@@ -78,6 +78,9 @@ CREATE TABLE EqualSectionTask(id INTEGER,
 								is_original BOOL,
                                 max_position INTEGER, min_position INTEGER,
 								PRIMARY KEY(id));
+
+CREATE TABLE IndexRelateTask(id INTEGER, index_task_type INTEGER, relate_stock TEXT, is_down_trigger bool, is_buy bool,  PRIMARY KEY(id));
+        
  */
 using namespace  TSystem;
 DBMoudle::DBMoudle(WinnerApp *app)
@@ -211,7 +214,7 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
                 , "can't find table TaskInfo: ");
 
     std::string sql  = utility::FormatStr("SELECT id, type, stock, alert_price, back_alert_trigger, rebounce, continue_second, step, quantity, target_price_level, start_time, end_time, is_loop, state, user_id, stock_pinyin, bs_times, assistant_field"
-		" FROM TaskInfo WHERE user_id=%d AND type != %d order by id ", app_->user_info().id, (int)TypeTask::EQUAL_SECTION);
+        " FROM TaskInfo WHERE user_id=%d AND type NOT IN (%d, %d) order by id ", app_->user_info().id, (int)TypeTask::EQUAL_SECTION, (int)TypeTask::INDEX_RISKMAN);
     
     //std::make_shared<std::string>();
     db_conn_->ExecuteSQL(sql.c_str(),[&taskinfos, this](int num_cols, char** vals, char** names)->int
@@ -310,9 +313,44 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
             return 0;
         }
         taskinfos.insert( std::make_pair(task_info->id, std::move(task_info)) );
-
         return 0;
     });
+
+    //IndexRelateTask task --------------- 
+        
+    sql = utility::FormatStr("SELECT t.id, t.type, t.stock, t.stock_pinyin, t.alert_price, t.continue_second, "
+		    " t.quantity, t.target_price_level, t.start_time, t.end_time, t.state, t.user_id, "
+		    " i.index_task_type, i.relate_stock, i.is_down_trigger, i.is_buy"
+            " FROM TaskInfo t INNER JOIN IndexRelateTask i ON t.id=i.id WHERE t.user_id=%d order by i.id ", app_->user_info().id);
+    db_conn_->ExecuteSQL(sql.c_str(),[&taskinfos, this](int num_cols, char** vals, char** names)->int
+    {
+        auto task_info = std::make_shared<T_TaskInformation>();
+		
+		task_info->id = boost::lexical_cast<int>(*(vals));
+        task_info->type = static_cast<TypeTask>(boost::lexical_cast<int>(*(vals + 1)));
+        task_info->stock = *(vals + 2);
+        if( task_info->stock.length() < 6 )
+        {
+            app_->local_logger().LogLocal("error", utility::FormatStr("task %d stock %s", task_info->id, task_info->stock.c_str()));
+            return 0;
+        }
+        task_info->stock_pinyin = *(vals + 3);
+        task_info->alert_price = boost::lexical_cast<double>(*(vals + 4));  
+        task_info->continue_second = boost::lexical_cast<int>(*(vals + 5)); 
+        task_info->quantity = boost::lexical_cast<int>(*(vals + 6));
+        task_info->target_price_level = boost::lexical_cast<int>(*(vals + 7));
+        task_info->start_time = boost::lexical_cast<int>(*(vals + 8));
+        task_info->end_time = boost::lexical_cast<int>(*(vals + 9)); 
+        task_info->state = boost::lexical_cast<int>(*(vals + 10)); 
+
+        task_info->index_rel_task.rel_type = (TindexTaskType)boost::lexical_cast<int>(*(vals + 12)); 
+        task_info->index_rel_task.stock_code = *(vals + 13);
+        task_info->index_rel_task.is_down_trigger =  boost::lexical_cast<int>(*(vals + 14)); 
+        task_info->index_rel_task.is_buy =  boost::lexical_cast<int>(*(vals + 15)); 
+        taskinfos.insert( std::make_pair(task_info->id, std::move(task_info)) );
+        return 0;
+    });
+        
 }
 
 T_UserAccountInfo * DBMoudle::FindUserAccountInfo(int user_id)

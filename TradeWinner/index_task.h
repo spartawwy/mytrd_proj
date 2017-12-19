@@ -15,6 +15,8 @@ public:
 private:
 
     WinnerApp  *app_;
+    __int64 time_point_open_warning_;
+
 };
 
 #endif

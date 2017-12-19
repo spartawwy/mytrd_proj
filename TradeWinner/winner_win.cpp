@@ -22,7 +22,7 @@
 //static const QString cst_str_Inflection_buy = QString::fromLocal8Bit("拐点买入");
 
 
-static const unsigned short cst_col_count = 10;
+static const unsigned short cst_col_count = 11;
 
 static const int cst_tbview_tasks_rowindex_task_id = 0;
 static const int cst_tbview_tasks_rowindex_state = 1;
@@ -34,6 +34,7 @@ static const int cst_tbview_tasks_rowindex_quantity = 6;
 static const int cst_tbview_tasks_rowindex_price_level = 7;
 static const int cst_tbview_tasks_rowindex_start_time = 8;
 static const int cst_tbview_tasks_rowindex_end_time = 9;
+static const int cst_tbview_tasks_rowindex_task_type = 10;
 
 static const int cst_tab_index_task_list = 0;
 static const int cst_tab_index_buy_task = 1;
@@ -96,8 +97,10 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     model->setHorizontalHeaderItem(cst_tbview_tasks_rowindex_end_time, new QStandardItem(QString::fromLocal8Bit("结束时间")));
     model->horizontalHeaderItem(cst_tbview_tasks_rowindex_end_time)->setTextAlignment(Qt::AlignCenter);
 
+    model->setHorizontalHeaderItem(cst_tbview_tasks_rowindex_task_type, new QStandardItem("类型"));
+     
     ui.tbview_tasks->setModel(model);
-   /* ui.tbview_tasks->setColumnWidth(0, 100); */
+    ui.tbview_tasks->setColumnWidth(cst_tbview_tasks_rowindex_task_type, 5);
 
     //------------------tab add sell task
     SetupSellTaskWin();
@@ -194,7 +197,10 @@ void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_
     item = new QStandardItem( utility::FormatStr("%d", task_info.end_time).c_str() );
     model->setItem(row_index, cst_tbview_tasks_rowindex_end_time, item);
     model->item(row_index, cst_tbview_tasks_rowindex_end_time)->setTextAlignment(align_way);        
-            
+    
+    item = new QStandardItem( utility::FormatStr("%d", task_info.type).c_str() );
+    model->setItem(row_index, cst_tbview_tasks_rowindex_task_type, item);
+    model->item(row_index, cst_tbview_tasks_rowindex_task_type)->setTextAlignment(align_way);  
 }
  
 void WinnerWin::Init()
@@ -419,8 +425,9 @@ void WinnerWin::SlotTbvTasksActionDel(bool)
     QStandardItemModel *model = static_cast<QStandardItemModel *>(ui.tbview_tasks->model());
     QModelIndex mod_index = ui.tbview_tasks->currentIndex();
     auto task_id = model->item(mod_index.row(), cst_tbview_tasks_rowindex_task_id)->text().toInt();
+    auto task_type = model->item(mod_index.row(), cst_tbview_tasks_rowindex_task_type)->text().toInt();
     
-    app_->DelTaskById(task_id);
+    app_->DelTaskById(task_id, (TypeTask)task_type);
 
     model->removeRow(mod_index.row());
     model->submit();

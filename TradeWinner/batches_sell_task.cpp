@@ -122,7 +122,7 @@ void BatchesSellTask::HandleQuoteData()
 
         app_->db_moudle().UpdateTaskInfo(para_);
         if( is_to_remove )
-            this->app_->RemoveTask(this->task_id());
+            this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_SELL);
 
         });
     } 

@@ -169,7 +169,7 @@ void EqualSectionTask::HandleQuoteData()
                     this->app_->EmitSigShowUi(ret_str, true);
                     app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
                     timed_mutex_wrapper_.unlock(); 
-                    this->app_->RemoveTask(this->task_id()); // invoke self destroy
+                    this->app_->RemoveTask(this->task_id(), TypeTask::EQUAL_SECTION); // invoke self destroy
                     return;
                 }  
                 goto BEFORE_TRADE; 
@@ -291,7 +291,7 @@ BEFORE_TRADE:
             is_waitting_removed_ = true;
             app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
             this->timed_mutex_wrapper_.unlock();
-            this->app_->RemoveTask(this->task_id()); // invoker delete self
+            this->app_->RemoveTask(this->task_id(), TypeTask::EQUAL_SECTION); // invoker delete self
         }
         
     });

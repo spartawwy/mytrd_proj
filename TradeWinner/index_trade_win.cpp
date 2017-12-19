@@ -145,7 +145,7 @@ void WinnerWin::DoAddIndexTradeTask()
 
     app_->ticker_strand().PostTask([index_trade_task, this]()
     {
-        app_->stock_ticker().Register(std::shared_ptr<StrategyTask>(index_trade_task));
+        app_->index_ticker().Register(std::shared_ptr<StrategyTask>(index_trade_task));
     });
     // add to task list ui
     InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);

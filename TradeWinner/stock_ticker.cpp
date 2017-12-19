@@ -406,13 +406,13 @@ bool IndexTicker::Init()
 
 void IndexTicker::Procedure()
 { 
-	static auto are_codes_in = [](char stock_codes[max_index_count][16], const char *str)
+	static auto are_codes_in = [](char codes[max_index_count][16], const char *str)
 	{ 
 		for(int i = 0; i < max_index_count; ++i)
 		{
-			if( stock_codes[i] == nullptr )
+			if( codes[i] == nullptr )
 				return false;
-			if( !strcmp(stock_codes[i], str) )
+			if( !strcmp(codes[i], str) )
 				return true;
 		}
 		return false;
@@ -420,29 +420,29 @@ void IndexTicker::Procedure()
     Buffer Result(cst_result_len);
     Buffer ErrInfo(cst_error_len);
 
-    char stock_codes[max_index_count][16];
-    memset(stock_codes, 0, max_index_count*16);
+    char index_codes[max_index_count][16];
+    memset(index_codes, 0, max_index_count*16);
        
     auto  cur_time = QTime::currentTime();
        
     //---------------------------
-    int stock_count = 0; 
+    int index_count = 0; 
     std::for_each( std::begin(registered_tasks_), std::end(registered_tasks_), [&](TTaskIdMapStrategyTask::reference entry)
     {
         if( entry.second->is_to_run() 
             && cur_time >= entry.second->tp_start() && cur_time < entry.second->tp_end()
-            && !are_codes_in(stock_codes, entry.second->code_data()) )
+            && !are_codes_in(index_codes, entry.second->code_data()) )
         { 
-            strcpy(stock_codes[stock_count], entry.second->code_data());
+            strcpy(index_codes[index_count], entry.second->code_data());
             //markets[stock_count] = static_cast<byte>(entry.second->market_type());
                  
-            ++stock_count;
+            ++index_count;
         }
     });
-	if( stock_count < 1 )
+	if( index_count < 1 )
 		return;
 	T_StockPriceInfo price_info[max_index_count];
-	auto num = StkQuoteGetQuote_(stock_codes, stock_count, price_info);
+	auto num = StkQuoteGetQuote_(index_codes, index_count, price_info);
 	if( num < 1 )
 		return;
     
@@ -450,7 +450,7 @@ void IndexTicker::Procedure()
     time_t t_t = std::chrono::system_clock::to_time_t(tp_now); 
 	for( int i = 0; i < num; ++i )
 	{
-		auto task_ids_iter = codes_taskids_.find(stock_codes[i]);
+		auto task_ids_iter = codes_taskids_.find(index_codes[i]);
         if( task_ids_iter == codes_taskids_.end() )
             continue;
         auto quote_data = std::make_shared<QuotesData>();

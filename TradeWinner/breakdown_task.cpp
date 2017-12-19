@@ -79,7 +79,7 @@ void BreakDownTask::HandleQuoteData()
                     this->app_->EmitSigShowUi(str, true);
                 }
                  
-                this->app_->RemoveTask(this->task_id());
+                this->app_->RemoveTask(this->task_id(), TypeTask::BREAK_SELL);
 
                 });
             }
