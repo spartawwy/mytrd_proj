@@ -83,8 +83,8 @@ void WinnerWin::InitBuyTaskWin()
     ret = QObject::connect(ui.pbtn_buytask_all_quantity, SIGNAL(clicked()), this, SLOT(DoQueryQtyCanBuy()));
     ret = QObject::connect(ui.pbtn_add_buytask, SIGNAL(clicked()), this, SLOT(DoAddBuyTask()));
     
-    std::string ret_str = utility::FormatStr("任务:1 拐点买入 22 成功!");
-    this->app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit(ret_str.c_str()));
+    //std::string ret_str = utility::FormatStr("任务:1 拐点买入 22 成功!");
+    //this->app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit(ret_str.c_str()));
 }
 
 

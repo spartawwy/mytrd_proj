@@ -62,7 +62,8 @@ StockTicker::~StockTicker()
 {
     /*if( TdxApiHMODULE )
         FreeLibrary(TdxApiHMODULE);*/
-    TdxHq_Disconnect();
+    if( TdxHq_Disconnect )
+        TdxHq_Disconnect();
 }
 
 bool StockTicker::Init()

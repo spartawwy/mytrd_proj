@@ -13,7 +13,7 @@ class MessageWin : public QWidget
 
 public:
 
-    MessageWin();
+    MessageWin(int time_out_seconds);
 
     void ShowUI(const QString &title_str, const QString &str);
     void ShowUI(const std::string &title_str, const std::string &str);
@@ -30,6 +30,8 @@ private:
     Ui::MsgForm  ui;
 
     QTimer *myTimer_;
+
+    int time_out_ms_;
 };
 
 #endif

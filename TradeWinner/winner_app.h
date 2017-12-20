@@ -40,6 +40,7 @@ public:
     ~WinnerApp();
 
     MessageWin& msg_win() { assert(msg_win_); return *msg_win_; }
+    MessageWin& msgwin_longshow() { assert(msgwin_longshow_); return *msgwin_longshow_; }
 
     bool Init();
 
@@ -88,6 +89,7 @@ public:
     void EmitSigRemoveTask(int id) { emit SigRemoveTask(id);}
     // memory will be delete by this function 
     void EmitSigShowUi(std::string *str, bool flash_task_bar=false) { emit SigShowUi(str, flash_task_bar); }
+    void EmitSigShowLongUi(std::string *str, bool flash_task_bar=false) { emit SigShowLongUi(str, flash_task_bar); }
 
     T_PositionData* QueryPosition(const std::string& code);
     T_Capital QueryCapital();
@@ -112,6 +114,7 @@ signals:
     void SigRemoveTask(int);
     //void SigShowUi(std::shared_ptr<std::string>); //cause can't invoke so use raw point
     void SigShowUi(std::string*, bool);
+    void SigShowLongUi(std::string*, bool);
 
 private slots:
 
@@ -119,6 +122,7 @@ private slots:
     void DoNormalTimer();
     //void DoShowUi(std::shared_ptr<std::string>);
     void DoShowUi(std::string*, bool flash_taskbar = false);
+    void DoShowLongUi(std::string*, bool flash_taskbar = false);
 
     void SlotStopAllTasks(bool);
      
@@ -152,6 +156,7 @@ private:
     T_IdMapTaskInfo task_infos_;
 	 
     MessageWin  *msg_win_;
+    MessageWin  *msgwin_longshow_;
     LoginWin  login_win_;
     WinnerWin  winner_win_;
     bool  exit_flag_;

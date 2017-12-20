@@ -77,6 +77,18 @@ QString ToQString(TaskCurrentState val)
     return "";
 }
 
+QString ToQString(TindexTaskType val)
+{
+    switch(val)
+    {
+    case TindexTaskType::ALERT: return QString::fromLocal8Bit("预警");
+    case TindexTaskType::RELSTOCK: return QString::fromLocal8Bit("关联交易");
+    case TindexTaskType::CLEAR: return QString::fromLocal8Bit("清仓");
+    default: assert(0);
+    }
+    return "";
+}
+
 void Delay(unsigned short mseconds)
 {
     //TSystem::WaitFor([]()->bool { return false;}, mseconds); // only make effect to timer

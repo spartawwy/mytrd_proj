@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_WinnerApp_t {
-    QByteArrayData data[14];
-    char stringdata[177];
+    QByteArrayData data[16];
+    char stringdata[204];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -38,16 +38,19 @@ QT_MOC_LITERAL(5, 56, 5),
 QT_MOC_LITERAL(6, 62, 13),
 QT_MOC_LITERAL(7, 76, 9),
 QT_MOC_LITERAL(8, 86, 12),
-QT_MOC_LITERAL(9, 99, 22),
-QT_MOC_LITERAL(10, 122, 13),
-QT_MOC_LITERAL(11, 136, 8),
-QT_MOC_LITERAL(12, 145, 13),
-QT_MOC_LITERAL(13, 159, 16)
+QT_MOC_LITERAL(9, 99, 13),
+QT_MOC_LITERAL(10, 113, 22),
+QT_MOC_LITERAL(11, 136, 13),
+QT_MOC_LITERAL(12, 150, 8),
+QT_MOC_LITERAL(13, 159, 13),
+QT_MOC_LITERAL(14, 173, 12),
+QT_MOC_LITERAL(15, 186, 16)
     },
     "WinnerApp\0SigTaskStatChange\0\0StrategyTask*\0"
     "SigAppendLog\0char*\0SigRemoveTask\0"
-    "SigShowUi\0std::string*\0DoStrategyTasksTimeout\0"
-    "DoNormalTimer\0DoShowUi\0flash_taskbar\0"
+    "SigShowUi\0std::string*\0SigShowLongUi\0"
+    "DoStrategyTasksTimeout\0DoNormalTimer\0"
+    "DoShowUi\0flash_taskbar\0DoShowLongUi\0"
     "SlotStopAllTasks\0"
 };
 #undef QT_MOC_LITERAL
@@ -58,36 +61,42 @@ static const uint qt_meta_data_WinnerApp[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       9,   14, // methods
+      12,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       4,       // signalCount
+       5,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    2,   59,    2, 0x06,
-       4,    1,   64,    2, 0x06,
-       6,    1,   67,    2, 0x06,
-       7,    2,   70,    2, 0x06,
+       1,    2,   74,    2, 0x06,
+       4,    1,   79,    2, 0x06,
+       6,    1,   82,    2, 0x06,
+       7,    2,   85,    2, 0x06,
+       9,    2,   90,    2, 0x06,
 
  // slots: name, argc, parameters, tag, flags
-       9,    0,   75,    2, 0x08,
-      10,    0,   76,    2, 0x08,
-      11,    2,   77,    2, 0x08,
-      11,    1,   82,    2, 0x28,
-      13,    1,   85,    2, 0x08,
+      10,    0,   95,    2, 0x08,
+      11,    0,   96,    2, 0x08,
+      12,    2,   97,    2, 0x08,
+      12,    1,  102,    2, 0x28,
+      14,    2,  105,    2, 0x08,
+      14,    1,  110,    2, 0x28,
+      15,    1,  113,    2, 0x08,
 
  // signals: parameters
     QMetaType::Void, 0x80000000 | 3, QMetaType::Int,    2,    2,
     QMetaType::Void, 0x80000000 | 5,    2,
     QMetaType::Void, QMetaType::Int,    2,
     QMetaType::Void, 0x80000000 | 8, QMetaType::Bool,    2,    2,
+    QMetaType::Void, 0x80000000 | 8, QMetaType::Bool,    2,    2,
 
  // slots: parameters
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 8, QMetaType::Bool,    2,   12,
+    QMetaType::Void, 0x80000000 | 8, QMetaType::Bool,    2,   13,
+    QMetaType::Void, 0x80000000 | 8,    2,
+    QMetaType::Void, 0x80000000 | 8, QMetaType::Bool,    2,   13,
     QMetaType::Void, 0x80000000 | 8,    2,
     QMetaType::Void, QMetaType::Bool,    2,
 
@@ -103,11 +112,14 @@ void WinnerApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 1: _t->SigAppendLog((*reinterpret_cast< char*(*)>(_a[1]))); break;
         case 2: _t->SigRemoveTask((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 3: _t->SigShowUi((*reinterpret_cast< std::string*(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 4: _t->DoStrategyTasksTimeout(); break;
-        case 5: _t->DoNormalTimer(); break;
-        case 6: _t->DoShowUi((*reinterpret_cast< std::string*(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 7: _t->DoShowUi((*reinterpret_cast< std::string*(*)>(_a[1]))); break;
-        case 8: _t->SlotStopAllTasks((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 4: _t->SigShowLongUi((*reinterpret_cast< std::string*(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
+        case 5: _t->DoStrategyTasksTimeout(); break;
+        case 6: _t->DoNormalTimer(); break;
+        case 7: _t->DoShowUi((*reinterpret_cast< std::string*(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
+        case 8: _t->DoShowUi((*reinterpret_cast< std::string*(*)>(_a[1]))); break;
+        case 9: _t->DoShowLongUi((*reinterpret_cast< std::string*(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
+        case 10: _t->DoShowLongUi((*reinterpret_cast< std::string*(*)>(_a[1]))); break;
+        case 11: _t->SlotStopAllTasks((*reinterpret_cast< bool(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -135,6 +147,12 @@ void WinnerApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             typedef void (WinnerApp::*_t)(std::string * , bool );
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&WinnerApp::SigShowUi)) {
                 *result = 3;
+            }
+        }
+        {
+            typedef void (WinnerApp::*_t)(std::string * , bool );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&WinnerApp::SigShowLongUi)) {
+                *result = 4;
             }
         }
     }
@@ -167,13 +185,13 @@ int WinnerApp::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 9)
+        if (_id < 12)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 9;
+        _id -= 12;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 9)
+        if (_id < 12)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 9;
+        _id -= 12;
     }
     return _id;
 }
@@ -204,5 +222,12 @@ void WinnerApp::SigShowUi(std::string * _t1, bool _t2)
 {
     void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 3, _a);
+}
+
+// SIGNAL 4
+void WinnerApp::SigShowLongUi(std::string * _t1, bool _t2)
+{
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
+    QMetaObject::activate(this, &staticMetaObject, 4, _a);
 }
 QT_END_MOC_NAMESPACE

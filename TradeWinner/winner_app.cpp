@@ -39,7 +39,8 @@ WinnerApp::WinnerApp(int argc, char* argv[])
 	, ticker_enable_flag_(false)
 	, trade_strand_(task_pool())
 	, task_infos_(256)
-	, msg_win_(new MessageWin())
+	, msg_win_(new MessageWin(5000))
+    , msgwin_longshow_(new MessageWin(60*1000))
 	, winner_win_(this, nullptr)
 	, login_win_(this)
 	, exit_flag_(false)
@@ -163,7 +164,7 @@ bool WinnerApp::Init()
 	//ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::shared_ptr<std::string>)), this, SLOT(DoShowUi(std::shared_ptr<std::string>)));
 	//ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::string *)), this, SLOT(DoShowUi(std::string *)));
 	ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::string *, bool)), this, SLOT(DoShowUi(std::string *, bool)));
-
+    ret1 = QObject::connect(this, SIGNAL(SigShowLongUi(std::string *, bool)), this, SLOT(DoShowLongUi(std::string *, bool)));
 #endif
 
 #if 1 
@@ -612,7 +613,7 @@ void WinnerApp::DoStrategyTasksTimeout()
     };
 	
     auto cur_time = QTime::currentTime();
-    qDebug() << "DoStrategyTasksTimeout: " << cur_time.toString() << "\n";
+    //qDebug() << "DoStrategyTasksTimeout: " << cur_time.toString() << "\n";
 	// register 
 	ReadLock locker(strategy_tasks_mutex_);
 	std::for_each( std::begin(strategy_tasks_), std::end(strategy_tasks_), [&cur_time, this](std::shared_ptr<StrategyTask>& entry)
@@ -687,6 +688,16 @@ void WinnerApp::DoShowUi(std::string* str, bool flash_taskbar)
 {
 	assert(str);
 	msg_win().ShowUI("提示", *str);
+	delete str; str = nullptr;
+
+    if( flash_taskbar )
+        winner_win_.TriggerFlashWinTimer(true);
+}
+ 
+void WinnerApp::DoShowLongUi(std::string* str, bool flash_taskbar)
+{
+	assert(str);
+	msgwin_longshow().ShowUI("提示", *str);
 	delete str; str = nullptr;
 
     if( flash_taskbar )
