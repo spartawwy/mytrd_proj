@@ -11,7 +11,7 @@ const unsigned int cst_max_data_count = 60 * 60 * 4;
 StrategyTask::StrategyTask(T_TaskInformation &task_info, WinnerApp *app)
     : app_(app)
     , para_(task_info)
-    , market_type_(task_info.stock.c_str()[0] == '6' ? TypeMarket::SH : TypeMarket::SZ)
+    , market_type_(GetStockMarketType(task_info.stock))
     , quote_data_queue_()
     , tp_start_(Int2Qtime(task_info.start_time))
     , tp_end_(Int2Qtime(task_info.end_time))

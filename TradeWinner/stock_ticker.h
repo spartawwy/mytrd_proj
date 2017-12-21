@@ -36,6 +36,13 @@ public:
 
     bool GetSecurityBars(int Category, int Market, char* Zqdm, short Start, short& Count, char* Result, char* ErrInfo);
 
+    bool GetQuotes(char* stock_codes[], short count, Buffer &Result);
+
+    void DecodeStkQuoteResult(Buffer &Result, std::list<std::shared_ptr<QuotesData> > *ret_quotes_data=nullptr
+            , std::function<void(const std::list<unsigned int>& id_list, std::shared_ptr<QuotesData> &data)> tell_all_rel_task=nullptr);
+
+    void TellAllRelTasks(const std::list<unsigned int>& id_list, std::shared_ptr<QuotesData> &data);
+
 protected:
       
     TTaskIdMapStrategyTask  registered_tasks_;

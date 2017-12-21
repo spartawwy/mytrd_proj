@@ -9,6 +9,7 @@
 #include "batches_buy_task.h"
 #include "batches_sell_task.h"
 #include "equal_section_task.h"
+#include "index_task.h"
 
 #include "winner_app.h"
  
@@ -70,6 +71,11 @@ void TaskFactory::CreateAllTasks(std::unordered_map<int, std::shared_ptr<T_TaskI
                    out_task_objs.push_back( std::move(std::make_shared<EqualSectionTask>(*iter->second, app)) );
                    break;
                 }
+            case TypeTask::INDEX_RISKMAN:
+            {  
+                out_task_objs.push_back( std::move(std::make_shared<IndexTask>(*iter->second, app)) );
+                break;
+            }
             default: break;
             }
         }

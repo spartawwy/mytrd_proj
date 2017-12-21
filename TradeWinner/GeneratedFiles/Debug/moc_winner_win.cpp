@@ -321,6 +321,17 @@ void WinnerWin::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 49: _t->TriggerFlashWinTimer(); break;
         default: ;
         }
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        switch (_id) {
+        default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+        case 22:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTableView* >(); break;
+            }
+            break;
+        }
     }
 }
 
@@ -354,7 +365,7 @@ int WinnerWin::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         _id -= 50;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         if (_id < 50)
-            *reinterpret_cast<int*>(_a[0]) = -1;
+            qt_static_metacall(this, _c, _id, _a);
         _id -= 50;
     }
     return _id;

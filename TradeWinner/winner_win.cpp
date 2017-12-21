@@ -308,7 +308,7 @@ void WinnerWin::keyPressEvent(QKeyEvent *event)
 void WinnerWin::DoQueryCapital()
 { 
     ui.pte_capital->clear();
-    std::unordered_map<std::string, T_PositionData> pos_map = app_->QueryPosition();
+    T_CodeMapPosition pos_map = app_->QueryPosition();
     T_Capital captital = app_->QueryCapital();
     ui.pte_capital->appendPlainText(QString::fromLocal8Bit("资金:\n"));
     ui.pte_capital->appendPlainText(QString::fromLocal8Bit(utility::FormatStr("总资金:\t%.2f\n", captital.total).c_str())); 

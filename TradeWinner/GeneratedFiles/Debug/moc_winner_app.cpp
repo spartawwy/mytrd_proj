@@ -39,19 +39,19 @@ QT_MOC_LITERAL(6, 62, 13),
 QT_MOC_LITERAL(7, 76, 9),
 QT_MOC_LITERAL(8, 86, 12),
 QT_MOC_LITERAL(9, 99, 13),
-QT_MOC_LITERAL(10, 113, 22),
-QT_MOC_LITERAL(11, 136, 13),
-QT_MOC_LITERAL(12, 150, 8),
-QT_MOC_LITERAL(13, 159, 13),
-QT_MOC_LITERAL(14, 173, 12),
-QT_MOC_LITERAL(15, 186, 16)
+QT_MOC_LITERAL(10, 113, 16),
+QT_MOC_LITERAL(11, 130, 22),
+QT_MOC_LITERAL(12, 153, 13),
+QT_MOC_LITERAL(13, 167, 8),
+QT_MOC_LITERAL(14, 176, 13),
+QT_MOC_LITERAL(15, 190, 12)
     },
     "WinnerApp\0SigTaskStatChange\0\0StrategyTask*\0"
     "SigAppendLog\0char*\0SigRemoveTask\0"
     "SigShowUi\0std::string*\0SigShowLongUi\0"
-    "DoStrategyTasksTimeout\0DoNormalTimer\0"
-    "DoShowUi\0flash_taskbar\0DoShowLongUi\0"
-    "SlotStopAllTasks\0"
+    "SlotStopAllTasks\0DoStrategyTasksTimeout\0"
+    "DoNormalTimer\0DoShowUi\0flash_taskbar\0"
+    "DoShowLongUi\0"
 };
 #undef QT_MOC_LITERAL
 
@@ -76,13 +76,13 @@ static const uint qt_meta_data_WinnerApp[] = {
        9,    2,   90,    2, 0x06,
 
  // slots: name, argc, parameters, tag, flags
-      10,    0,   95,    2, 0x08,
-      11,    0,   96,    2, 0x08,
-      12,    2,   97,    2, 0x08,
-      12,    1,  102,    2, 0x28,
-      14,    2,  105,    2, 0x08,
-      14,    1,  110,    2, 0x28,
-      15,    1,  113,    2, 0x08,
+      10,    1,   95,    2, 0x0a,
+      11,    0,   98,    2, 0x08,
+      12,    0,   99,    2, 0x08,
+      13,    2,  100,    2, 0x08,
+      13,    1,  105,    2, 0x28,
+      15,    2,  108,    2, 0x08,
+      15,    1,  113,    2, 0x28,
 
  // signals: parameters
     QMetaType::Void, 0x80000000 | 3, QMetaType::Int,    2,    2,
@@ -92,13 +92,13 @@ static const uint qt_meta_data_WinnerApp[] = {
     QMetaType::Void, 0x80000000 | 8, QMetaType::Bool,    2,    2,
 
  // slots: parameters
-    QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 8, QMetaType::Bool,    2,   13,
-    QMetaType::Void, 0x80000000 | 8,    2,
-    QMetaType::Void, 0x80000000 | 8, QMetaType::Bool,    2,   13,
-    QMetaType::Void, 0x80000000 | 8,    2,
     QMetaType::Void, QMetaType::Bool,    2,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, 0x80000000 | 8, QMetaType::Bool,    2,   14,
+    QMetaType::Void, 0x80000000 | 8,    2,
+    QMetaType::Void, 0x80000000 | 8, QMetaType::Bool,    2,   14,
+    QMetaType::Void, 0x80000000 | 8,    2,
 
        0        // eod
 };
@@ -113,13 +113,13 @@ void WinnerApp::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 2: _t->SigRemoveTask((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 3: _t->SigShowUi((*reinterpret_cast< std::string*(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
         case 4: _t->SigShowLongUi((*reinterpret_cast< std::string*(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 5: _t->DoStrategyTasksTimeout(); break;
-        case 6: _t->DoNormalTimer(); break;
-        case 7: _t->DoShowUi((*reinterpret_cast< std::string*(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 8: _t->DoShowUi((*reinterpret_cast< std::string*(*)>(_a[1]))); break;
-        case 9: _t->DoShowLongUi((*reinterpret_cast< std::string*(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 10: _t->DoShowLongUi((*reinterpret_cast< std::string*(*)>(_a[1]))); break;
-        case 11: _t->SlotStopAllTasks((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 5: _t->SlotStopAllTasks((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 6: _t->DoStrategyTasksTimeout(); break;
+        case 7: _t->DoNormalTimer(); break;
+        case 8: _t->DoShowUi((*reinterpret_cast< std::string*(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
+        case 9: _t->DoShowUi((*reinterpret_cast< std::string*(*)>(_a[1]))); break;
+        case 10: _t->DoShowLongUi((*reinterpret_cast< std::string*(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
+        case 11: _t->DoShowLongUi((*reinterpret_cast< std::string*(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {

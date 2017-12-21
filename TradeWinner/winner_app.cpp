@@ -7,6 +7,8 @@
 #include <qtimer.h>
 
 #include <boost/lexical_cast.hpp>
+#include <algorithm>
+
 #include <TLib/core/tsystem_utility_functions.h>
 
 #include "common.h"
@@ -27,10 +29,12 @@ static bool SetCurrentEnvPath();
 static const int cst_ticker_update_interval = 2000;  //ms :notice value have to be bigger than 1000
 static const int cst_normal_timer_interval = 2000;
 
+static const unsigned int cst_result_len = 1024 * 1024;
+
 WinnerApp::WinnerApp(int argc, char* argv[])
 	: QApplication(argc, argv)
 	, ServerClientAppBase("client", "trade_winner", "0.1")
-	, ticker_strand_(task_pool())
+	, tick_strand_(task_pool())
     , index_tick_strand_(task_pool())
 	, stock_ticker_(nullptr)
 	, index_ticker_(std::make_shared<IndexTicker>(this->local_logger())) 
@@ -189,7 +193,7 @@ bool WinnerApp::Init()
 			if( !this->ticker_enable_flag_ )
 				continue;
 
-			ticker_strand_.PostTask([this]()
+			tick_strand_.PostTask([this]()
 			{
 				this->stock_ticker_->Procedure();
 				this->stock_ticker_life_count_ = 0;
@@ -390,7 +394,7 @@ std::shared_ptr<StrategyTask> WinnerApp::FindStrategyTask(int task_id)
 	return nullptr;
 }
 
-std::unordered_map<std::string, T_PositionData> WinnerApp::QueryPosition()
+T_CodeMapPosition WinnerApp::QueryPosition()
 { 
 	auto result = std::make_shared<Buffer>(5*1024);
 
@@ -400,7 +404,7 @@ std::unordered_map<std::string, T_PositionData> WinnerApp::QueryPosition()
 	if( strlen(error) != 0 )
 	{ 
 		qDebug() << "query  fail! " << "\n";
-		return std::unordered_map<std::string, T_PositionData>();
+		return T_CodeMapPosition();
 	}
 	qDebug() << QString::fromLocal8Bit( result->data() ) << "\n";
 #endif
@@ -605,6 +609,15 @@ T_StockPriceInfo * WinnerApp::GetStockPriceInfo(const std::string& code, bool is
     }
 }
 
+void WinnerApp::SlotStopAllTasks(bool)
+{
+    StopAllStockTasks();
+	StopAllIndexRelTypeTasks(TindexTaskType::ALERT); 
+    StopAllIndexRelTypeTasks(TindexTaskType::CLEAR); 
+    StopAllIndexRelTypeTasks(TindexTaskType::RELSTOCK); 
+
+}
+
 void WinnerApp::DoStrategyTasksTimeout()
 {
     static auto is_in_task_time = [](const QTime &current, const QTime &start, const QTime &end) ->bool
@@ -633,7 +646,7 @@ void WinnerApp::DoStrategyTasksTimeout()
 			        });
                 }else
                 {
-                    this->ticker_strand_.PostTask([entry, this]()
+                    this->tick_strand_.PostTask([entry, this]()
 			        {
 				        this->stock_ticker_->Register(entry);
 			        });
@@ -704,22 +717,6 @@ void WinnerApp::DoShowLongUi(std::string* str, bool flash_taskbar)
         winner_win_.TriggerFlashWinTimer(true);
 }
 
-void WinnerApp::SlotStopAllTasks(bool)
-{
-	ticker_strand().PostTask([this]()
-	{
-		this->stock_ticker().ClearAllTask(); 
-
-		std::for_each( std::begin(strategy_tasks_), std::end(strategy_tasks_), [this](std::shared_ptr<StrategyTask> entry)
-		{
-			entry->SetOriginalState(TaskCurrentState::STOP);
-			db_moudle().UpdateTaskInfo(entry->task_info());
-			this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
-		});
-	}); 
-
-}
-
 void WinnerApp::DoNormalTimer()
 { 
 	ticker_enable_flag_ = IsNowTradeTime();
@@ -779,6 +776,103 @@ void WinnerApp::AppendLog2Ui(const char *fmt, ...)
 		, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, szContent ); 
 
 	emit SigAppendLog(p_buf); //will invoke SlotAppendLog
+}
+
+bool WinnerApp::SellAllPosition()
+{
+      T_CodeMapPosition stocks_pos = QueryPosition();
+      T_CodeMapPosition *p_stocks_pos = &stocks_pos;
+      if( p_stocks_pos->size() < 1)
+      {
+          p_stocks_pos = &stocks_position_;
+      }
+
+      std::for_each( std::begin(*p_stocks_pos), std::end(*p_stocks_pos), [&, this](T_CodeMapPosition::reference entry)
+      {
+        if( entry.second.avaliable <= 0 )
+              return;
+#if 0
+        this->trade_agent().SendOrder(this->trade_client_id()
+                , (int)TypeOrderCategory::SELL, 0
+                , const_cast<T_AccountData *>(this->trade_agent().account_data(GetStockMarketType(entry.first)))->shared_holder_code, const_cast<char*>(entry.first.c_str())
+                , price, qty
+                , result, error_info); 
+
+ 
+                // judge result 
+                if( strlen(error_info) > 0 )
+                {
+                    auto ret_str = new std::string(utility::FormatStr("error %d 破位卖出 %s %.2f %d fail:%s"
+                        , para_.id, para_.stock.c_str(), price, qty, error_info));
+                    this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
+                    this->app_->AppendLog2Ui(ret_str->c_str());
+                    this->app_->EmitSigShowUi(ret_str, true);
+                  
+                }else
+                {
+                    this->app_->SubPosition(para_.stock, qty);
+                    auto str = new std::string(utility::FormatStr("执行任务:%d 破位卖出 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, qty));
+                    this->app_->EmitSigShowUi(str, true);
+                }
+#endif
+      });
+
+    // get quotes --------------------------
+    Buffer Result(cst_result_len);
+    Buffer ErrInfo(cst_error_len);
+
+    char* stock_codes[128];
+    memset(stock_codes, 0, sizeof(char*)*cst_max_stock_code_count);
+      
+    byte markets[cst_max_stock_code_count];
+
+    short stock_count = 0;
+     
+    auto  cur_time = QTime::currentTime();
+    //--------------------------- 
+   
+    if( !stock_ticker_->GetQuotes(stock_codes, stock_count, Result) )
+        return;
+
+    return true;
+}
+
+void WinnerApp::StopAllStockTasks()
+{
+    ticker_strand().PostTask([this]()
+	{
+		this->stock_ticker().ClearAllTask(); 
+
+		std::for_each( std::begin(strategy_tasks_), std::end(strategy_tasks_), [this](std::shared_ptr<StrategyTask> entry)
+		{
+            if( entry->task_info().type != TypeTask::INDEX_RISKMAN )
+            {
+			    entry->SetOriginalState(TaskCurrentState::STOP);
+			    db_moudle().UpdateTaskInfo(entry->task_info());
+			    this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+            } 
+		});
+	}); 
+}
+
+void WinnerApp::StopAllIndexRelTypeTasks(TindexTaskType type_task)
+{
+    ticker_strand().PostTask([this, &type_task]()
+	{
+        this->index_ticker().ClearAllTask(); 
+
+		std::for_each( std::begin(strategy_tasks_), std::end(strategy_tasks_), [this, &type_task](std::shared_ptr<StrategyTask> entry)
+		{
+            if( entry->task_info().type == TypeTask::INDEX_RISKMAN && entry->task_info().index_rel_task.rel_type == type_task )
+            {
+                //entry->task_info().index_rel_task.rel_type == TindexTaskType::RELSTOCK;
+
+			    entry->SetOriginalState(TaskCurrentState::STOP);
+			    db_moudle().UpdateTaskInfo(entry->task_info());
+			    this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+            } 
+		});
+	}); 
 }
 
 bool SetCurrentEnvPath()  

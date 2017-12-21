@@ -10,20 +10,7 @@
 #include "stock_ticker.h"
 #include "strategy_task.h"
 #include "index_task.h"
-
-const QString cst_sh_index = "000001";
-const char cst_sh_index_name[]  = "上证指数";
-
-const QString cst_sz_compre_index = "399001";
-const char cst_sz_compre_index_name[]  = "深圳成指";
-
-const QString cst_entrepren_plate_index = "399006";
-const char cst_entrepren_plate_index_name[]  = "创业板指数";
-
-const QString cst_entreplate_compre_index = "399102"; //创业板综合
-const char cst_entreplate_compre_index_name[]  = "创业板综指";
-
-
+  
 void WinnerWin::InitIndexTradeWin()
 {
 	 // reset some widget ------------
@@ -45,7 +32,7 @@ void WinnerWin::InitIndexTradeWin()
 	auto obj_name = ui.spinBox_indtrd_quantity->objectName();
     const QRect geome_val = ui.spinBox_indtrd_quantity->geometry();
     delete ui.spinBox_indtrd_quantity;
-    ui.spinBox_indtrd_quantity = new MySpinBox(ui.tab_eq_section_trd);
+    ui.spinBox_indtrd_quantity = new MySpinBox(ui.grp_relstock_trade);
     ui.spinBox_indtrd_quantity->setSingleStep(100);
     ui.spinBox_indtrd_quantity->setObjectName(obj_name);
     ui.spinBox_indtrd_quantity->setGeometry(geome_val);
@@ -76,15 +63,6 @@ void WinnerWin::InitIndexTradeWin()
     ui.indtrd_timeEdit_end->setTime(QTime(15, 00, 0));
 
 	ret = connect(ui.pbtn_add_indtrd_task, SIGNAL(clicked()), this, SLOT(DoAddIndexTradeTask()));
-}
-
-QString WinnerWin::IndexCode2IndexName(const QString& code)
-{
-	if( code == cst_sh_index ) return QString::fromLocal8Bit(cst_sh_index_name);
-	else if( code == cst_sz_compre_index ) return QString::fromLocal8Bit(cst_sz_compre_index_name);
-	else if( code == cst_entrepren_plate_index ) return QString::fromLocal8Bit(cst_entrepren_plate_index_name);
-	else if( code == cst_entreplate_compre_index ) return QString::fromLocal8Bit(cst_entreplate_compre_index_name);
-	else return "";
 }
 
 void WinnerWin::DoAddIndexTradeTask()

@@ -30,6 +30,19 @@ std::vector<std::string> split(const std::string& line, const std::string& seper
 std::string&   replace_all(std::string&   str, const   std::string&   old_value, const   std::string&   new_value);
 std::string&   replace_all_distinct(std::string&   str, const   std::string&   old_value, const  std::string&   new_value);
 #endif
+
+const QString cst_sh_index = "000001";
+const char cst_sh_index_name[]  = "上证指数";
+
+const QString cst_sz_compre_index = "399001";
+const char cst_sz_compre_index_name[]  = "深圳成指";
+
+const QString cst_entrepren_plate_index = "399006";
+const char cst_entrepren_plate_index_name[]  = "创业板指数";
+
+const QString cst_entreplate_compre_index = "399102"; //创业板综合
+const char cst_entreplate_compre_index_name[]  = "创业板综指";
+
 enum class TypeMarket : char
 {
     SZ = 0,
@@ -412,6 +425,8 @@ struct T_Capital
 //    unsigned int position;
 //};
 
+TypeMarket GetStockMarketType(const std::string &stock_code);
+
 QString ToQString(TypeTask val);
 QString ToQString(TypeQuoteLevel val);
 QString ToQString(TaskCurrentState val);
@@ -435,6 +450,8 @@ std::string TagOfOrderLog();
 
 std::tuple<int, std::string> CurrentDateTime();
 bool IsNowTradeTime();
+
+QString IndexCode2IndexName(const QString& code);
 
 #define USE_TRADE_FLAG
 

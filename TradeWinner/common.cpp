@@ -8,6 +8,11 @@
 #include <TLib/core/tsystem_time.h>
 #include <TLib/core/tsystem_utility_functions.h>
 
+TypeMarket GetStockMarketType(const std::string &stock_code)
+{
+    return (stock_code.c_str()[0] == '6' ? TypeMarket::SH : TypeMarket::SZ);
+}
+
 QString ToQString(TypeTask val)
 {
     switch(val)
@@ -250,4 +255,13 @@ bool IsNowTradeTime()
         return true;
     else 
         return false;
+}
+
+QString IndexCode2IndexName(const QString& code)
+{
+	if( code == cst_sh_index ) return QString::fromLocal8Bit(cst_sh_index_name);
+	else if( code == cst_sz_compre_index ) return QString::fromLocal8Bit(cst_sz_compre_index_name);
+	else if( code == cst_entrepren_plate_index ) return QString::fromLocal8Bit(cst_entrepren_plate_index_name);
+	else if( code == cst_entreplate_compre_index ) return QString::fromLocal8Bit(cst_entreplate_compre_index_name);
+	else return "";
 }

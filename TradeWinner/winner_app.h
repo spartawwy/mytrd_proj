@@ -23,6 +23,8 @@
 
 using namespace TSystem;
  
+typedef std::unordered_map<std::string, T_PositionData> T_CodeMapPosition;
+
 class StockTicker;
 class IndexTicker;
 class StrategyTask; 
@@ -50,7 +52,7 @@ public:
 
     void Stop();
 
-    TaskStrand& ticker_strand() { return ticker_strand_;} 
+    TaskStrand& ticker_strand() { return tick_strand_;} 
     TaskStrand& trade_strand() { return trade_strand_; }
 
     TradeAgent& trade_agent() { return trade_agent_; }
@@ -94,7 +96,7 @@ public:
     T_PositionData* QueryPosition(const std::string& code);
     T_Capital QueryCapital();
     //std::unordered_map<std::string, int>& stocks_position() { return stocks_position_; }
-    std::unordered_map<std::string, T_PositionData> QueryPosition();
+    T_CodeMapPosition QueryPosition();
     int QueryPosAvaliable_LazyMode(const std::string& code);
     T_PositionData* QueryPosition_LazyMode(const std::string& code);
 
@@ -102,9 +104,10 @@ public:
     void SubPosition(const std::string& code, int pos);
 
 	T_StockPriceInfo * GetStockPriceInfo(const std::string& code, bool is_lazy=true);
-
-
+     
     void AppendLog2Ui(const char *fmt, ...);
+ 
+    bool SellAllPosition();   
 
 signals:
 
@@ -116,6 +119,10 @@ signals:
     void SigShowUi(std::string*, bool);
     void SigShowLongUi(std::string*, bool);
 
+public slots:
+
+    void SlotStopAllTasks(bool);    
+
 private slots:
 
     void DoStrategyTasksTimeout();
@@ -123,13 +130,14 @@ private slots:
     //void DoShowUi(std::shared_ptr<std::string>);
     void DoShowUi(std::string*, bool flash_taskbar = false);
     void DoShowLongUi(std::string*, bool flash_taskbar = false);
-
-    void SlotStopAllTasks(bool);
-     
+      
 private:
 	 
+    void StopAllStockTasks(); 
+    void StopAllIndexRelTypeTasks(TindexTaskType type); 
+
     //QApplication  *qt_app_;
-    TaskStrand  ticker_strand_;
+    TaskStrand  tick_strand_;
     TaskStrand  index_tick_strand_;
    
     TaskStrand  trade_strand_;
@@ -172,7 +180,7 @@ private:
     std::shared_ptr<QTimer>  strategy_tasks_timer_;
     std::shared_ptr<QTimer>  normal_timer_;
 
-    std::unordered_map<std::string, T_PositionData> stocks_position_;
+    T_CodeMapPosition stocks_position_;
     std::mutex  stocks_position_mutex_;
 	  
 	std::unordered_map<std::string, T_StockPriceInfo> stocks_price_info_;
@@ -180,5 +188,7 @@ private:
     T_UserAccountInfo *p_user_account_info_;
     T_BrokerInfo *p_user_broker_info_;
       
+
+    friend class IndexTask;
 };
 #endif

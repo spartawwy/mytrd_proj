@@ -135,8 +135,7 @@ private:
 
 	// index trade task related 
 	void InitIndexTradeWin();
-	QString IndexCode2IndexName(const QString& code);
-
+	
     Ui::TradeWinnerClass ui;
     WinnerApp *app_;
     QMenu *tbv_tasks_popMenu_;

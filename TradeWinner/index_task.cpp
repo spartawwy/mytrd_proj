@@ -37,12 +37,13 @@ void IndexTask::HandleQuoteData()
                 app_->trade_strand().PostTask([iter, time_span, this]()
                 {
                     std::string *str = nullptr;
-                    std::string str_header = utility::FormatStr("任务:%d %s %s %.2f "
-                            , para_.id, para_.stock.c_str(), (para_.index_rel_task.is_down_trigger ? "下穿" : "上穿"), this->para_.alert_price);
+                    std::string str_header = utility::FormatStr("任务:%d %s(%s) %s %.2f ", para_.id, para_.stock.c_str()
+                        , IndexCode2IndexName(para_.stock.c_str()).toLocal8Bit().data(), (para_.index_rel_task.is_down_trigger ? "下穿" : "上穿"), this->para_.alert_price);
                     switch( para_.index_rel_task.rel_type )
                     {
                     case TindexTaskType::ALERT:
                     { 
+                        str = new std::string(str_header);
                     }
                     break;
                     case TindexTaskType::RELSTOCK:
@@ -51,7 +52,11 @@ void IndexTask::HandleQuoteData()
                     }
                     break;
                     case TindexTaskType::CLEAR:
-                    {
+                    { 
+                        this->app()->StopAllStockTasks();
+                        this->app()->StopAllIndexRelTypeTasks(TindexTaskType::RELSTOCK); 
+                        this->app()->SellAllPosition();
+
                         str = new std::string(str_header + "清仓");
                     }
                     break;

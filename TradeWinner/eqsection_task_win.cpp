@@ -12,7 +12,7 @@
 void WinnerWin::InitEqSectionTaskWin()
 {
     // reset some widget ------------
-#if 1
+
      
     ui.dbspbox_eqsec_raise_percent->setDecimals(1);
     ui.dbspbox_eqsec_raise_percent->setMaximum(100);
@@ -21,7 +21,7 @@ void WinnerWin::InitEqSectionTaskWin()
 	ui.dbspbox_eqsec_fall_percent->setDecimals(1);
     ui.dbspbox_eqsec_fall_percent->setMaximum(100);
     ui.dbspbox_eqsec_fall_percent->setMinimum(0.1);
-
+#if 1
 	auto obj_name = ui.spinBox_eqsec_quantity->objectName();
     const QRect geome_val = ui.spinBox_eqsec_quantity->geometry();
     delete ui.spinBox_eqsec_quantity;
