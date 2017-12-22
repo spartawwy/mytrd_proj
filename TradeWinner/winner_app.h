@@ -28,7 +28,8 @@ typedef std::unordered_map<std::string, T_PositionData> T_CodeMapPosition;
 class StockTicker;
 class IndexTicker;
 class StrategyTask; 
- 
+class IndexTask;
+
 class WinnerApp : public QApplication, public TSystem::ServerClientAppBase
 {
     Q_OBJECT
@@ -53,6 +54,8 @@ public:
     void Stop();
 
     TaskStrand& ticker_strand() { return tick_strand_;} 
+    TaskStrand& index_tick_strand() { return index_tick_strand_; }
+
     TaskStrand& trade_strand() { return trade_strand_; }
 
     TradeAgent& trade_agent() { return trade_agent_; }
@@ -107,7 +110,7 @@ public:
      
     void AppendLog2Ui(const char *fmt, ...);
  
-    bool SellAllPosition();   
+    bool SellAllPosition(IndexTask * task);   
 
 signals:
 

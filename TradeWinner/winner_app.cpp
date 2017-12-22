@@ -22,6 +22,8 @@
 #include "broker_cfg_win.h"
 #include "message_win.h"
 
+#include "index_task.h"
+
 static bool SetCurrentEnvPath();
 
 //static void AjustTickFlag(bool & enable_flag);
@@ -29,7 +31,7 @@ static bool SetCurrentEnvPath();
 static const int cst_ticker_update_interval = 2000;  //ms :notice value have to be bigger than 1000
 static const int cst_normal_timer_interval = 2000;
 
-static const unsigned int cst_result_len = 1024 * 1024;
+//static const unsigned int cst_result_len = 1024 * 1024;
 
 WinnerApp::WinnerApp(int argc, char* argv[])
 	: QApplication(argc, argv)
@@ -350,14 +352,20 @@ std::shared_ptr<T_TaskInformation> WinnerApp::FindTaskInfo(int task_id)
 
 bool WinnerApp::DelTaskById(int task_id, TypeTask task_type)
 { 
-	ticker_strand().PostTask([task_id, task_type, this]()
+    if( task_type != TypeTask::INDEX_RISKMAN )
+    {
+	    ticker_strand().PostTask([task_id, this]()
+	    {
+          this->stock_ticker_->UnRegister(task_id);
+	    });
+    }else
 	{
-        if( task_type != TypeTask::INDEX_RISKMAN )
-		    this->stock_ticker_->UnRegister(task_id);
-        else
-		    this->index_ticker_->UnRegister(task_id);
-	});
-     
+        index_tick_strand().PostTask([task_id, this]()
+	    {
+          this->index_ticker_->UnRegister(task_id);
+	    }); 
+    }
+
 	{
 		ReadLock  locker(task_infos_mutex_);
 		auto iter = task_infos_.find(task_id);
@@ -778,62 +786,100 @@ void WinnerApp::AppendLog2Ui(const char *fmt, ...)
 	emit SigAppendLog(p_buf); //will invoke SlotAppendLog
 }
 
-bool WinnerApp::SellAllPosition()
-{
-      T_CodeMapPosition stocks_pos = QueryPosition();
-      T_CodeMapPosition *p_stocks_pos = &stocks_pos;
-      if( p_stocks_pos->size() < 1)
-      {
-          p_stocks_pos = &stocks_position_;
-      }
-
-      std::for_each( std::begin(*p_stocks_pos), std::end(*p_stocks_pos), [&, this](T_CodeMapPosition::reference entry)
-      {
+bool WinnerApp::SellAllPosition(IndexTask * task)
+{ 
+    T_CodeMapPosition stocks_pos = QueryPosition();
+       
+    auto p_stocks_pos = std::make_shared<T_CodeMapPosition>(std::move(stocks_pos));
+    if( p_stocks_pos->size() < 1 && stocks_position_.size() > 0)
+    {
+        p_stocks_pos->clear();
+        {
+        std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
+        *p_stocks_pos = stocks_position_;
+        }
+    }
+          
+    char* stock_codes[cst_max_stock_code_count];
+    memset(stock_codes, 0, sizeof(char*)*cst_max_stock_code_count);
+     
+    //byte markets[cst_max_stock_code_count];
+    short stock_count = 0;
+    std::for_each( std::begin(*p_stocks_pos), std::end(*p_stocks_pos), [&, this](T_CodeMapPosition::reference entry)
+    {
         if( entry.second.avaliable <= 0 )
-              return;
-#if 0
-        this->trade_agent().SendOrder(this->trade_client_id()
-                , (int)TypeOrderCategory::SELL, 0
-                , const_cast<T_AccountData *>(this->trade_agent().account_data(GetStockMarketType(entry.first)))->shared_holder_code, const_cast<char*>(entry.first.c_str())
-                , price, qty
-                , result, error_info); 
+                return; 
+        stock_codes[stock_count++] = const_cast<char*>(entry.first.c_str());
+    });
 
- 
-                // judge result 
-                if( strlen(error_info) > 0 )
-                {
-                    auto ret_str = new std::string(utility::FormatStr("error %d 破位卖出 %s %.2f %d fail:%s"
-                        , para_.id, para_.stock.c_str(), price, qty, error_info));
-                    this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
-                    this->app_->AppendLog2Ui(ret_str->c_str());
-                    this->app_->EmitSigShowUi(ret_str, true);
-                  
-                }else
-                {
-                    this->app_->SubPosition(para_.stock, qty);
-                    auto str = new std::string(utility::FormatStr("执行任务:%d 破位卖出 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, qty));
-                    this->app_->EmitSigShowUi(str, true);
-                }
-#endif
-      });
+    if( stock_count < 1 )
+    {
+        std::string str = utility::FormatStr("warning: %d 清仓任务触发, 并无可卖出仓位!", task->task_id());
+        this->local_logger().LogLocal(TagOfOrderLog(), str);
+        this->AppendLog2Ui(str.c_str());
+        return false;
+    }
 
     // get quotes --------------------------
     Buffer Result(cst_result_len);
     Buffer ErrInfo(cst_error_len);
-
-    char* stock_codes[128];
-    memset(stock_codes, 0, sizeof(char*)*cst_max_stock_code_count);
-      
-    byte markets[cst_max_stock_code_count];
-
-    short stock_count = 0;
-     
-    auto  cur_time = QTime::currentTime();
-    //--------------------------- 
-   
+        
     if( !stock_ticker_->GetQuotes(stock_codes, stock_count, Result) )
-        return;
+    {
+        auto ret_str = new std::string(utility::FormatStr("error %d 清仓任务失败:获得报价失败!", task->task_id()));
+        this->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
+        this->AppendLog2Ui(ret_str->c_str());
+        this->EmitSigShowUi(ret_str, true);
+        return false;
+    }
+    // decode  
+    auto quotes_data_list = std::make_shared<std::list<T_codeQuoteDateTuple> >();
+    stock_ticker_->DecodeStkQuoteResult(Result, quotes_data_list.get(), nullptr);
+     
+    // send orders -----
+    trade_strand().PostTask([ quotes_data_list, p_stocks_pos, task, this]()
+    {
+        std::for_each( std::begin(*quotes_data_list), std::end(*quotes_data_list), [p_stocks_pos, task, this](T_codeQuoteDateTuple &entry)
+        {
+            auto iter = p_stocks_pos->find( std::get<0>(entry) );
+            if( iter == p_stocks_pos->end() || iter->second.avaliable == 0 )
+                return;
 
+            char result[1024] = {0};
+            char error_info[1024] = {0};
+            // get quote of buy
+            double price = task->GetQuoteTargetPrice(*(std::get<1>(entry)), false);
+            price -= 0.01;
+#ifdef USE_TRADE_FLAG
+            // send order 
+            this->trade_agent().SendOrder(this->trade_client_id()
+                    , (int)TypeOrderCategory::SELL, 0
+                    , const_cast<T_AccountData *>(this->trade_agent().account_data(GetStockMarketType( std::get<0>(entry) )))->shared_holder_code, const_cast<char*>(std::get<0>(entry).c_str())
+                    , price, iter->second.avaliable
+                    , result, error_info); 
+         
+            // judge result 
+            if( strlen(error_info) > 0 )
+            {
+                auto ret_str = new std::string(utility::FormatStr("error %d 清仓卖出 %s %.2f %d 失败:%s"
+                    , task->task_id(), std::get<0>(entry).c_str(), price, iter->second.avaliable, error_info));
+
+                this->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
+                this->AppendLog2Ui(ret_str->c_str());
+                this->EmitSigShowUi(ret_str, true);
+                  
+            }else
+            {
+                auto ret_str = new std::string(utility::FormatStr("%d 清仓卖出 %s %.2f %d 成功:%s"
+                    , task->task_id(), std::get<0>(entry).c_str(), price, iter->second.avaliable, error_info));
+                this->EmitSigShowUi(ret_str, true);
+            } 
+#endif  
+        }); // for each
+
+    }); // post task
+
+    
     return true;
 }
 

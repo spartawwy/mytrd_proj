@@ -25,10 +25,7 @@ void WinnerWin::InitIndexTradeWin()
     ui.dbspbox_index_val->setValue(1000.0); 
 
 	bool ret = QObject::connect(ui.le_indtrd_stock, SIGNAL(textChanged(QString)), this, SLOT(FlushFromStationListWidget(QString)));
-    m_bt_list_hint_ = new HintList(this, ui.le_indtrd_stock);
-    m_bt_list_hint_->hide();
-
-      
+     
 	auto obj_name = ui.spinBox_indtrd_quantity->objectName();
     const QRect geome_val = ui.spinBox_indtrd_quantity->geometry();
     delete ui.spinBox_indtrd_quantity;
@@ -38,20 +35,20 @@ void WinnerWin::InitIndexTradeWin()
     ui.spinBox_indtrd_quantity->setGeometry(geome_val);
     ui.spinBox_indtrd_quantity->setMaximum(1000000000);
 #endif
-
-	
-	ret = QObject::connect(ui.le_indtrd_stock, SIGNAL(textChanged(QString)), this, SLOT(FlushFromStationListWidget(QString)));
-    m_indtrd_list_hint_ = new HintList(this, ui.le_indtrd_stock);
-    m_indtrd_list_hint_->hide();
-    ret = QObject::connect(m_indtrd_list_hint_, SIGNAL(clicked(QModelIndex)), this, SLOT(OnClickedListWidget(QModelIndex)));
-    ret = QObject::connect(m_indtrd_list_hint_, SIGNAL(choiceStr(QString)), this, SLOT(ChangeFromStationText(QString)));
      
+    // radio button
 	ret = QObject::connect(ui.radiobtn_cross_up, SIGNAL(clicked (bool)), SLOT(DoTrdIndexRadioCrossUpChecked(bool)));
 	 
     ret = QObject::connect(ui.radiobtn_alert, SIGNAL(clicked (bool)), SLOT(DoTrdIndexAlertBtnBtnChecked(bool)));
     ret = QObject::connect(ui.radiobtn_reltrade, SIGNAL(clicked (bool)), SLOT(DoTrdIndexRelBtnBtnChecked(bool)));
     ret = QObject::connect(ui.radiobtn_clearall, SIGNAL(clicked (bool)), SLOT(DoTrdIndexClearBtnChecked(bool)));
 	 
+    ret = QObject::connect(ui.le_indtrd_stock, SIGNAL(textChanged(QString)), this, SLOT(FlushFromStationListWidget(QString)));
+    m_indtrd_list_hint_ = new HintList(this, ui.le_indtrd_stock);
+    m_indtrd_list_hint_->hide();
+    ret = QObject::connect(m_indtrd_list_hint_, SIGNAL(clicked(QModelIndex)), this, SLOT(OnClickedListWidget(QModelIndex)));
+    ret = QObject::connect(m_indtrd_list_hint_, SIGNAL(choiceStr(QString)), this, SLOT(ChangeFromStationText(QString)));
+     
 	ui.indtrd_trd_price_level->addItem(QString::fromLocal8Bit("即时价"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_CUR)));
     ui.indtrd_trd_price_level->addItem(QString::fromLocal8Bit("买一和卖一"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_1)));
     ui.indtrd_trd_price_level->addItem(QString::fromLocal8Bit("买二和卖二"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_2)));
@@ -152,6 +149,7 @@ void WinnerWin::DoTrdIndexAlertBtnBtnChecked(bool checked)
 	{
 		ui.grp_relstock_trade->setDisabled(true);
 		ui.le_indtrd_stock->clear();
+        m_indtrd_list_hint_->hide();
 		ui.spinBox_indtrd_quantity->clear();
 	}
 }
@@ -170,6 +168,7 @@ void WinnerWin::DoTrdIndexClearBtnChecked(bool checked)
 		ui.grp_relstock_trade->setDisabled(true);
 
 		ui.le_indtrd_stock->clear();
+        m_indtrd_list_hint_->hide();
 		ui.spinBox_indtrd_quantity->clear();
 	}
 }

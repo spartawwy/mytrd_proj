@@ -84,7 +84,9 @@ void BatchesBuyTask::HandleQuoteData()
         char error_info[1024] = {0};
 	            
         // to choice price to buy
-        const auto price = GetQuoteTargetPrice(*iter, false);
+        double price = GetQuoteTargetPrice(*iter, false);
+        if( IsPriceJumpUp(iter->cur_price, price) )
+            price = iter->cur_price;
 #ifdef USE_TRADE_FLAG
         assert(this->app_->trade_agent().account_data(market_type_));
 

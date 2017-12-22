@@ -68,23 +68,17 @@ void WinnerWin::InitBuyTaskWin()
     bool ret = QObject::connect(ui.le_buytask_stock, SIGNAL(textChanged(QString)), this, SLOT(FlushFromStationListWidget(QString)));
     m_bt_list_hint_ = new HintList(this, ui.le_buytask_stock);
     m_bt_list_hint_->hide();
-    ret = QObject::connect(m_bt_list_hint_, SIGNAL(clicked(QModelIndex)), this, SLOT(OnClickedListWidget(QModelIndex)));
-    ret = QObject::connect(m_bt_list_hint_, SIGNAL(choiceStr(QString)), this, SLOT(ChangeFromStationText(QString)));
+    ret = connect(m_bt_list_hint_, SIGNAL(clicked(QModelIndex)), this, SLOT(OnClickedListWidget(QModelIndex)));
+    ret = connect(m_bt_list_hint_, SIGNAL(choiceStr(QString)), this, SLOT(ChangeFromStationText(QString)));
+     
     ret = QObject::connect(ui.dbspbox_buytask_alert_percent, SIGNAL(valueChanged(double)), this, SLOT(DoBuyAlertPercentChanged(double)));
 
     DoBuyTypeChanged(cst_str_inflection_buy);
     ret = QObject::connect(ui.combox_buy_type, SIGNAL(currentTextChanged(const QString&)), SLOT(DoBuyTypeChanged(const QString&)));
-    
-#if 0  // todo:
-	ret = QObject::connect(ui.le_stock, SIGNAL(editingFinished()), this, SLOT(DoLeStockEditingFinished()));
-    ret = QObject::connect(ui.le_stock, SIGNAL(textChanged(const QString & )), this, SLOT(DoLeStockChanged(const QString &)));
-      
-#endif
+ 
     ret = QObject::connect(ui.pbtn_buytask_all_quantity, SIGNAL(clicked()), this, SLOT(DoQueryQtyCanBuy()));
-    ret = QObject::connect(ui.pbtn_add_buytask, SIGNAL(clicked()), this, SLOT(DoAddBuyTask()));
-    
-    //std::string ret_str = utility::FormatStr("任务:1 拐点买入 22 成功!");
-    //this->app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit(ret_str.c_str()));
+    ret = QObject::connect(ui.pbtn_add_buytask, SIGNAL(clicked()), this, SLOT(DoAddBuyTask())); 
+ 
 }
 
 

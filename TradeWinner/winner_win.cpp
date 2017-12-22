@@ -711,8 +711,15 @@ void WinnerWin::FlushFromStationListWidget(QString str)
     {
         int x,y, w,h;
         p_edit->geometry().getRect(&x, &y, &w, &h);
-    
-        p_list->setGeometry( x + 4, y + 90, w, h + 40);
+        if( ui.tabwid_holder->currentIndex() != cst_tab_index_stkindex_task )
+        {   // grp_relstock_trade
+            p_list->setGeometry( x + 4, y + 90, w, h + 40);
+        }else
+        {
+            int x_g, y_g, w_g, h_g;
+            ui.grp_relstock_trade->geometry().getRect(&x_g, &y_g, &w_g, &h_g);
+            p_list->setGeometry( x_g + x + 4, y_g + y + 90, w, h + 40);
+        }
         p_list->setCurrentRow(0);
         p_list->ShowUI();
     }

@@ -20,6 +20,12 @@ typedef std::unordered_map<unsigned int, std::shared_ptr<StrategyTask> > TTaskId
 // <stock code, task_id>
 typedef std::unordered_map<std::string, std::list<unsigned int> > TCodeMapTasks;
 
+static const unsigned int cst_result_len = 1024 * 1024;
+static const unsigned int cst_error_len = 1024;
+static const unsigned int cst_max_stock_code_count = 128;
+
+typedef std::tuple<std::string, std::shared_ptr<QuotesData> > T_codeQuoteDateTuple;
+
 class StockTicker : public Handler
 {
 public:
@@ -38,7 +44,7 @@ public:
 
     bool GetQuotes(char* stock_codes[], short count, Buffer &Result);
 
-    void DecodeStkQuoteResult(Buffer &Result, std::list<std::shared_ptr<QuotesData> > *ret_quotes_data=nullptr
+    void DecodeStkQuoteResult(Buffer &Result, std::list<T_codeQuoteDateTuple> *ret_quotes_data=nullptr
             , std::function<void(const std::list<unsigned int>& id_list, std::shared_ptr<QuotesData> &data)> tell_all_rel_task=nullptr);
 
     void TellAllRelTasks(const std::list<unsigned int>& id_list, std::shared_ptr<QuotesData> &data);

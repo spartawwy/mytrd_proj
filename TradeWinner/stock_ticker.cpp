@@ -21,10 +21,6 @@
 #include "strategy_task.h"
 #include "winner_app.h"
 
-static const unsigned int cst_result_len = 1024 * 1024;
-static const unsigned int cst_error_len = 1024;
-static const unsigned int cst_max_stock_code_count = 128;
-
  //获取api函数
 TdxHq_ConnectDelegate TdxHq_Connect = nullptr;
 TdxHq_DisconnectDelegate TdxHq_Disconnect = nullptr;
@@ -119,11 +115,11 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
     if ( !ret )
     {
         qDebug() << ErrInfo.data() << endl;
-        logger_.LogLocal(std::string("StockTicker::Procedure TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
+        logger_.LogLocal(std::string("StockTicker::GetQuotes TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
         if( !strstr(ErrInfo.data(), "请重新连接") )
             TdxHq_Disconnect();
 
-        logger_.LogLocal(utility::FormatStr("StockTicker::Procedure TdxHq_Connect %s : %d ", cst_hq_server, cst_hq_port) );
+        logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect %s : %d ", cst_hq_server, cst_hq_port) );
         Result.reset(); 
         ErrInfo.reset();
         try
@@ -131,29 +127,29 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
         ret = TdxHq_Connect(cst_hq_server, cst_hq_port, Result.data(), ErrInfo.data());
         if ( !ret )
         {
-            logger_.LogLocal(std::string("StockTicker::Procedure retry TdxHq_Connect fail:") + ErrInfo.data());
+            logger_.LogLocal(std::string("StockTicker::GetQuotes retry TdxHq_Connect fail:") + ErrInfo.data());
             return false;
         }
-        logger_.LogLocal(utility::FormatStr("StockTicker::Procedure TdxHq_Connect ok!"));
+        logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect ok!"));
         Result.reset(); 
         ErrInfo.reset();
         // debug 
         for( int i = 0; i < count; ++i )
-            logger_.LogLocal(utility::FormatStr("StockTicker::Procedure stock_codes[%d]:%s", i, stock_codes[i]));
+            logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes stock_codes[%d]:%s", i, stock_codes[i]));
         // end debug
         ret = TdxHq_GetSecurityQuotes(markets, stock_codes, count, Result.data(), ErrInfo.data());
         if ( !ret )
         {
-            logger_.LogLocal(std::string("StockTicker::Procedure retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
+            logger_.LogLocal(std::string("StockTicker::GetQuotes retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
             return false;
         }
         }catch(std::exception &e)
         {
-            logger_.LogLocal(utility::FormatStr("StockTicker::Procedure exception:%s", e.what()));
+            logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes exception:%s", e.what()));
             return false;
         }catch(...)
         {
-            logger_.LogLocal("StockTicker::Procedure exception");
+            logger_.LogLocal("StockTicker::GetQuotes exception");
             return false;
         }
          
@@ -161,7 +157,7 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
     return true;
 }
 
-void StockTicker::DecodeStkQuoteResult(Buffer &Result, std::list<std::shared_ptr<QuotesData> > * ret_quotes_data
+void StockTicker::DecodeStkQuoteResult(Buffer &Result, std::list<T_codeQuoteDateTuple> * ret_quotes_data
                                        , std::function<void (const std::list<unsigned int>& id_list, std::shared_ptr<QuotesData> &data)> tell_all_rel_task)
 {
     auto tp_now = std::chrono::system_clock::now();
@@ -205,8 +201,11 @@ void StockTicker::DecodeStkQuoteResult(Buffer &Result, std::list<std::shared_ptr
         {
             continue;
         }
+        
         if( tell_all_rel_task )
             tell_all_rel_task(task_ids_iter->second, quote_data);
+        if( ret_quotes_data )
+            ret_quotes_data->push_back(std::make_tuple(stock_code, std::move(quote_data)));
     }
 }
 
@@ -517,6 +516,7 @@ bool IndexTicker::Init()
     return true;
 }
 
+// run in index_tick_strand_ 
 void IndexTicker::Procedure()
 { 
 	static auto are_codes_in = [](char codes[max_index_count][16], const char *str)
@@ -538,7 +538,7 @@ void IndexTicker::Procedure()
        
     auto  cur_time = QTime::currentTime();
        
-    //---------------------------
+    //------------------find  task's stock code ,which state and time is fit---------
     int index_count = 0; 
     std::for_each( std::begin(registered_tasks_), std::end(registered_tasks_), [&](TTaskIdMapStrategyTask::reference entry)
     {
@@ -547,13 +547,12 @@ void IndexTicker::Procedure()
             && !are_codes_in(index_codes, entry.second->code_data()) )
         { 
             strcpy(index_codes[index_count], entry.second->code_data());
-            //markets[stock_count] = static_cast<byte>(entry.second->market_type());
-                 
             ++index_count;
         }
     });
 	if( index_count < 1 )
 		return;
+
 	T_StockPriceInfo price_info[max_index_count];
 	auto num = StkQuoteGetQuote_(index_codes, index_count, price_info);
 	if( num < 1 )

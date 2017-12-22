@@ -6,6 +6,7 @@ class QLineEdit;
 class HintList: public QListWidget
 {
     Q_OBJECT
+
 public:
     HintList(QWidget *parent, QLineEdit *le_stock);
     ~HintList();
@@ -14,14 +15,14 @@ public:
 
     virtual void keyPressEvent(QKeyEvent *event) override;
 
-private slots:
-
-    void checkSlots();
-
 signals:
 
     void choiceStr(QString);
 
+private slots:
+
+    void checkSlots();
+     
 private:
 
     QTimer  *myTimer;

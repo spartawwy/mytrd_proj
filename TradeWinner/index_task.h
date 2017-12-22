@@ -8,7 +8,7 @@ class IndexTask : public StrategyTask
 public:
 
     IndexTask(T_TaskInformation &task_info, WinnerApp *app);
-    ~IndexTask(){}
+    virtual ~IndexTask(){}
 
     virtual void HandleQuoteData() override;
 
