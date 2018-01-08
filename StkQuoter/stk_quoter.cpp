@@ -102,6 +102,18 @@ EXIT_PROC:
 //ps: use delete[] to release datas; out : count--can't be null
 extern "C" int STKQUOTER_IMEXPORT  StkHisData(char stocks[16], int start_date, int end_date, T_StockHisDataItem **datas)
 {
+	const unsigned int buf_size = 1024*10;
+	static auto do_move = [buf_size](char *target, char *src, unsigned int &position)
+	{
+		/*if( buf_size < 1024*10 )
+			position = position;*/
+		position = strlen(src);
+		auto old_len = strlen(target); 
+		memmove(target, src, position);
+		assert( buf_size >= position);
+		memset(target + position, 0, buf_size - position);
+	};
+
     int count = 0;
     CInternetSession session((LPCTSTR)"by_dreamcatcher"); //"建立会话"  
     CStdioFile* sessionfile = NULL;   
@@ -133,33 +145,28 @@ extern "C" int STKQUOTER_IMEXPORT  StkHisData(char stocks[16], int start_date, i
             <<"dwcontext:" << ex.m_dwContext << "\tdwErrorCode:" << ex.m_dwError << std::endl;  
         ex.Delete();  
     }
-
-    static auto do_move = [](char *target, char *src, unsigned int &position)
-    {
-        position = strlen(src);
-        memmove(target, src, position);
-        target[position] = '\0';
-    };
+	
 
     *datas = new T_StockHisDataItem[1024];
     T_StockHisDataItem * p_data_array = *datas;
-     
-    const unsigned int buf_size = 1024*10;
+      
+    
     char *p_buffer = new char[buf_size];
     memset(p_buffer, 0, buf_size);
 
     unsigned int getlen = 0;
     unsigned int pos = 0;
     bool is_head_line = true;
+#if 1
     do
     {
         getlen = sessionfile->Read(p_buffer + pos, 40);  
-        pos += getlen;
+        pos += getlen; 
 
         char *p_rem = strstr(p_buffer, "\r\n");
         if( !p_rem )
             continue;
-
+		OutputDebugString(p_buffer);
         *p_rem = '\0';
  
         p_rem += 2;
@@ -199,7 +206,14 @@ extern "C" int STKQUOTER_IMEXPORT  StkHisData(char stocks[16], int start_date, i
         do_move(p_buffer, p_rem, pos);
 
     }while (getlen > 0);
-
+#else
+	do
+	{
+		getlen = sessionfile->Read(p_buffer + pos, 40);  
+		pos += getlen; 
+	 }while (getlen > 0);
+	OutputDebugString(p_buffer);
+#endif
     //std::cout << p_buffer << std::endl;
     std::cout << p_buffer << std::endl;
       
