@@ -35,6 +35,7 @@
            //printf("hwnd: %d ", (int)hWnd); // 输出窗口信息    
            TCHAR buf[WINDOW_TEXT_LENGTH];    
            SendMessage(hWnd, WM_GETTEXT, WINDOW_TEXT_LENGTH, (LPARAM)buf);    
+		   printf("hwnd :%d %s\n", (int)hWnd, buf);
            if( strstr(buf, MAIN_PROCESS_WIN_TAG) )
            {
                 //wprintf(L"%s/n", buf);   
