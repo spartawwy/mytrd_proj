@@ -8,9 +8,13 @@
 
 #include <QDebug>
 
+#include "gloakm_capture_api.h"
+
 #define WINDOW_TEXT_LENGTH 256    
 
 #define MAIN_PROCESS_WIN_TAG "方正证券泉友通"
+
+char g_win_process_win_tag[256] = "方正证券泉友通";
 
 BOOL CALLBACK EnumChildWindowCallBack(HWND hWnd, LPARAM lParam)    
 {    
@@ -51,6 +55,12 @@ BOOL CALLBACK EnumWindowCallBack(HWND hWnd, LPARAM lParam)
 	return TRUE;    
 }    
 
+int CallBackFunc(BOOL is_buy, char *stock)
+{
+
+    return 0;
+}
+
 FlashingOrder::FlashingOrder(QWidget *parent)
 	: QWidget(parent)
 {
@@ -66,12 +76,26 @@ FlashingOrder::~FlashingOrder()
 
 bool FlashingOrder::Init()
 {
+   
+#if 1
 	normal_timer_.start(2000);
+#else
+   BOOL ret = InstallLaunchEv(CallBackFunc, g_win_process_win_tag);
+#endif
 	return true;
 }
 
 void FlashingOrder::DoNormalTimer()
 {
+#if 1
+     HWND wnd = GetForegroundWindow(); 
+    //HWND wnd1 = FindWindow(NULL, NULL);  // not ok
+    char buf[1024] = {0};
+    GetWindowText(wnd, buf, sizeof(buf)); // "方正证券泉友通专业版V6.58 - [组合图-中国平安]" 
+    qDebug() << "FlashingOrder::Init wnd: "<< QString::fromLocal8Bit(buf) << "\n";
+    //GetWindowText(wnd1, buf, sizeof(buf));
+    //qDebug() << "FlashingOrder::Init wnd1: "<< QString::fromLocal8Bit(buf) << "\n";
+#else
 	setlocale(LC_CTYPE, "chs");    
 
 	DWORD targetPid = 0;    // 进程id    
@@ -98,4 +122,5 @@ void FlashingOrder::DoNormalTimer()
 		qDebug() << "Find TdxW.exe process: "<< targetPid << "\n";
 		EnumWindows(EnumWindowCallBack, targetPid);   
 	}
+#endif
 }
