@@ -52,14 +52,14 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="flashingorder.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="flashingorder.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="flashingorder.qrc">
       <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="flashingorder.h">
+      <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

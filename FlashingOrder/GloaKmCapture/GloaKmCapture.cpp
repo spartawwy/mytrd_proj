@@ -48,34 +48,23 @@ struct T_KeysStatus
     bool is_right_ctr_down;
     DWORD pre_Key;
 };
-
-// (key, is_down)
-//typedef std::unordered_map<DWORD, bool> T_Key_Down_Map;
-//T_Key_Down_Map g_downed_keys; 
-
+ 
 T_KeysStatus g_key_status = {0};
 ReCallFunc   p_recall_func = nullptr;
 char         g_win_tag[1024] = {0};
 
 HHOOK        Hook;
 
-LRESULT CALLBACK LauncherHook(int nCode,WPARAM wParam,LPARAM lParam);
-//void SaveLog(char* c);
+LRESULT CALLBACK LauncherHook(int nCode, WPARAM wParam, LPARAM lParam);
+
+CGloaKmCaptureApp theApp;
 
 CGloaKmCaptureApp::CGloaKmCaptureApp()
 {
 	// TODO: 在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
 }
-
-
-// 唯一的一个 CGloaKmCaptureApp 对象
-
-CGloaKmCaptureApp theApp;
-
-
-// CGloaKmCaptureApp 初始化
-
+ 
 BOOL CGloaKmCaptureApp::InitInstance()
 {
 	CWinApp::InitInstance();
@@ -165,4 +154,9 @@ EXIT_PROC:
 #else
 	return CallNextHookEx(Hook,nCode,wParam,lParam);
 #endif
+}
+
+extern "C" DllExport void WINAPI UnInstallLaunchEv()
+{
+	// todo:
 }

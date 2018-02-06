@@ -1,4 +1,3 @@
-// GloaKmCapture.h : GloaKmCapture DLL 的主头文件
 #ifndef GLOAKM_CAPTURE_SFSD34_H_
 #define GLOAKM_CAPTURE_SFSD34_H_
 
@@ -16,10 +15,9 @@ class CGloaKmCaptureApp : public CWinApp
 {
 public:
 	CGloaKmCaptureApp();
-
-// 重写
+	 
 public:
-	virtual BOOL InitInstance();
+	virtual BOOL InitInstance() override;
 
 	DECLARE_MESSAGE_MAP()
 };

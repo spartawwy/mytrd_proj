@@ -12,7 +12,9 @@ int main(int argc, char *argv[])
 	QTextCodec::setCodecForLocale(QTextCodec::codecForName("GBK"));
 
 	QApplication a(argc, argv);
+	// todo: use argv to get account no and password
 	FlashingOrder flashing_order;
+
 	flashing_order.Init();
 	flashing_order.show();
 
