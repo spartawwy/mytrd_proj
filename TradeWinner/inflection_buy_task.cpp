@@ -61,7 +61,7 @@ void InflectionBuyTask::HandleQuoteData()
         time_point_open_warning_ = time_point_bottom_price_ = iter->time_stamp; // open warning
         bottom_price_ = iter->cur_price; 
         app_->local_logger().LogLocal(TagOfOrderLog(), 
-			utility::FormatStr("%d InflectionBuyTask::HandleQuoteData first open bottom %.2f", para_.id, bottom_price_));
+			utility::FormatStr("%d InflectionBuyTask::HandleQuoteData first open. cur:%.2f alert:%.2f bottom %.2f", para_.id, iter->cur_price, para_.alert_price, bottom_price_));
         
     }
 

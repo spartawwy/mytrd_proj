@@ -50,6 +50,9 @@
     <ClCompile Include="GeneratedFiles\qrc_flashingorder.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="dbmoudle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="flashingorder.ui">
@@ -65,6 +68,9 @@
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_flashingorder.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dbmoudle.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

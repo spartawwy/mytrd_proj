@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
  
 	QCoreApplication::addLibraryPath(".");
 	QCoreApplication::addLibraryPath("./plugins");
-	QTextCodec::setCodecForLocale(QTextCodec::codecForName("GBK"));
+	QTextCodec::setCodecForLocale(QTextCodec::codecForName("GBK")); 
 
 	QApplication a(argc, argv);
 	// todo: use argv to get account no and password

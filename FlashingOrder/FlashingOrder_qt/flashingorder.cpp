@@ -10,15 +10,20 @@
 #include <locale.h>     
 #include <stdio.h>
 
+#include <Qdir.h>
+#include <QSettings>
 #include <QDebug>
 
 #include "gloakm_capture_api.h"
 
+#include "dbmoudle.h"
+
+
 #define WINDOW_TEXT_LENGTH 256    
 
-#define MAIN_PROCESS_WIN_TAG "方正证券泉友通"
+#define MAIN_PROCESS_WIN_TAG "通达信"
 
-char g_win_process_win_tag[256] = "方正证券泉友通";
+char g_win_process_win_tag[256] = MAIN_PROCESS_WIN_TAG; // "方正证券泉友通";  
 
 bool g_is_accept_order_ = false;
 
@@ -27,8 +32,7 @@ BOOL CALLBACK EnumChildWindowCallBack(HWND hWnd, LPARAM lParam)
 	DWORD dwPid = 0;    
 	GetWindowThreadProcessId(hWnd, &dwPid); // 获得找到窗口所属的进程    
 	if(dwPid == lParam) // 判断是否是目标进程的窗口    
-	{    
-		//printf("%d    ", hWnd);     
+	{         
 		TCHAR buf[WINDOW_TEXT_LENGTH];    
 		SendMessage(hWnd, WM_GETTEXT, WINDOW_TEXT_LENGTH, (LPARAM)buf);    
 		//wprintf(L"%s/n", buf);    
@@ -76,7 +80,14 @@ FlashingOrder::FlashingOrder(QWidget *parent)
 	: QWidget(parent) 
 {
 	ui.setupUi(this);
-	target_win_title_tag_ = MAIN_PROCESS_WIN_TAG;
+    //------------  
+    //auto str0 = QDir::currentPath();
+    QString iniFilePath = "flashingorder.ini";  
+    QSettings settings(iniFilePath, QSettings::IniFormat);  
+    QString app_title = QString::fromLocal8Bit(settings.value("config/broker_app_title").toString().toLatin1().constData());
+    qDebug() << app_title << "\n";
+    target_win_title_tag_ = app_title.toLocal8Bit();
+
 	connect(&normal_timer_, SIGNAL(timeout()), this, SLOT(DoNormalTimer()));
 }
 
@@ -87,6 +98,9 @@ FlashingOrder::~FlashingOrder()
 
 bool FlashingOrder::Init()
 { 
+    DBMoudle  dbobj;
+    dbobj.Init();
+
 #if 1
 	normal_timer_.start(2000);
 
