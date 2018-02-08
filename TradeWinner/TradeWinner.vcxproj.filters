@@ -228,12 +228,6 @@
     <ClInclude Include="GeneratedFiles\ui_trade_winner.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="TdxTradeApi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TdxHqApi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="stock_ticker.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -308,6 +302,12 @@
     </ClInclude>
     <ClInclude Include="index_task.h">
       <Filter>task</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\TdxHqApi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\TdxTradeApi.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

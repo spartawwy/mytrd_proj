@@ -5,10 +5,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;cxx;c;def</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h</Extensions>
-    </Filter>
     <Filter Include="Form Files">
       <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
       <Extensions>ui</Extensions>
@@ -33,6 +29,13 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+    </Filter>
+    <Filter Include="moudle">
+      <UniqueIdentifier>{97b0abb0-e343-40a3-9c29-b5544ecf69d6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -50,8 +53,17 @@
     <ClCompile Include="GeneratedFiles\qrc_flashingorder.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="dbmoudle.cpp">
+    <ClCompile Include="fo_common.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dbmoudle.cpp">
+      <Filter>moudle</Filter>
+    </ClCompile>
+    <ClCompile Include="trade_proxy.cpp">
+      <Filter>moudle</Filter>
+    </ClCompile>
+    <ClCompile Include="ticker.cpp">
+      <Filter>moudle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -69,8 +81,23 @@
     <ClInclude Include="GeneratedFiles\ui_flashingorder.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbmoudle.h">
+    <ClInclude Include="..\..\include\TdxHqApi.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\TdxTradeApi.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="fo_common.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dbmoudle.h">
+      <Filter>moudle</Filter>
+    </ClInclude>
+    <ClInclude Include="trade_proxy.h">
+      <Filter>moudle</Filter>
+    </ClInclude>
+    <ClInclude Include="ticker.h">
+      <Filter>moudle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

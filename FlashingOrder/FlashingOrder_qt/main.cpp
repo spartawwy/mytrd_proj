@@ -13,9 +13,9 @@ int main(int argc, char *argv[])
 
 	QApplication a(argc, argv);
 	// todo: use argv to get account no and password
-	FlashingOrder flashing_order;
-
-	flashing_order.Init();
+	FlashingOrder &flashing_order = AppInstance();
+	
+	flashing_order.Init(argc, argv);
 	flashing_order.show();
 
 	return a.exec();

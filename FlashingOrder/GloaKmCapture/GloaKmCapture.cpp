@@ -87,6 +87,11 @@ extern "C"  DllExport BOOL WINAPI InstallLaunchEv(ReCallFunc func, char* tag_str
 
 LRESULT CALLBACK LauncherHook(int nCode, WPARAM wParam, LPARAM lParam)
 {
+	// todo: to use GetKeyboardState
+	/* http://blog.csdn.net/linrulei11/article/details/7612197
+	关于GetAsyncKeyState与GetKeyState区别： 
+	GetAsyncKeyState上面已经讲差不多了，关于GetAsyncKeyState与GetKeyState二者最大区别:GetAsyncKeyState在按键不按的情况下为0，而GetKeyState在按键不按的情况下开始为0，当一次‘按下抬起’后变为1，依次循环。
+	*/
 #define  PRE_CALL
 #ifdef PRE_CALL
 	LRESULT Result = CallNextHookEx(Hook, nCode, wParam, lParam);
@@ -101,7 +106,7 @@ LRESULT CALLBACK LauncherHook(int nCode, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_KEYDOWN:
         {
-            if( g_key_status.pre_Key == pSturct->vkCode )
+            if( g_key_status.pre_Key == pSturct->vkCode ) //consider long time press
                 goto EXIT_PROC;
             g_key_status.pre_Key = pSturct->vkCode;
             ++g_key_status.downed_keys_count;
@@ -128,11 +133,13 @@ LRESULT CALLBACK LauncherHook(int nCode, WPARAM wParam, LPARAM lParam)
             { 
                 if( g_key_status.downed_keys_count == 1 && (g_key_status.is_left_ctr_down || g_key_status.is_right_ctr_down) )
                 {
-                    // TODO: invoke 
+					g_key_status.downed_keys_count = 0;
+                   
                     if( VK_OEM_PLUS == pSturct->vkCode ) OutputDebugString("TO BUY\n");
                     if( VK_OEM_MINUS == pSturct->vkCode ) OutputDebugString("TO SELL\n");
                     if( p_recall_func )
                         p_recall_func(VK_OEM_PLUS == pSturct->vkCode, "600001");
+					
                 }
             }else if( VK_LCONTROL == pSturct->vkCode )
             { 

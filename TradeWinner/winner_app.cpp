@@ -853,10 +853,14 @@ bool WinnerApp::SellAllPosition(IndexTask * task)
 #ifdef USE_TRADE_FLAG
             // send order 
             this->trade_agent().SendOrder(this->trade_client_id()
-                    , (int)TypeOrderCategory::SELL, 0
-                    , const_cast<T_AccountData *>(this->trade_agent().account_data(GetStockMarketType( std::get<0>(entry) )))->shared_holder_code, const_cast<char*>(std::get<0>(entry).c_str())
-                    , price, iter->second.avaliable
-                    , result, error_info); 
+                    , (int)TypeOrderCategory::SELL
+					, 0
+                    , const_cast<T_AccountData *>(this->trade_agent().account_data(GetStockMarketType( std::get<0>(entry) )))->shared_holder_code
+					, const_cast<char*>(std::get<0>(entry).c_str())
+                    , price
+					, iter->second.avaliable
+                    , result
+					, error_info); 
          
             // judge result 
             if( strlen(error_info) > 0 )

@@ -5,38 +5,7 @@
 #include "TdxTradeApi.h"
 
 #include "common.h"
-class WinnerApp;
-//
-//class TradeAgent
-//{ 
-//public:
-//    TradeAgent();
-//    ~TradeAgent();
-//
-//    static void Init();
-//
-//    static OpenTdxDelegate OpenTdx;  
-//	static CloseTdxDelegate CloseTdx;
-//	static LogonDelegate Logon;
-//	static LogoffDelegate Logoff;
-//	static QueryDataDelegate QueryData; 
-//	static SendOrderDelegate SendOrder; 
-//	static CancelOrderDelegate CancelOrder;
-//	static GetQuoteDelegate GetQuote; 
-//	static RepayDelegate Repay; 
-//	 
-//	 //以下是普通批量版功能函数
-//	static QueryDatasDelegate QueryDatas;
-//	static QueryHistoryDataDelegate QueryHistoryData;
-//	static SendOrdersDelegate SendOrders;
-//	static CancelOrdersDelegate CancelOrders;
-//	static GetQuotesDelegate GetQuotes; 
-//
-//    void Check();
-//
-//    HINSTANCE TdxApiHMODULE;
-//
-//};
+class WinnerApp; 
 
 class TradeAgent
 {
