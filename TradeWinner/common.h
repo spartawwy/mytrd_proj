@@ -23,6 +23,7 @@
 #define EQSEC_MAX_STOP_PRICE 999.00
 #define EQSEC_MIN_CLEAR_PRICE 0.0
 
+#define APP_CODE_TEXT "GBK"
 #if 0
 std::vector<std::string> split(const std::string& line, const std::string& seperator = " ", 
 		const std::string& quotation = "\"");

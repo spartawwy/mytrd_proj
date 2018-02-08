@@ -89,7 +89,7 @@ public:
 #endif
     QCoreApplication::addLibraryPath(".");
 	QCoreApplication::addLibraryPath("./plugins");
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("GBK"));
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName(APP_CODE_TEXT));
      
     //-------------test
     

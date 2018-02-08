@@ -17,7 +17,7 @@ DBMoudle::DBMoudle()
     else
     {*/
         *p_database_ = QSqlDatabase::addDatabase("QSQLITE");
-        p_database_->setDatabaseName("pzwj.kd.local");
+        p_database_->setDatabaseName("pzwj.kd");
         //database.setUserName("XingYeZhiXia");
         //database.setPassword("123456");
     //}

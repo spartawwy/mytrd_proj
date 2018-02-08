@@ -3,6 +3,7 @@
 #include <qdebug.h>
 #include <qmessagebox.h> 
 #include <QtGui/QStandardItemModel>
+#include <qtextcodec.h>
 
 #include <TLib/core/tsystem_utility_functions.h>
 #include <TLib/core/tsystem_time.h>
@@ -702,9 +703,12 @@ void WinnerWin::FlushFromStationListWidget(QString str)
 
     std::vector<T_StockCodeName> stockCodeNames;
     app_->db_moudle().GetStockCode(str.toLocal8Bit().data(), stockCodeNames);
+     
     std::for_each( std::begin(stockCodeNames), std::end(stockCodeNames), [p_list, this](T_StockCodeName& entry)
     { 
-        QString tmp_str = QString("%1/%2").arg(entry.code.c_str()).arg(QString::fromLocal8Bit(entry.name.c_str()));
+        auto str = QTextCodec::codecForName( "utf-8" )->toUnicode(entry.name.c_str());
+        
+        QString tmp_str = QString("%1/%2").arg(entry.code.c_str()).arg(str);
         p_list->addItem(tmp_str);
     });
     if( p_list->count() > 0 )
