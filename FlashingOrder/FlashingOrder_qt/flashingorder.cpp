@@ -4,7 +4,7 @@
 
 #include "flashingorder.h"
  
-#include <windows.h>    
+#include <qt_windows.h>    
 #include <TlHelp32.h>    
    
 #include <locale.h>     
@@ -19,9 +19,8 @@
 
 #include "dbmoudle.h"
 #include "ticker.h"
-
+ 
 #define WINDOW_TEXT_LENGTH 256    
-
 #define MAIN_PROCESS_WIN_TAG "方正证券泉友通"  //"通达信"
 
 char g_win_process_win_tag[256] = MAIN_PROCESS_WIN_TAG; // "方正证券泉友通";  
@@ -67,27 +66,32 @@ BOOL CALLBACK EnumWindowCallBack(HWND hWnd, LPARAM lParam)
 			return FALSE;
 		}else
 			qDebug() << "hwnd: " << (int)hWnd << "  " << QString::fromLocal8Bit(buf) << "\n";
-		//EnumChildWindows(hWnd, EnumChildWindowCallBack, lParam);        
+		      
 	}    
 	return TRUE;    
 }    
 
-int CallBackFunc(BOOL is_buy, char *stock_name)
+//int CallBackFunc(BOOL is_buy, char *stock_name)
+int CallBackFunc(void)
 {
-	qDebug() << "CallBackFunc: " << "\n";
-	std::string title;
-	std::string name;
+	//qDebug() << "CallBackFunc: " << (is_buy ? "buy " : "sell ") << "\n";
+	  
+	QString title;
+	QString name;
 	if( AppInstance().GetWinTileAndStockName(title, name) )
-	{
-		return 1;
-		qDebug() << "CallBackFunc: todo " << (is_buy ? "buy " : "sell ") << name.c_str() << "\n";
-		AppInstance().HandleOrder(is_buy, name);
+	{ 
+		AppInstance().EmitKeySig(name);
+		//qDebug() << "todo " << (is_buy ? "buy " : "sell ") << name.c_str() << "\n";
+		return 1; 
 	}
     return 0;
 }
 
 FlashingOrder::FlashingOrder(QWidget *parent)
 	: QWidget(parent) 
+	, key_sig_mutex_()
+	, key_sig_wait_cond_()
+	, thread_(this)
 	, stock_name2code_(1024*4)
 	, trade_proxy_()
 	, trade_client_id_(0)
@@ -103,6 +107,8 @@ FlashingOrder::FlashingOrder(QWidget *parent)
     target_win_title_tag_ = app_title.toLocal8Bit();
 
 	connect(&normal_timer_, SIGNAL(timeout()), this, SLOT(DoNormalTimer()));
+	bool ret = connect(this, SIGNAL(key_sig(QString)), this, SLOT(DoKeySig(QString)));
+	thread_.start();
 }
 
 FlashingOrder::~FlashingOrder()
@@ -211,35 +217,51 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
 #endif
 }
 
-bool FlashingOrder::GetWinTileAndStockName(std::string& title, std::string& stock_name)
+bool FlashingOrder::GetWinTileAndStockName(QString& title, QString& stock_name)
 {
 	HWND wnd = GetForegroundWindow(); 
 	//HWND wnd1 = FindWindow(NULL, NULL);  // not ok
 	char buf[1024] = {0};
 	GetWindowText(wnd, buf, sizeof(buf)); // "方正证券泉友通专业版V6.58 - [组合图-中国平安]" 
 	qDebug() << "FlashingOrder::GetWinTileAndStockName wnd: "<< QString::fromLocal8Bit(buf) << "\n";
-	
-	/*char *pos = strstr(buf, "[组合图-");
-	if( !pos )
-	return false;*/
+	 
+	if( !strstr(buf, target_win_title_tag_.c_str()) )
+		return false;
+	title = QString::fromLocal8Bit(buf);
 
-	title = buf; 
+	std::string title_str = buf;   
 	std::string key_str = "[组合图-";
 
-	auto pos = title.find(key_str);
+	auto pos = title_str.find(key_str);
 	if( std::string::npos == pos )
 		return false; 
 
-	stock_name = title.substr(pos + key_str.length(), title.length() - pos - key_str.length() - 1 );
-		/*
-		if( strstr(buf, target_win_title_tag_.c_str()) )
-		g_is_accept_order_ = true;
-		else
-		g_is_accept_order_ = false;*/
+	stock_name = 
+	QString::fromLocal8Bit(title_str.substr(pos + key_str.length(), title_str.length() - pos - key_str.length() - 1 ).c_str());
+		 
 	return stock_name.length() > 0;
 }
 
+bool is_prepare_buy = false;
+bool is_prepare_sell = false;
 
+void FlashingOrder::DoKeySig(QString str)
+{
+	qDebug() << "Enter DoKeySig\n";
+	key_sig_mutex_.lock();
+	thread_.stock_name(str);
+	key_sig_wait_cond_.wakeAll();
+	key_sig_mutex_.unlock();
+}
+  
+void FlashingOrder::set_key_sig(bool val)
+{ 
+	key_sig_mutex_.lock();
+	key_sig_wait_cond_.wakeAll();
+	key_sig_mutex_.unlock();
+}
+
+#if 0
 void FlashingOrder::DoNormalTimer()
 {
 #if 1
@@ -283,3 +305,4 @@ void FlashingOrder::DoNormalTimer()
 	}
 #endif
 }
+#endif

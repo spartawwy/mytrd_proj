@@ -5,11 +5,14 @@
 #include "ui_flashingorder.h"
 
 #include <unordered_map>
-
-#include <QTimer>
 #include <string>
+#include <mutex>
+
+#include <QWaitCondition>
+#include <QTimer>
 
 #include "trade_proxy.h"
+#include "mythread.h"
 
 class Ticker;
 class FlashingOrder : public QWidget
@@ -29,16 +32,41 @@ public:
 
 	std::shared_ptr<Ticker>& ticker() { return  ticker_; }
 
-	bool GetWinTileAndStockName(std::string& title, std::string& stock_name);
+	bool GetWinTileAndStockName(QString& title, QString& stock_name);
+
+	bool exit_flag() const { return exit_flag_; }
+
+	void EmitKeySig(QString str) { emit key_sig(str); }
+
+	void set_key_sig(bool val);
+
+	QMutex & key_sig_mutex() { return key_sig_mutex_; }
+	QWaitCondition & key_sig_wait_cond() { return key_sig_wait_cond_; }
+
 private slots:
 
-	void DoNormalTimer();
+	//void DoNormalTimer();
+	void DoKeySig(QString);
+
+signals:
+
+	void key_sig(QString);
 
 private:
 	Ui::FlashingOrderClass  ui;
 
+	bool exit_flag_;
+
 	std::string  target_win_title_tag_;
-	 
+
+	volatile bool has_key_sig_; 
+	std::mutex  key_sig_flag_mutex_;
+
+	
+	QMutex          key_sig_mutex_;
+	QWaitCondition  key_sig_wait_cond_;
+
+	MyThread  thread_;
 	QTimer  normal_timer_;
 	/*/int broker_id_;
 	std::string account_no_;

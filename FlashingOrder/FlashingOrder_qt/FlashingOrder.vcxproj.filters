@@ -65,6 +65,9 @@
     <ClCompile Include="ticker.cpp">
       <Filter>moudle</Filter>
     </ClCompile>
+    <ClCompile Include="mythread.cpp">
+      <Filter>moudle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="flashingorder.ui">
@@ -97,6 +100,9 @@
       <Filter>moudle</Filter>
     </ClInclude>
     <ClInclude Include="ticker.h">
+      <Filter>moudle</Filter>
+    </ClInclude>
+    <ClInclude Include="mythread.h">
       <Filter>moudle</Filter>
     </ClInclude>
   </ItemGroup>

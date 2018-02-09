@@ -93,6 +93,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mythread.cpp" />
     <ClCompile Include="ticker.cpp" />
     <ClCompile Include="trade_proxy.cpp" />
   </ItemGroup>
@@ -126,6 +127,7 @@
     <ClInclude Include="dbmoudle.h" />
     <ClInclude Include="fo_common.h" />
     <ClInclude Include="GeneratedFiles\ui_flashingorder.h" />
+    <ClInclude Include="mythread.h" />
     <ClInclude Include="ticker.h" />
     <ClInclude Include="trade_proxy.h" />
   </ItemGroup>

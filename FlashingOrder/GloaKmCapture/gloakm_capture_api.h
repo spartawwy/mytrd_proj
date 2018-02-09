@@ -5,7 +5,7 @@
 
 #define DllExport __declspec(dllexport)
 
-typedef int (*ReCallFunc)(BOOL is_buy, char *stock_code);
+typedef int (*ReCallFunc)(void);
 
 extern "C" DllExport BOOL WINAPI InstallLaunchEv(ReCallFunc func, char *tag_str);
 extern "C" DllExport void WINAPI UnInstallLaunchEv();
