@@ -40,19 +40,19 @@ CREATE TABLE TaskInfo( id INTEGER,
                 assistant_field  TEXT,
                 PRIMARY KEY(id));
 CREATE TABLE OrderMessage( longdate INTEGER, timestamp TEXT, msg_type TEXT, msg_id INTEGER, user_id INTEGER,
-                                stock  TEXT not null,
+                stock  TEXT not null,
                 alert_price  DOUBLE,
                 back_alert_trigger  BOOL,
                 rebounce  DOUBLE,
-                                top_or_buttom_price DOUBLE,
+                top_or_buttom_price DOUBLE,
                 continue_second   INTEGER,
                 step  DOUBLE,
                 quantity  INTEGER,
                 target_price_level INTEGER);
 CREATE TABLE HisTask( id INTEGER,
-                                        longdate INTEGER,
-                                        timestamp TEXT,
-                    type INTEGER,
+                longdate INTEGER,
+                timestamp TEXT,
+                type INTEGER,
                 user_id INTEGER,
                 stock  TEXT not null,
                 alert_price  DOUBLE,
@@ -262,7 +262,7 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
     });
 
 	// equal section task
-	sql = utility::FormatStr("SELECT t.id, t.type, t.stock, t.stock_pinyin, t.alert_price, t.back_alert_trigger, t.continue_second, "
+	sql = utility::FormatStr("SELECT t.id, t.type, t.stock, t.stock_pinyin, t.alert_price, t.back_alert_trigger, t.rebounce, t.continue_second, "
 		" t.quantity, t.target_price_level, t.start_time, t.end_time, t.state, t.user_id, "
 		" e.raise_percent, e.fall_percent, e.raise_infection, e.fall_infection, e.multi_qty, e.max_trig_price, e.min_trig_price, e.is_original, t.assistant_field, e.max_position, e.min_position "
         " FROM TaskInfo t INNER JOIN EqualSectionTask e ON t.id=e.id WHERE t.user_id=%d order by t.id ", app_->user_info().id);
@@ -282,32 +282,33 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
             }
 			task_info->stock_pinyin = *(vals + 3);
             task_info->alert_price = boost::lexical_cast<double>(*(vals + 4));
-            task_info->back_alert_trigger = boost::lexical_cast<bool>(*(vals + 5)); 
-            task_info->continue_second = boost::lexical_cast<int>(*(vals + 6)); 
-            task_info->quantity = boost::lexical_cast<int>(*(vals + 7));
+			task_info->back_alert_trigger = boost::lexical_cast<bool>(*(vals + 5)); 
+			task_info->rebounce = boost::lexical_cast<double>(*(vals + 6));
+            task_info->continue_second = boost::lexical_cast<int>(*(vals + 7)); 
+            task_info->quantity = boost::lexical_cast<int>(*(vals + 8));
             if( task_info->quantity <= 0 || task_info->quantity % 100 != 0 )
             {
                 app_->local_logger().LogLocal("error", utility::FormatStr("task %d quantity %d", task_info->id, task_info->quantity));
                 return 0;
             }
-            task_info->target_price_level = boost::lexical_cast<int>(*(vals + 8));
-            task_info->start_time = boost::lexical_cast<int>(*(vals + 9));
-            task_info->end_time = boost::lexical_cast<int>(*(vals + 10)); 
-            task_info->state = boost::lexical_cast<int>(*(vals + 11));
-            //auto userid = boost::lexical_cast<int>(*(vals + 12));
+            task_info->target_price_level = boost::lexical_cast<int>(*(vals + 9));
+            task_info->start_time = boost::lexical_cast<int>(*(vals + 10));
+            task_info->end_time = boost::lexical_cast<int>(*(vals + 11)); 
+            task_info->state = boost::lexical_cast<int>(*(vals + 12));
+            //auto userid = boost::lexical_cast<int>(*(vals + 13));
 			  
-			task_info->secton_task.raise_percent = boost::lexical_cast<double>(*(vals + 13));
-			task_info->secton_task.fall_percent = boost::lexical_cast<double>(*(vals + 14));
-			task_info->secton_task.raise_infection = boost::lexical_cast<double>(*(vals + 15));
-			task_info->secton_task.fall_infection = boost::lexical_cast<double>(*(vals + 16));
-			task_info->secton_task.multi_qty = boost::lexical_cast<int>(*(vals + 17));
-			task_info->secton_task.max_trig_price = boost::lexical_cast<double>(*(vals + 18));
-			task_info->secton_task.min_trig_price = boost::lexical_cast<double>(*(vals + 19));
-			task_info->secton_task.is_original = boost::lexical_cast<bool>(*(vals + 20));
+			task_info->secton_task.raise_percent = boost::lexical_cast<double>(*(vals + 14));
+			task_info->secton_task.fall_percent = boost::lexical_cast<double>(*(vals + 15));
+			task_info->secton_task.raise_infection = boost::lexical_cast<double>(*(vals + 16));
+			task_info->secton_task.fall_infection = boost::lexical_cast<double>(*(vals + 17));
+			task_info->secton_task.multi_qty = boost::lexical_cast<int>(*(vals + 18));
+			task_info->secton_task.max_trig_price = boost::lexical_cast<double>(*(vals + 19));
+			task_info->secton_task.min_trig_price = boost::lexical_cast<double>(*(vals + 20));
+			task_info->secton_task.is_original = boost::lexical_cast<bool>(*(vals + 21));
 			
-            task_info->assistant_field = *(vals + 21);
-            task_info->secton_task.max_position = boost::lexical_cast<int>(*(vals + 22));
-            task_info->secton_task.min_position = boost::lexical_cast<int>(*(vals + 23));
+            task_info->assistant_field = *(vals + 22);
+            task_info->secton_task.max_position = boost::lexical_cast<int>(*(vals + 23));
+            task_info->secton_task.min_position = boost::lexical_cast<int>(*(vals + 24));
         }catch(boost::exception& )
         {
             return 0;

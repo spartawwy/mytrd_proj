@@ -11,7 +11,6 @@ InflectionSellTask::InflectionSellTask(T_TaskInformation &task_info, WinnerApp *
     , time_point_top_price_(0)
     , top_price_(0.0)
     , time_point_half_ready_(0)
-    //, pre_price_(0.0)
 {
 
 }

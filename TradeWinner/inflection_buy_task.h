@@ -16,6 +16,5 @@ public:
     __int64 time_point_bottom_price_;  
 	__int64 time_point_half_ready_;
     double bottom_price_;
-    double pre_close_price_;
 };
 #endif

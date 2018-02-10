@@ -96,12 +96,9 @@ bool WinnerApp::Init()
 		}
 		return false;
 	}
-
-#if 1
+ 
 	db_moudle_.Init();
-
-#endif
-
+	  
 #if 1
 	login_win_.Init();
 	ret = login_win_.exec(); 
