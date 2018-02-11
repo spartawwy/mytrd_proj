@@ -100,6 +100,8 @@ EqualSectionTask::EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app)
 	, top_price_(0.0)
 	, cur_type_action_(TypeAction::NOOP)
 	, prepare_rebounce_price_(0.0)
+	, cond4_sell_backtrigger_price_(0.0)
+	, cond4_buy_backtrigger_price_(cst_max_stock_price)
 { 
     if( task_info.secton_task.is_original )
         CalculateSections(task_info.alert_price, task_info, sections_);
@@ -220,7 +222,6 @@ void EqualSectionTask::HandleQuoteData()
 		app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
 		timed_mutex_wrapper.unlock(); 
 		this->app_->RemoveTask(this->task_id(), TypeTask::EQUAL_SECTION); // invoke self destroy
-		  
 	};
 
     if( is_waitting_removed_ )
@@ -261,13 +262,19 @@ void EqualSectionTask::HandleQuoteData()
 		{
 			bottom_price_ = iter->cur_price;  
 		}
-		if( cur_type_action_ == TypeAction::NOOP ) // first in trigger 
+		if( cur_type_action_ == TypeAction::NOOP ) // mybe first enter
 		{ 
+			cond4_buy_backtrigger_price_ = cst_max_stock_price;			 
+			cond4_sell_backtrigger_price_ = 0.0;			 
+
 			cur_type_action_ = JudgeTypeAction(iter); 
-			prepare_rebounce_price_ = iter->cur_price;
-			 
+			cond4_sell_backtrigger_price_ = 0.0;
 			if( cur_type_action_ != TypeAction::CLEAR )
+			{
+				if( cur_type_action_ != TypeAction::NOOP ) // prepare trigger
+					prepare_rebounce_price_ = iter->cur_price;
 				goto NOT_TRADE; // because first in trigger
+			}
 			// to clear position ----- 
 			order_type = TypeOrderCategory::SELL; 
 			if( avaliable_pos == 0 )
@@ -284,7 +291,11 @@ void EqualSectionTask::HandleQuoteData()
 			if( cur_type_action_ != TypeAction::PREPARE_BUY)
 			{
 				if( cur_type_action_ != TypeAction::CLEAR )
+				{
+					if( cur_type_action_ != TypeAction::NOOP )
+						prepare_rebounce_price_ = iter->cur_price;
 					goto NOT_TRADE; // because first in trigger
+				}
 				// to clear position ----- 
 				order_type = TypeOrderCategory::SELL; 
 				if( avaliable_pos == 0 )
@@ -296,6 +307,12 @@ void EqualSectionTask::HandleQuoteData()
 				}
 			}else
 			{
+				if( iter->cur_price < cond4_buy_backtrigger_price_ ) cond4_buy_backtrigger_price_ = iter->cur_price;
+				if( para_.back_alert_trigger && cond4_buy_backtrigger_price_ < prepare_rebounce_price_ && iter->cur_price > prepare_rebounce_price_ )
+				{
+					order_type = TypeOrderCategory::BUY; 
+					goto BEFORE_TRADE;
+				}
 				double rebounce = Get2UpRebouncePercent(prepare_rebounce_price_, bottom_price_, iter->cur_price);
 				if( rebounce > para_.rebounce - 0.0001 )
 				{ 
@@ -311,7 +328,11 @@ void EqualSectionTask::HandleQuoteData()
 			if( cur_type_action_ != TypeAction::PREPARE_SELL)
 			{
 				if( cur_type_action_ != TypeAction::CLEAR )
+				{
+					if( cur_type_action_ != TypeAction::NOOP )
+						prepare_rebounce_price_ = iter->cur_price;
 					goto NOT_TRADE; // because first in trigger
+				}
 				// to clear position ----- 
 				order_type = TypeOrderCategory::SELL; 
 				if( avaliable_pos == 0 )
@@ -321,14 +342,22 @@ void EqualSectionTask::HandleQuoteData()
 					qty = avaliable_pos; 
 					goto BEFORE_TRADE; 
 				}
-			}
-			double rebounce = Get2DownRebouncePercent(prepare_rebounce_price_, top_price_, iter->cur_price);
-			if( rebounce > para_.rebounce - 0.0001 )
-			{ 
-				order_type = TypeOrderCategory::SELL; 
-				goto BEFORE_TRADE; 
 			}else
-				goto NOT_TRADE;
+			{
+				if( iter->cur_price > cond4_sell_backtrigger_price_ ) cond4_sell_backtrigger_price_ = iter->cur_price;
+				if( para_.back_alert_trigger && cond4_sell_backtrigger_price_ > prepare_rebounce_price_ && iter->cur_price < prepare_rebounce_price_ + 0.1 )
+				{
+					order_type = TypeOrderCategory::SELL; 
+					goto BEFORE_TRADE;
+				}
+				double rebounce = Get2DownRebouncePercent(prepare_rebounce_price_, top_price_, iter->cur_price);
+				if( rebounce > para_.rebounce - 0.0001 )
+				{ 
+					order_type = TypeOrderCategory::SELL; 
+					goto BEFORE_TRADE; 
+				}else
+					goto NOT_TRADE;
+			} 
 		}
 	}else
 	{
@@ -435,7 +464,7 @@ BEFORE_TRADE:
 #endif
          
 #endif
-		cur_type_action_ = TypeAction::NOOP;
+		cur_type_action_ = TypeAction::NOOP; // for rebounce
         // judge result 
         if( strlen(error_info) > 0 )
         {
@@ -457,8 +486,11 @@ BEFORE_TRADE:
         {
             // re calculate
             CalculateSections(iter->cur_price, para_, sections_);
+			// for rebouce -------
 			bottom_price_ = cst_max_stock_price;
 			top_price_ = 0.0;
+			cond4_sell_backtrigger_price_ = 0.0;
+			cond4_buy_backtrigger_price_ = cst_max_stock_price;
             // save to db: save cur_price as start_price in assistant_field 
             app_->db_moudle().UpdateEqualSection(para_.id, para_.secton_task.is_original, iter->cur_price);
             app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");

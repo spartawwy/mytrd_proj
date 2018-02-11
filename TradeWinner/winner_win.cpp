@@ -480,6 +480,23 @@ void WinnerWin::SlotTbvTasksActionDetail(bool)
                 ui.cb_min_qty->setChecked(false);
             else
                 ui.cb_min_qty->setChecked(true);
+			if( p_tskinfo->rebounce > 0.0 )
+			{
+				ui.wid_eqsec_rebounce_grp->setEnabled(true);
+				ui.cb_eqsec_rebounce->setChecked(true);
+				ui.spinBox_eqsec_rebounce->setValue(p_tskinfo->rebounce);
+				if( p_tskinfo->back_alert_trigger )
+					ui.cb_eqsec_back_trigger->setChecked(true);
+				else
+					ui.cb_eqsec_back_trigger->setChecked(false);
+			}else
+			{
+				ui.wid_eqsec_rebounce_grp->setDisabled(true);
+				ui.cb_eqsec_rebounce->setChecked(false);
+				ui.spinBox_eqsec_rebounce->setValue(0.0);
+				ui.cb_eqsec_back_trigger->setChecked(false);
+			}
+			
             ui.spinBox_max_qty->setValue(p_tskinfo->secton_task.max_position);
             ui.spinBox_min_qty->setValue(p_tskinfo->secton_task.min_position);
 

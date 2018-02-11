@@ -29,6 +29,9 @@ private:
 	double top_price_;
 	double prepare_rebounce_price_;
 
+	double cond4_sell_backtrigger_price_;
+	double cond4_buy_backtrigger_price_;
+
 	TypeAction cur_type_action_; 
 	
 };

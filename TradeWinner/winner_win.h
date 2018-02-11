@@ -86,6 +86,8 @@ public slots:
 	void DoMaxStopTrigCheckBoxChanged(int);
 	void DoMinClearTrigCheckBoxChanged(int);
 
+	void DoRebounceCheckBoxChanged(int);
+
     //---------------index trade task related----
 	void DoAddIndexTradeTask();
 	void DoTrdIndexRadioCrossDownChecked(bool);
@@ -103,7 +105,7 @@ public slots:
     void FlushFromStationListWidget(QString str);
     void OnClickedListWidget(QModelIndex index);
     void ChangeFromStationText(QString text);
-
+	 
     void AssignHintListAndLineEdit(HintList *& p_list, QLineEdit *&p_edit, QDoubleSpinBox *&p_dbspb_alert_price, QDoubleSpinBox *&p_dbspb_percent);
 
     void SlotOpenCalcWin(bool);
