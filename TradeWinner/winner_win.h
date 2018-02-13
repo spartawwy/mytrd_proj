@@ -112,6 +112,8 @@ public slots:
 
     void TriggerFlashWinTimer(bool enable=true);
 
+    void DoTabTasksDbClick(const QModelIndex index);
+
 signals:
 
     //void SigRemoveTask(int task_id);
@@ -122,6 +124,8 @@ protected:
     virtual void changeEvent(QEvent * event) override;
 
 private:
+
+    void DoShowTaskDetail(int task_id);
 
     // sell task related 
     void InitSellTaskWin();
@@ -137,7 +141,8 @@ private:
 
 	// index trade task related 
 	void InitIndexTradeWin();
-	
+	 
+
     Ui::TradeWinnerClass ui;
     WinnerApp *app_;
     QMenu *tbv_tasks_popMenu_;

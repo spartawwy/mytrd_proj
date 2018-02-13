@@ -35,7 +35,7 @@ public:
 
     void retranslateUi(QWidget *FlashingOrderClass)
     {
-        FlashingOrderClass->setWindowTitle(QApplication::translate("FlashingOrderClass", "FlashingOrder", 0));
+        FlashingOrderClass->setWindowTitle(QApplication::translate("FlashingOrderClass", "\351\227\252\347\224\265\344\270\213\345\215\225", 0));
     } // retranslateUi
 
 };
