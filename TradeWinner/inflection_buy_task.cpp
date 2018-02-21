@@ -20,10 +20,7 @@ void InflectionBuyTask::HandleQuoteData()
     static auto get_inflect_percent = [](double alert, double bottom, double cur)->double
     {
         double percent_inflect = 0.0;
-        if( cur < alert )
-            percent_inflect =  (alert - bottom) * 100 / alert;
-        else
-            percent_inflect = (cur - bottom) * 100 / alert;
+        percent_inflect = (cur - bottom) * 100 / alert;
         return percent_inflect;
     };
 
