@@ -248,6 +248,7 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
             task_info->is_loop = boost::lexical_cast<int>(*(vals + 12));
             task_info->state = boost::lexical_cast<int>(*(vals + 13)); 
 			task_info->stock_pinyin = *(vals + 15); 
+            utf8ToGbk(task_info->stock_pinyin);
 			task_info->bs_times = boost::lexical_cast<int>(*(vals + 16));
 			//if( task_info->type == TypeTask::BATCHES_BUY || task_info->type == TypeTask::BATCHES_SELL )
             task_info->assistant_field = *(vals + 17);
@@ -280,7 +281,9 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
                 app_->local_logger().LogLocal("error", utility::FormatStr("task %d stock %s", task_info->id, task_info->stock.c_str()));
                 return 0;
             }
+            
 			task_info->stock_pinyin = *(vals + 3);
+            utf8ToGbk(task_info->stock_pinyin);
             task_info->alert_price = boost::lexical_cast<double>(*(vals + 4));
 			task_info->back_alert_trigger = boost::lexical_cast<bool>(*(vals + 5)); 
 			task_info->rebounce = boost::lexical_cast<double>(*(vals + 6));
@@ -336,6 +339,7 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
             return 0;
         }
         task_info->stock_pinyin = *(vals + 3);
+        utf8ToGbk(task_info->stock_pinyin);
         task_info->alert_price = boost::lexical_cast<double>(*(vals + 4));  
         task_info->continue_second = boost::lexical_cast<int>(*(vals + 5)); 
         task_info->quantity = boost::lexical_cast<int>(*(vals + 6));
@@ -527,6 +531,8 @@ int DBMoudle::FindBorkerIdByAccountID(int account_id)
 // info->id will set if saved ok
 bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
 {
+    auto str_stock_py = info->stock_pinyin;
+    gbkToUtf8(str_stock_py);
     std::string sql = utility::FormatStr("INSERT INTO TaskInfo VALUES( %d, %d, %d, '%s', %.2f,  %d, %.2f, %d, %.2f, %d,  %d, %d, %d, %d, %d, '%s', %d, '%s') "
         , app_->Cookie_MaxTaskId() + 1
         , info->type
@@ -543,7 +549,7 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
         , info->end_time
         , info->is_loop
         , info->state
-		, info->stock_pinyin.c_str()
+		, str_stock_py.c_str()
         , info->bs_times
         , info->assistant_field.c_str());
    if( !db_conn_ )
@@ -660,7 +666,9 @@ bool DBMoudle::UpdateTaskInfo(T_TaskInformation &info)
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
                 , "DBMoudle::UpdateTaskInfo"
                 , "can't find table TaskInfo");
-    
+
+    auto str_stock_py = info.stock_pinyin;
+    gbkToUtf8(str_stock_py);
     std::string sql = utility::FormatStr("UPDATE TaskInfo SET type=%d, stock='%s', alert_price=%.2f"
         ", back_alert_trigger=%d, rebounce=%.2f, continue_second=%d, step=%.2f, quantity=%d, target_price_level=%d"
         ", start_time=%d, end_time=%d, is_loop=%d, state=%d, stock_pinyin='%s', bs_times=%d, assistant_field='%s' WHERE id=%d "
@@ -677,7 +685,7 @@ bool DBMoudle::UpdateTaskInfo(T_TaskInformation &info)
         , info.end_time
         , info.is_loop
         , info.state
-        , info.stock_pinyin.c_str()
+        , str_stock_py.c_str()
         , info.bs_times
         , info.assistant_field.c_str()
          , info.id);
@@ -721,6 +729,8 @@ bool DBMoudle::AddHisTask(std::shared_ptr<T_TaskInformation>& info)
 {
     std::tuple<int, std::string> date_time = CurrentDateTime();
 
+    auto str_stock_py = info->stock_pinyin;
+    gbkToUtf8(str_stock_py);
     std::string sql = utility::FormatStr("INSERT INTO HisTask VALUES( %d, %d, '%s', %d, %d, '%s', %.2f,  %d, %.2f, %d, %.2f, %d,  %d, %d, %d, %d, %d, '%s', %d) "
         , info->id
         , std::get<0>(date_time)
@@ -739,7 +749,7 @@ bool DBMoudle::AddHisTask(std::shared_ptr<T_TaskInformation>& info)
         , info->end_time
         , info->is_loop
         , info->state
-		, info->stock_pinyin.c_str()
+		, str_stock_py.c_str()
         , info->bs_times);
     std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
     Open(db_conn);

@@ -2,7 +2,7 @@
 
 #include <qdebug.h>
 #include <qmessagebox.h> 
- 
+#include <QTextCodec> 
 //#include <QtGui/QStandardItemModel>
 
 #include <TLib/core/tsystem_utility_functions.h>
@@ -252,15 +252,19 @@ void WinnerWin::DoAddBuyTask()
         }
         return true;
     };
-
+     
 	static auto fill_common_ui = [this](std::shared_ptr<T_TaskInformation> &task_info)
 	{
+        /*QTextCodec* utf8Codec = QTextCodec::codecForName("utf-8");
+        assert(utf8Codec);*/
 		QString::SectionFlag flag = QString::SectionSkipEmpty;
 		QString stock_str = ui.le_buytask_stock->text().trimmed();
 		QString stock_pinyin = stock_str.section('/', 1, 1, flag);
 		task_info->stock = stock_str.section('/', 0, 0, flag).toLocal8Bit();
-		task_info->stock_pinyin = stock_str.section('/', 1, 1, flag).toLocal8Bit();
-
+        task_info->stock_pinyin = stock_str.section('/', 1, 1, flag).toLocal8Bit().data();
+        /*QByteArray bytes = utf8Codec->fromUnicode(stock_str.section('/', 1, 1, flag));
+        task_info->stock_pinyin = bytes.data();
+*/
 		task_info->alert_price = ui.dbspbox_buytask_alert_price->value(); 
         task_info->back_alert_trigger = ui.cb_bt_back_alert_trigger->isChecked();
         task_info->continue_second = ui.spinBox_buytask_continue_time->value();

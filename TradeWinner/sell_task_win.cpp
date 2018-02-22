@@ -4,6 +4,7 @@
 #include <qmessagebox.h> 
 //#include <QPixmap>
 #include <QtGui/QStandardItemModel>
+#include <QTextCodec>
 
 #include <TLib/core/tsystem_utility_functions.h>
 //#include "mythread.h"
@@ -191,12 +192,14 @@ void WinnerWin::DoAddTask()
 
 	static auto fill_common_ui = [this](std::shared_ptr<T_TaskInformation> &task_info)
 	{
+        /*QTextCodec* utf8Codec = QTextCodec::codecForName("utf-8");
+        assert(utf8Codec);*/
 		QString::SectionFlag flag = QString::SectionSkipEmpty;
 		QString stock_str = ui.le_stock->text().trimmed();
 		QString stock_pinyin = stock_str.section('/', 1, 1, flag);
 		task_info->stock = stock_str.section('/', 0, 0, flag).toLocal8Bit();
 		task_info->stock_pinyin = stock_str.section('/', 1, 1, flag).toLocal8Bit();
-
+         
 		task_info->alert_price = ui.dbspbox_alert_price->value(); 
         task_info->back_alert_trigger = ui.cb_back_alert_trigger->isChecked();
         task_info->continue_second = ui.spinBox_continue_time->value();

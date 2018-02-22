@@ -131,6 +131,7 @@ WinnerWin::~WinnerWin()
 {
 }
 
+// notice : task_info.stock_pinyin 's code will change to gbk
 void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_info)
 {
     QStandardItemModel * model = static_cast<QStandardItemModel *>(tbv->model());
@@ -165,7 +166,7 @@ void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_
 		}
 	}else
 	{
-		item = new QStandardItem(ToQString(task_info.type));
+		item = new QStandardItem(ToQString(task_info.type)); 
 		stock_str = QString("%1/%2").arg(task_info.stock.c_str()).arg(QString::fromLocal8Bit(task_info.stock_pinyin.c_str()));
 	}
     model->setItem(row_index, cst_tbview_tasks_rowindex_task_name, item);

@@ -454,6 +454,9 @@ bool IsNowTradeTime();
 
 QString IndexCode2IndexName(const QString& code);
 
+void utf8ToGbk(std::string& strUtf8);
+void gbkToUtf8(std::string& strGbk);
+
 #define USE_TRADE_FLAG
 
 
