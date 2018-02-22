@@ -34,8 +34,8 @@ bool StrategyTask::IsPriceJumpUp(double pre_price, double cur_price)
     else if( pre_price < 20.0 ) return (cur_price - pre_price) > 0.07;
     else if( pre_price < 50.0 ) return (cur_price - pre_price) > 0.08; 
     else if( pre_price < 80.0 ) return (cur_price - pre_price) > 0.09; 
-    else if( pre_price < 100.0 ) return (cur_price - pre_price) > 0.1; 
-    else if( pre_price < 150.0 ) return (cur_price - pre_price) > 0.15; 
+    else if( pre_price < 100.0 ) return (cur_price - pre_price) > 0.15; 
+    else if( pre_price < 150.0 ) return (cur_price - pre_price) > 0.2; 
     else if( pre_price < 200.0 ) return (cur_price - pre_price) > 0.3; 
     else  return (cur_price - pre_price) > 0.60;
 

@@ -28,8 +28,11 @@ format: section0_type$section0_price#section1_type$section1_price
 
 #include "winner_app.h"
 
+#define DO_LOG(tag, b)  do{ app_->local_logger().LogLocal((tag), b); }while(0);
+
 static const int cst_max_sec = 5;
 static const double cst_max_stock_price = 9999.0;
+const std::string cst_rebounce_debug = "EqualSec";
 
 void EqualSectionTask::CalculateSections(double price, IN T_TaskInformation &task_info, OUT std::vector<T_SectionAutom> &sections)
 {
@@ -237,13 +240,14 @@ void EqualSectionTask::HandleQuoteData()
     double pre_price = quote_data_queue_.size() > 1 ? (*(++data_iter))->cur_price : iter->cur_price;
     if( IsPriceJumpDown(pre_price, iter->cur_price) || IsPriceJumpUp(pre_price, iter->cur_price) )
     {
-        app_->local_logger().LogLocal(TSystem::utility::FormatStr("%d EqualSectionTask price jump %.2f to %.2f", para_.id, pre_price, iter->cur_price));
+        DO_LOG(cst_rebounce_debug, TSystem::utility::FormatStr("%d EqualSectionTask price jump %.2f to %.2f", para_.id, pre_price, iter->cur_price));
+        //app_->local_logger().LogLocal(cst_rebounce_debug, TSystem::utility::FormatStr("%d EqualSectionTask price jump %.2f to %.2f", para_.id, pre_price, iter->cur_price));
         return;
     };
 
     if( !timed_mutex_wrapper_.try_lock_for(1000) )
     {
-        app_->local_logger().LogLocal(TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
+        DO_LOG(cst_rebounce_debug, TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
         app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock fail"); 
         return;
     };
@@ -258,12 +262,15 @@ void EqualSectionTask::HandleQuoteData()
 		if( iter->cur_price > top_price_ )
 		{
 			top_price_ = iter->cur_price; 
+            DO_LOG(cst_rebounce_debug, TSystem::utility::FormatStr("eqsec task %d set top_price:%.2f ", para_.id, top_price_));
 		}else if( iter->cur_price < bottom_price_ )
 		{
 			bottom_price_ = iter->cur_price;  
+            DO_LOG(cst_rebounce_debug, TSystem::utility::FormatStr("eqsec task %d set bottom_price_:%.2f ", para_.id, bottom_price_));
 		}
 		if( cur_type_action_ == TypeAction::NOOP ) // mybe first enter
 		{ 
+            //DO_LOG(cst_rebounce_debug, TSystem::utility::FormatStr("eqsec task %d Enter TypeAction::NOOP ", para_.id));
 			cond4_buy_backtrigger_price_ = cst_max_stock_price;			 
 			cond4_sell_backtrigger_price_ = 0.0;			 
 
@@ -272,7 +279,10 @@ void EqualSectionTask::HandleQuoteData()
 			if( cur_type_action_ != TypeAction::CLEAR )
 			{
 				if( cur_type_action_ != TypeAction::NOOP ) // prepare trigger
+                {
 					prepare_rebounce_price_ = iter->cur_price;
+                    DO_LOG(cst_rebounce_debug, TSystem::utility::FormatStr("eqsec task %d next handle Type will change from NOOP to %d; prepare price:%.2f", para_.id, cur_type_action_, prepare_rebounce_price_));
+                }
 				goto NOT_TRADE; // because first in trigger
 			}
 			// to clear position ----- 
@@ -290,6 +300,7 @@ void EqualSectionTask::HandleQuoteData()
 			cur_type_action_ = JudgeTypeAction(iter);
 			if( cur_type_action_ != TypeAction::PREPARE_BUY)
 			{
+                DO_LOG(cst_rebounce_debug, TSystem::utility::FormatStr("eqsec task %d Type change from PREPARE_BUY to %d; cur_price:%.2f", para_.id, cur_type_action_, iter->cur_price));
 				if( cur_type_action_ != TypeAction::CLEAR )
 				{
 					if( cur_type_action_ != TypeAction::NOOP )
@@ -314,6 +325,7 @@ void EqualSectionTask::HandleQuoteData()
 					goto BEFORE_TRADE;
 				}
 				double rebounce = Get2UpRebouncePercent(prepare_rebounce_price_, bottom_price_, iter->cur_price);
+                DO_LOG(cst_rebounce_debug, utility::FormatStr("eqsec task %d rebounce:%.2f ", para_.id, para_.rebounce)); 
 				if( rebounce > para_.rebounce - 0.0001 )
 				{ 
 					order_type = TypeOrderCategory::BUY; 
@@ -327,6 +339,7 @@ void EqualSectionTask::HandleQuoteData()
 			cur_type_action_ = JudgeTypeAction(iter);
 			if( cur_type_action_ != TypeAction::PREPARE_SELL)
 			{
+                DO_LOG(cst_rebounce_debug, TSystem::utility::FormatStr("eqsec task %d Type change from PREPARE_SELL to %d; cur_price:%.2f", para_.id, cur_type_action_, iter->cur_price));
 				if( cur_type_action_ != TypeAction::CLEAR )
 				{
 					if( cur_type_action_ != TypeAction::NOOP )
@@ -351,6 +364,7 @@ void EqualSectionTask::HandleQuoteData()
 					goto BEFORE_TRADE;
 				}
 				double rebounce = Get2DownRebouncePercent(prepare_rebounce_price_, top_price_, iter->cur_price);
+                DO_LOG(cst_rebounce_debug, utility::FormatStr("eqsec task %d rebounce:%.2f ", para_.id, para_.rebounce)); 
 				if( rebounce > para_.rebounce - 0.0001 )
 				{ 
 					order_type = TypeOrderCategory::SELL; 
