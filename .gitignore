@@ -25,7 +25,6 @@
 *.ilk
 *.unsuccessfulbuild
 *.opensdf
-*.kd
 *.idb
 *.ipch
 
