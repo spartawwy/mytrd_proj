@@ -15,6 +15,7 @@
 #include "mythread.h"
 
 class Ticker;
+class MsgWin;
 class FlashingOrder : public QWidget
 {
 	Q_OBJECT
@@ -37,6 +38,7 @@ public:
 	bool exit_flag() const { return exit_flag_; }
 
 	void EmitKeySig(QString str) { emit key_sig(str); }
+    void EmitShowMsgSig(QString title, QString content) { emit show_msg_sig(title, content); }
 
 	void set_key_sig(bool val);
 
@@ -45,12 +47,17 @@ public:
 
 private slots:
 
+    void DoReadCfg();
+    void DoSaveCfg();
+
 	//void DoNormalTimer();
 	void DoKeySig(QString);
+    void DoShowMsgSig(QString, QString);
 
 signals:
 
 	void key_sig(QString);
+    void show_msg_sig(QString, QString);
 
 private:
 	Ui::FlashingOrderClass  ui;
@@ -58,6 +65,9 @@ private:
 	bool exit_flag_;
 
 	std::string  target_win_title_tag_;
+    int qty_buy_;
+    int qty_sell_;
+    TypeQuoteLevel quote_level_;
 
 	volatile bool has_key_sig_; 
 	std::mutex  key_sig_flag_mutex_;
@@ -81,6 +91,8 @@ private:
 	T_UserAccountInfo  account_info_;
 
 	std::shared_ptr<Ticker>  ticker_;
+
+    MsgWin  *msg_win_;
 
 	friend class DBMoudle;
 };

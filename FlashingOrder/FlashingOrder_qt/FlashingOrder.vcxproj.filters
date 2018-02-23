@@ -68,6 +68,15 @@
     <ClCompile Include="mythread.cpp">
       <Filter>moudle</Filter>
     </ClCompile>
+    <ClCompile Include="msg_win.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_msg_win.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_msg_win.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="flashingorder.ui">
@@ -78,6 +87,12 @@
     </CustomBuild>
     <CustomBuild Include="flashingorder.h">
       <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="msg_win.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="message.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -104,6 +119,9 @@
     </ClInclude>
     <ClInclude Include="mythread.h">
       <Filter>moudle</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_message.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

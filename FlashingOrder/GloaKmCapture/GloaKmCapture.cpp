@@ -147,59 +147,6 @@ LRESULT CALLBACK LauncherHook(int nCode, WPARAM wParam, LPARAM lParam)
 			p_recall_func();
 		} 
 		goto EXIT_PROC;
-#if 0 
-		if( (KEYDOWN(VK_LCONTROL) || KEYDOWN(VK_RCONTROL)) && !(KEYDOWN(VK_LCONTROL) && KEYDOWN(VK_RCONTROL)) )
-		{ 
-			if( KEYDOWN(VK_OEM_PLUS) && KEYUP(VK_OEM_MINUS) )
-			{ 
-				OutputDebugString("LauncherHook  line 136 set g_is_prepare_buy = true\n");
-				g_is_prepare_buy = true;
-			}
-			else if( KEYDOWN(VK_OEM_MINUS) && KEYUP(VK_OEM_PLUS) )
-			{
-				OutputDebugString("LauncherHook  line 141 set g_is_prepare_sell = true\n");
-				g_is_prepare_sell = true;
-			}
-			else if( KEYDOWN(VK_OEM_MINUS) && KEYDOWN(VK_OEM_PLUS) )
-			{
-				OutputDebugString("LauncherHook  line 146 set all false\n");
-				g_is_prepare_buy = false;
-				g_is_prepare_sell = false;
-			} 
-		}
-		if( KEYUP(VK_OEM_PLUS) )
-		{
-			if (g_is_prepare_buy && KEYUP(VK_OEM_MINUS))
-			{
-				OutputDebugString("LauncherHook  line 155 set g_is_prepare_buy = false\n");
-				g_is_prepare_buy = false; 
-				if( p_recall_func )
-				{ 
-					OutputDebugString("TO BUY\n");
-					p_recall_func(true, "");
-				} 
-			} 
-		}
-		if( KEYUP(VK_OEM_MINUS) )
-		{
-			if (g_is_prepare_sell && KEYUP(VK_OEM_PLUS))
-			{
-				OutputDebugString("LauncherHook  line 168 set g_is_prepare_sell = false\n");
-				g_is_prepare_sell = false;
-				if( p_recall_func )
-				{
-					OutputDebugString("TO SELL\n");
-					p_recall_func(false, "");
-				} 
-			} 
-		}
-		if(  KEYUP(VK_LCONTROL) && KEYUP(VK_RCONTROL) )
-		{ 
-			OutputDebugString("LauncherHook  line 179 set all = false\n");
-			g_is_prepare_buy = false;
-			g_is_prepare_sell = false;
-		}
-#endif
 	} //if
 
 EXIT_PROC:
