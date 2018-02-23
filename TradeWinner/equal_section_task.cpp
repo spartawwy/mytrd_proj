@@ -325,9 +325,10 @@ void EqualSectionTask::HandleQuoteData()
 					goto BEFORE_TRADE;
 				}
 				double rebounce = Get2UpRebouncePercent(prepare_rebounce_price_, bottom_price_, iter->cur_price);
-                DO_LOG(cst_rebounce_debug, utility::FormatStr("eqsec task %d rebounce:%.2f ", para_.id, para_.rebounce)); 
+                DO_LOG(cst_rebounce_debug, utility::FormatStr("eqsec task %d rebounce:%.2f para: %.2f ", para_.id, rebounce, para_.rebounce)); 
 				if( rebounce > para_.rebounce - 0.0001 )
 				{ 
+                    DO_LOG(cst_rebounce_debug, utility::FormatStr("eqsec task %d rebounce:%.2f to buy", para_.id, rebounce)); 
 					order_type = TypeOrderCategory::BUY; 
 					goto BEFORE_TRADE; 
 				}else
@@ -364,9 +365,10 @@ void EqualSectionTask::HandleQuoteData()
 					goto BEFORE_TRADE;
 				}
 				double rebounce = Get2DownRebouncePercent(prepare_rebounce_price_, top_price_, iter->cur_price);
-                DO_LOG(cst_rebounce_debug, utility::FormatStr("eqsec task %d rebounce:%.2f ", para_.id, para_.rebounce)); 
+                DO_LOG(cst_rebounce_debug, utility::FormatStr("eqsec task %d rebounce:%.2f para %.2f", para_.id, rebounce, para_.rebounce)); 
 				if( rebounce > para_.rebounce - 0.0001 )
 				{ 
+                    DO_LOG(cst_rebounce_debug, utility::FormatStr("eqsec task %d rebounce:%.2f to sell", para_.id, rebounce)); 
 					order_type = TypeOrderCategory::SELL; 
 					goto BEFORE_TRADE; 
 				}else
@@ -375,7 +377,7 @@ void EqualSectionTask::HandleQuoteData()
 		}
 	}else
 	{
-		//---------judge order type base on current section-------------- 
+		//----no rebounce para -----judge order type base on current section-------------- 
 		index = 0;
 		for( ; index < sections_.size(); ++index )
 		{
@@ -496,7 +498,14 @@ BEFORE_TRADE:
         }
         para_.secton_task.is_original = false;
 
-        if( this->sections_[index].section_type != TypeEqSection::CLEAR )
+        bool is_to_clear = false;
+        if( para_.rebounce > 0.0 ) // use rebounce 
+        {
+            if( cur_type_action_ == TypeAction::CLEAR ) is_to_clear = true;
+        }else if( this->sections_[index].section_type == TypeEqSection::CLEAR )
+            is_to_clear = true;
+         
+        if( !is_to_clear )
         {
             // re calculate
             CalculateSections(iter->cur_price, para_, sections_);
