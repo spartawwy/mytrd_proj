@@ -309,6 +309,9 @@
     <ClInclude Include="..\include\TdxTradeApi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\common_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TradeWinner.rc" />

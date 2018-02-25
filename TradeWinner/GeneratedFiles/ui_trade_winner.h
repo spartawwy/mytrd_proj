@@ -913,7 +913,7 @@ public:
         TradeWinnerClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(TradeWinnerClass);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 917, 23));
+        menuBar->setGeometry(QRect(0, 0, 917, 18));
         menu_system = new QMenu(menuBar);
         menu_system->setObjectName(QStringLiteral("menu_system"));
         menu_help = new QMenu(menuBar);
@@ -991,7 +991,7 @@ public:
 
     void retranslateUi(QMainWindow *TradeWinnerClass)
     {
-        TradeWinnerClass->setWindowTitle(QApplication::translate("TradeWinnerClass", "TradeWinner 0.1 Copyright reserved by sparta.wwy", 0));
+        TradeWinnerClass->setWindowTitle(QApplication::translate("TradeWinnerClass", "TradeWinner 0.2 Copyright reserved by sparta.wwy", 0));
         actionClose->setText(QApplication::translate("TradeWinnerClass", "\351\200\200\345\207\272", 0));
         actionRestart->setText(QApplication::translate("TradeWinnerClass", "\351\207\215\346\226\260\345\220\257\345\212\250", 0));
         actionStopAllTask->setText(QApplication::translate("TradeWinnerClass", "\345\201\234\346\255\242\346\211\200\346\234\211\344\273\273\345\212\241", 0));

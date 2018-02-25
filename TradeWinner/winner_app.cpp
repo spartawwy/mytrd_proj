@@ -270,7 +270,7 @@ bool WinnerApp::LoginBroker(int broker_id, int depart_id, const std::string& acc
 		, const_cast<char*>(account.c_str())
 		, const_cast<char*>(account.c_str())  // default trade no is account no  
 		, const_cast<char*>(password.c_str())
-		, p_broker_info->type == TypeBroker::ZHONGYGJ ? password.c_str() : ""// communication password 
+		, p_broker_info->type == TypeBroker::ZHONGY_GJ ? password.c_str() : ""// communication password 
 		, error_info);
 #elif 0
 	trade_client_id_ = trade_agent_.Logon("218.205.84.239" //"115.238.180.23"
@@ -280,7 +280,7 @@ bool WinnerApp::LoginBroker(int broker_id, int depart_id, const std::string& acc
 		, const_cast<char*>(account.c_str())
 		, const_cast<char*>(account.c_str())  // default trade no is account no  
 		, const_cast<char*>(password.c_str())
-		, p_broker_info->type == TypeBroker::ZHONGYGJ ? password.c_str() : ""// communication password 
+		, p_broker_info->type == TypeBroker::ZHONGY_GJ ? password.c_str() : ""// communication password 
 		//, const_cast<char*>(password.c_str())
 		, error_info);
 #elif 0
@@ -291,7 +291,7 @@ bool WinnerApp::LoginBroker(int broker_id, int depart_id, const std::string& acc
 		, const_cast<char*>(account.c_str())
 		, const_cast<char*>(account.c_str())  // default trade no is account no  
 		, const_cast<char*>(password.c_str())
-		, p_broker_info->type == TypeBroker::ZHONGYGJ ? password.c_str() : ""// communication password 
+		, p_broker_info->type == TypeBroker::ZHONGY_GJ ? password.c_str() : ""// communication password 
 		//, const_cast<char*>(password.c_str())
 		, error_info);
 #elif 1
@@ -302,7 +302,7 @@ bool WinnerApp::LoginBroker(int broker_id, int depart_id, const std::string& acc
 		, const_cast<char*>(account.c_str())
 		, ""//const_cast<char*>(account.c_str())  // default trade no is account no  
 		, const_cast<char*>(password.c_str())
-		, p_broker_info->type == TypeBroker::ZHONGYGJ ? password.c_str() : ""// communication password 
+		, p_broker_info->type == TypeBroker::ZHONGY_GJ ? password.c_str() : ""// communication password 
 		//, const_cast<char*>(password.c_str())
 		, error_info);
 
@@ -430,7 +430,7 @@ T_CodeMapPosition WinnerApp::QueryPosition()
 
 	int start = 14;
 	int content_col = 13;
-	if( p_user_broker_info_->type == TypeBroker::ZHONGYGJ )
+	if( p_user_broker_info_->type == TypeBroker::ZHONGY_GJ )
 		start = 15;
 	else if ( p_user_broker_info_->type == TypeBroker::PING_AN )
 	{

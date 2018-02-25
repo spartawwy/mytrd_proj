@@ -11,6 +11,8 @@
 #include <QtCore/qstring.h> 
 #include <QTime>
 
+#include "common_base.h"
+
 #ifndef IN
 #define  IN
 #define  OUT
@@ -83,8 +85,8 @@ enum class TypeBroker : char
 {
     FANG_ZHENG = 1,    //方正
     PING_AN,           //平安
-	ZHONGXIN,          //中信
-    ZHONGYGJ,          //中银国际
+	ZHONG_XIN,          //中信
+    ZHONGY_GJ,          //中银国际
 	YINGHE_ZQ,         //银河证券
 };
 

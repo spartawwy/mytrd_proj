@@ -297,6 +297,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\common_base.h" />
     <ClInclude Include="..\include\TdxHqApi.h" />
     <ClInclude Include="..\include\TdxTradeApi.h" />
     <ClInclude Include="..\StkQuoter\stk_quoter_api.h" />
