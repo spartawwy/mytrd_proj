@@ -7,14 +7,37 @@
 #define AGENT_INTERFACE_API __declspec(dllimport)
 #endif
 
+class TradeDelegater;
 class  /*AGENT_INTERFACE_API*/ AgentInterface
 {
 public:
-	AgentInterface(){};
+	AgentInterface() : trade_delegater_(nullptr){};
 
 	virtual ~AgentInterface(){}
 
 	virtual bool Setup(char* account_no){ return true; };
+
+     CloseTdxDelegate CloseTdx;
+	 LogonDelegate Logon;
+	 LogoffDelegate Logoff;
+	 QueryDataDelegate QueryData; 
+	 SendOrderDelegate SendOrder; 
+	 CancelOrderDelegate CancelOrder;
+	 GetQuoteDelegate GetQuote; 
+	 RepayDelegate Repay; 
+	 
+	 //是普通批量版功能函数
+	 QueryDatasDelegate QueryDatas;
+	 QueryHistoryDataDelegate QueryHistoryData;
+	 SendOrdersDelegate SendOrders;
+	 CancelOrdersDelegate CancelOrders;
+	 GetQuotesDelegate GetQuotes; 
+
+protected:
+
+    TradeDelegater  *trade_delegater_;
+
+    //void InstallFunc();
 };
  
 extern "C" AGENT_INTERFACE_API AgentInterface * __cdecl CreateObject();

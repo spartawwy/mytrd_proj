@@ -24,10 +24,10 @@
     <ClInclude Include="targetver.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\agent_interface.h">
-      <Filter>header</Filter>
-    </ClInclude>
     <ClInclude Include="agent_fang_zheng.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\agent_interface.h">
       <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>
