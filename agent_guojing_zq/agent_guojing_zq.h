@@ -10,11 +10,11 @@
 #endif
 
 
-class /*AGENT_FANG_ZHENG_API*/ Agent_FANG_ZHENG : public AgentInterface
+class /*AGENT_FANG_ZHENG_API*/ Agent_GUOJING_ZQ : public AgentInterface
 {
 public:
-	Agent_FANG_ZHENG();
-	virtual ~Agent_FANG_ZHENG();
+	Agent_GUOJING_ZQ();
+	virtual ~Agent_GUOJING_ZQ();
 
 	virtual bool Setup(char* account_no) override;
 	virtual bool Login(char* password) override;

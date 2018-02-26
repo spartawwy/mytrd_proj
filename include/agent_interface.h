@@ -1,6 +1,8 @@
 #ifndef AGENT_INTERFACE_SDF23FDSFS_H_
 #define AGENT_INTERFACE_SDF23FDSFS_H_
 
+#include <cstring>
+
 #ifdef AGENT_INTERFACE_EXPORTS
 #define AGENT_INTERFACE_API __declspec(dllexport)
 #else
@@ -11,32 +13,27 @@ class TradeDelegater;
 class  /*AGENT_INTERFACE_API*/ AgentInterface
 {
 public:
-	AgentInterface() : trade_delegater_(nullptr){};
+	AgentInterface() : trade_delegater_(nullptr), trade_client_id_(-1)
+	{
+		auto val = sizeof(account_no_);
+		memset(dll_pre_str_, 0, sizeof(dll_pre_str_));
+		memset(account_no_, 0, sizeof(account_no_));
+		memset(password_, 0, sizeof(password_));
+	}
 
-	virtual ~AgentInterface(){}
+	virtual ~AgentInterface(){};
 
-	virtual bool Setup(char* account_no){ return true; };
-
-     CloseTdxDelegate CloseTdx;
-	 LogonDelegate Logon;
-	 LogoffDelegate Logoff;
-	 QueryDataDelegate QueryData; 
-	 SendOrderDelegate SendOrder; 
-	 CancelOrderDelegate CancelOrder;
-	 GetQuoteDelegate GetQuote; 
-	 RepayDelegate Repay; 
-	 
-	 //是普通批量版功能函数
-	 QueryDatasDelegate QueryDatas;
-	 QueryHistoryDataDelegate QueryHistoryData;
-	 SendOrdersDelegate SendOrders;
-	 CancelOrdersDelegate CancelOrders;
-	 GetQuotesDelegate GetQuotes; 
+	virtual bool Setup(char* account_no){ return false; }
+	virtual bool Login(char* password){ return false; }
 
 protected:
+	bool __Setup(char* account_no);
 
     TradeDelegater  *trade_delegater_;
-
+	char dll_pre_str_[64];
+	int trade_client_id_;
+	char account_no_[64];
+	char password_[64];
     //void InstallFunc();
 };
  

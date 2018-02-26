@@ -6,9 +6,28 @@
 
 typedef void(__stdcall* LogoffDelegate)(int ClientID);
 
+#define  TEST_FANG_ZHENG 
+//#define  TEST_GUOJING_ZQ   // 
+
+#ifdef TEST_FANG_ZHENG
+#define DYNAMIC_DLL_NAME "agent_fang_zheng.dll"
+#define ACCOUNT_NO "32506627"
+#define  PASSWORD_STR "626261"
+
+#elif defined TEST_GUOJING_ZQ 
+#define DYNAMIC_DLL_NAME "agent_guojing_zq.dll"
+#define ACCOUNT_NO  "40482392"
+#define  PASSWORD_STR "200672"
+
+#else
+#define DYNAMIC_DLL_NAME  " "
+#define ACCOUNT_NO  "40482392"
+#define  PASSWORD_STR "200672"
+#endif
+
 int main()
 {  
-	HMODULE md = LoadLibrary("agent_fang_zheng.dll");
+	HMODULE md = LoadLibrary(DYNAMIC_DLL_NAME);
 	if( md )
 	{
 		//auto p_val = GetProcAddress(md, "fnagent_fang_zheng");
@@ -20,7 +39,9 @@ int main()
 			p_agent_interface = CreateObject();
 		if( p_agent_interface )
 		{
-			p_agent_interface->Setup("abc");
+			p_agent_interface->Setup(ACCOUNT_NO);
+			auto ret = p_agent_interface->Login(PASSWORD_STR);
+			ret = ret;
 		}
 		
 		if( DestroyObject )
