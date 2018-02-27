@@ -229,146 +229,11 @@ void StockTicker::Procedure()
 
     if( !GetQuotes(stock_codes, stock_count, Result) )
         return;
-#if 0 
-    auto ret = TdxHq_GetSecurityQuotes(markets, stock_codes, stock_count, Result.data(), ErrInfo.data());
-    if ( !ret )
-    {
-        qDebug() << ErrInfo.data() << endl;
-        logger_.LogLocal(std::string("StockTicker::Procedure TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
-        if( !strstr(ErrInfo.data(), "请重新连接") )
-            TdxHq_Disconnect();
-
-        logger_.LogLocal(utility::FormatStr("StockTicker::Procedure TdxHq_Connect %s : %d ", cst_hq_server, cst_hq_port) );
-        Result.reset(); 
-        ErrInfo.reset();
-        try
-        {
-        ret = TdxHq_Connect(cst_hq_server, cst_hq_port, Result.data(), ErrInfo.data());
-        if ( !ret )
-        {
-            logger_.LogLocal(std::string("StockTicker::Procedure retry TdxHq_Connect fail:") + ErrInfo.data());
-            return;
-        }
-        logger_.LogLocal(utility::FormatStr("StockTicker::Procedure TdxHq_Connect ok!"));
-        Result.reset(); 
-        ErrInfo.reset();
-        // debug 
-        for( int i = 0; i < stock_count; ++i )
-            logger_.LogLocal(utility::FormatStr("StockTicker::Procedure stock_codes[%d]:%s", i, stock_codes[i]));
-        // end debug
-        ret = TdxHq_GetSecurityQuotes(markets, stock_codes, stock_count, Result.data(), ErrInfo.data());
-        if ( !ret )
-        {
-            logger_.LogLocal(std::string("StockTicker::Procedure retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
-            return;
-        }
-        }catch(std::exception &e)
-        {
-            logger_.LogLocal(utility::FormatStr("StockTicker::Procedure exception:%s", e.what()));
-            return;
-        }catch(...)
-        {
-            logger_.LogLocal("StockTicker::Procedure exception");
-            return;
-        }
-         
-    }
-#endif
-    /*auto tp_now = std::chrono::system_clock::now();
-    time_t t_t = std::chrono::system_clock::to_time_t(tp_now); */
+  
     //--------------------------Docode result -------------
 
     DecodeStkQuoteResult(Result, nullptr, std::bind(&StockTicker::TellAllRelTasks, this, std::placeholders::_1, std::placeholders::_2));
-    ///////====================
-    //std::bind(&StockTicker::TellAllRelTasks, this, std::placeholders::_1);
-#if 0
-    std::string res_str = Result.data();
-    TSystem::utility::replace_all_distinct(res_str, "\n", "\t");
-     
-    auto result_array = TSystem::utility::split(res_str, "\t");
-    
-    for( int n = 1; n < result_array.size() / 44; ++n )
-    {
-        auto stock_code = result_array.at(1 + n * 44);
-        auto task_ids_iter = codes_taskids_.find(stock_code);
-        if( task_ids_iter == codes_taskids_.end() )
-            continue;
-        auto quote_data = std::make_shared<QuotesData>();
-
-        try
-        {
-        quote_data->cur_price = boost::lexical_cast<double>( result_array.at(3 + n * 44) );
-        quote_data->active_degree = boost::lexical_cast<double>(result_array.at(42 + n * 44));
-
-        quote_data->time_stamp = (__int64)t_t;
-
-        quote_data->price_b_1 = boost::lexical_cast<double>(result_array.at(17 + n * 44));
-        quote_data->price_s_1 = boost::lexical_cast<double>(result_array.at(18 + n * 44));
-        quote_data->price_b_2 = boost::lexical_cast<double>(result_array.at(21 + n * 44));
-        quote_data->price_s_2 = boost::lexical_cast<double>(result_array.at(22 + n * 44));
-        quote_data->price_b_3 = boost::lexical_cast<double>(result_array.at(25 + n * 44));
-        quote_data->price_s_3 = boost::lexical_cast<double>(result_array.at(26 + n * 44));
-        quote_data->price_b_4 = boost::lexical_cast<double>(result_array.at(29 + n * 44));
-        quote_data->price_s_4 = boost::lexical_cast<double>(result_array.at(30 + n * 44));
-        quote_data->price_b_5 = boost::lexical_cast<double>(result_array.at(33 + n * 44));
-        quote_data->price_s_5 = boost::lexical_cast<double>(result_array.at(34 + n * 44));
-        }catch(const boost::exception&)
-        {
-            continue;
-        }
-         
-        TellAllRelTasks(task_ids_iter->second, quote_data);
-#endif 
-    //    std::for_each( std::begin(task_ids_iter->second), std::end(task_ids_iter->second), [&, this](unsigned int id)
-    //    {
-    //        TTaskIdMapStrategyTask::iterator  task_iter = this->registered_tasks_.find(id);
-    //        if( task_iter != registered_tasks_.end() )
-    //        { 
-    //            //qDebug() << std::get<1>(CurrentDateTime()).c_str() << " " << task_iter->second->stock_code() << " cur_pric:" << task_iter->second->cur_price() << "\n";
-    //            task_iter->second->ObtainData(quote_data);
-
-    //            task_iter->second->life_count_ = 0;
-				//if( task_iter->second->cur_state() != TaskCurrentState::RUNNING )
-				//{
-				//	task_iter->second->cur_state(TaskCurrentState::RUNNING);
-				//	task_iter->second->app()->Emit(task_iter->second.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
-				//}
-
-    //        }else
-    //        {
-    //            // log error
-    //            logger_.LogLocal(utility::FormatStr("error StockTicker::Procedure can't find task %d", id));
-    //        }
-    //    });
-        //===================
-#if 0
-        auto cur_price = result_array.at(3 + n * 44);
-        auto active_degree = result_array.at(42 + n * 44); 
-        auto price_b_1 = result_array.at(17 + n * 44);
-        auto price_s_1 = result_array.at(18 + n * 44);
-        auto price_b_2 = result_array.at(21 + n * 44);
-        auto price_s_2 = result_array.at(22 + n * 44);
-        auto price_b_3 = result_array.at(25 + n * 44);
-        auto price_s_3 = result_array.at(26 + n * 44);
-        auto price_b_4 = result_array.at(29 + n * 44);
-        auto price_s_4 = result_array.at(30 + n * 44);
-        auto price_b_5 = result_array.at(33 + n * 44);
-        auto price_s_5 = result_array.at(34 + n * 44);
-
-        qDebug() << "sell5 " << price_s_5.c_str() << "\n";
-        qDebug() << "sell4 " << price_s_4.c_str() << "\n";
-        qDebug() << "sell3 " << price_s_3.c_str() << "\n";
-        qDebug() << "sell2 " << price_s_2.c_str() << "\n";
-        qDebug() << "sell1 " << price_s_1.c_str() << "\n";
-        qDebug() << "cur " << cur_price.c_str() << "\n";
-        qDebug() << "buy1 " << price_b_1.c_str() << "\n";
-        qDebug() << "buy2 " << price_b_2.c_str() << "\n";
-        qDebug() << "buy3 " << price_b_3.c_str() << "\n";
-        qDebug() << "buy4 " << price_b_4.c_str() << "\n";
-        qDebug() << "buy5 " << price_b_5.c_str() << "\n";
-#endif
-    //} // for 
-
+      
     ///qDebug() << QString::fromLocal8Bit(Result.data()) << "\n";  
 }
  
@@ -523,14 +388,14 @@ void IndexTicker::Procedure()
 	{ 
 		for(int i = 0; i < max_index_count; ++i)
 		{
-			if( codes[i] == nullptr )
+			if( strlen(codes[i]) == 0 )
 				return false;
 			if( !strcmp(codes[i], str) )
 				return true;
 		}
 		return false;
 	};
-    Buffer Result(cst_result_len);
+    //Buffer Result(cst_result_len);
     Buffer ErrInfo(cst_error_len);
 
     char index_codes[max_index_count][16];
@@ -552,26 +417,37 @@ void IndexTicker::Procedure()
     });
 	if( index_count < 1 )
 		return;
-
-	T_StockPriceInfo price_info[max_index_count];
+    assert(StkQuoteGetQuote_);
+    T_StockPriceInfo price_info[max_index_count];
 	auto num = StkQuoteGetQuote_(index_codes, index_count, price_info);
 	if( num < 1 )
 		return;
-    
+
+#if 1
+	 
 	auto tp_now = std::chrono::system_clock::now();
     time_t t_t = std::chrono::system_clock::to_time_t(tp_now); 
 	for( int i = 0; i < num; ++i )
 	{
+#if 1
 		auto task_ids_iter = codes_taskids_.find(index_codes[i]);
         if( task_ids_iter == codes_taskids_.end() )
             continue;
+#endif
         auto quote_data = std::make_shared<QuotesData>();
-		 
-		quote_data->cur_price = price_info[i].cur_price;  
+#if 1 
+        double price = price_info[i].cur_price;
+		quote_data->cur_price = price;  
+#else
+        quote_data->cur_price = price_info[i].cur_price; // cause exception. ndchk why
+#endif
 		quote_data->time_stamp = (__int64)t_t;
+          
+#if 1 
 		// throu id list which this stock code related  ----------------
         std::for_each( std::begin(task_ids_iter->second), std::end(task_ids_iter->second), [&, this](unsigned int id)
         {
+#if 1
             TTaskIdMapStrategyTask::iterator  task_iter = registered_tasks_.find(id);
             if( task_iter != registered_tasks_.end() )
             { 
@@ -590,8 +466,11 @@ void IndexTicker::Procedure()
                 // log error
                 logger_.LogLocal(utility::FormatStr("error IndexTicker::Procedure can't find task %d", id));
             }
+#endif
         });
+#endif
 	}
+#endif 
 }
  
 

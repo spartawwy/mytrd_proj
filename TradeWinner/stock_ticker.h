@@ -20,7 +20,7 @@ typedef std::unordered_map<unsigned int, std::shared_ptr<StrategyTask> > TTaskId
 // <stock code, task_id>
 typedef std::unordered_map<std::string, std::list<unsigned int> > TCodeMapTasks;
 
-static const unsigned int cst_result_len = 1024 * 1024;
+static const unsigned int cst_result_len = 1024 * 1000;
 static const unsigned int cst_error_len = 1024;
 static const unsigned int cst_max_stock_code_count = 128;
 

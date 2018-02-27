@@ -32,7 +32,7 @@ Cookie::TRetCookie Cookie::Init()
     TRetCookie  ret = TRetCookie::OK;
 
     //const char* shared_name = "cookietrdw";
-    const char* shared_name = "cookietrdw11";
+    const char* shared_name = "cookietrdw12";
      
     _mkdir("c:\\trade_localf");
 

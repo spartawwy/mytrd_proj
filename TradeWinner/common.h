@@ -242,6 +242,9 @@ public:
         , price_s_5(0.0)
     {
     }
+    ~QuotesData()
+    {
+    }
 };
 
 class Buffer
