@@ -28,9 +28,15 @@ public:
 	virtual bool Setup(char* account_no){ return false; }
     
 
-	virtual bool Login(char* password){ return false; }
-    virtual bool InstallAccountData(){ return false; }
+	virtual bool Login(char* ip, short port, char* ver, short yybid, char* account_no
+		, char* trade_account, char* trade_pwd, char* txpwd, char* error){ return false; }
+	// ps: make sure error arrary len is larger than 1024
+    virtual bool InstallAccountData(char *error){ return false; }
     virtual const T_AccountData * account_data(TypeMarket type_market) const;
+
+	virtual void SendOrder(int ClientID, int Category, int PriceType, char* Gddm, char* Zqdm, float Price, int Quantity, char* Result, char* ErrInfo);
+
+	//TradeDelegater * trade_delegater() { return trade_delegater_; }
 
 protected:
 	bool __Setup(char* account_no);

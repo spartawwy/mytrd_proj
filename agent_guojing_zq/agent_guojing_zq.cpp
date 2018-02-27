@@ -27,17 +27,18 @@ bool Agent_GUOJING_ZQ::Setup(char* account_no)
 }
 
 
-bool Agent_GUOJING_ZQ::Login(char* password)
-{
+bool Agent_GUOJING_ZQ::Login(char* ip, short port, char* ver, short yybid, char* account_no
+							 , char* trade_account, char* trade_pwd, char* txpwd, char* error)
+{ 
+	assert(trade_delegater_); 
+	assert(ip && ver && account_no && trade_account && trade_pwd && txpwd && error);
+
 	char error_info[1024] = {0};
-
-	assert(trade_delegater_);
-	if( !password ) 
-		return false;
-
     trade_client_id_ = -1;
-
 #if 1
+	trade_client_id_ = trade_delegater_->Logon(ip, port, ver, yybid, account_no
+		, trade_account, trade_pwd, txpwd, error);
+#elif 0
     if( trade_client_id_ == -1 )
     {
          trade_client_id_ = trade_delegater_->Logon("114.141.171.133"  
@@ -50,7 +51,7 @@ bool Agent_GUOJING_ZQ::Login(char* password)
 		, "" //, p_broker_info->type == TypeBroker::ZHONGY_GJ ? password.c_str() : ""// communication password 
 		, error_info);
     }
-#elif 1
+#elif 0
     if( trade_client_id_ == -1 )
     {
          trade_client_id_ = trade_delegater_->Logon("114.141.171.133"  
@@ -65,17 +66,17 @@ bool Agent_GUOJING_ZQ::Login(char* password)
     }
  
 #endif
-    if( trade_client_id_ != -1 )
-        strcpy_s(password_, password);
+    /*if( trade_client_id_ != -1 )
+        strcpy_s(password_, password);*/
     return trade_client_id_ != -1;
 }
 
-bool Agent_GUOJING_ZQ::InstallAccountData()
+bool Agent_GUOJING_ZQ::InstallAccountData(char *error)
 {
+	assert(error);
     if( !trade_delegater_ || trade_client_id_ == -1 )
          return false;
-     Buffer result(1024);
-	 char error[1024] = {0};
+     Buffer result(1024); 
      trade_delegater_->QueryData(trade_client_id_, (int)TypeQueryCategory::SHARED_HOLDER_CODE, result.data(), error);
 	 if( strlen(error) != 0 )
 	 { 

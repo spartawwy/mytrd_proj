@@ -17,9 +17,10 @@ public:
 	virtual ~Agent_GUOJING_ZQ();
 
 	virtual bool Setup(char* account_no) override;
-	virtual bool Login(char* password) override;
+	virtual bool Login(char* ip, short port, char* ver, short yybid, char* account_no
+		, char* trade_account, char* trade_pwd, char* txpwd, char* error) override;
 
-    virtual bool InstallAccountData() override;
+    virtual bool InstallAccountData(char *error) override;
     //virtual const T_AccountData * account_data(TypeMarket type_market) const override;
 };
 

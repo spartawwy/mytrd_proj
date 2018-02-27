@@ -26,13 +26,15 @@ bool Agent_FANG_ZHENG::Setup(char* account_no)
 	 return __Setup(account_no);
 }
 
-bool Agent_FANG_ZHENG::Login(char* password)
-{
-	char error_info[1024] = {0};
-
+bool Agent_FANG_ZHENG::Login(char* ip, short port, char* ver, short yybid, char* account_no
+							 , char* trade_account, char* trade_pwd, char* txpwd, char* error)
+{ 
 	assert(trade_delegater_);
+	assert(ip && ver && account_no && trade_account && trade_pwd && txpwd && error);
+#if 0
 	if( !password ) 
 		return false;
+	char error_info[1024] = {0};
 	trade_client_id_ = trade_delegater_->Logon("122.224.113.121" //"218.75.75.28" // 
 		, 7708
 		, "2.20" // "4.02" //"2.43" //"8.19"  // "2.24" 
@@ -42,24 +44,28 @@ bool Agent_FANG_ZHENG::Login(char* password)
 		, const_cast<char*>(password)
 		, password //, p_broker_info->type == TypeBroker::ZHONGY_GJ ? password.c_str() : ""// communication password 
 		, error_info);
+#else
+	trade_client_id_ = trade_delegater_->Logon(ip, port, ver, yybid, account_no
+		, trade_account, trade_pwd, txpwd, error);
+#endif
 	return trade_client_id_ != -1;
 
     
 }
 
-bool Agent_FANG_ZHENG::InstallAccountData()
+bool Agent_FANG_ZHENG::InstallAccountData(char *error)
 {
+	 assert(error);
      if( !trade_delegater_ || trade_client_id_ == -1 )
          return false;
-     Buffer result(1024);
-	 char error[1024] = {0};
+     Buffer result(1024); 
      trade_delegater_->QueryData(trade_client_id_, (int)TypeQueryCategory::SHARED_HOLDER_CODE, result.data(), error);
 	 if( strlen(error) != 0 )
 	 { 
 		 //QMessageBox::information(nullptr, "alert", QString::fromLocal8Bit("查询股权代码失败!"));
 		 return false;
 	 } 
-     unsigned short shared_holder_code_index = 0;
+    unsigned short shared_holder_code_index = 0;
     unsigned short name_index = 1;
     unsigned short type_index = 2;
     unsigned short capital_code_index = 3;

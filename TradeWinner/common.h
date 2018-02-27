@@ -167,20 +167,6 @@ struct T_AccountInformation
     T_AccountInformation() : id(-1), broker_id(-1) {}
 };
 
-struct T_PositionData
-{
-    std::string code;
-    std::string pinyin;
-    int total;
-    int avaliable;
-    double cost;
-    double value;
-    double profit;
-    double profit_percent;
-    T_PositionData() : code(), pinyin(), total(0), avaliable(0), cost(0.0), value(0.0), profit(0.0), profit_percent(0.0){}
-    T_PositionData(const T_PositionData &lh) : code(lh.code), pinyin(lh.pinyin), total(lh.total),avaliable(lh.avaliable), cost(lh.cost), value(lh.value), profit(lh.profit), profit_percent(lh.profit_percent){}
-    T_PositionData(const T_PositionData &&lh) : code(std::move(lh.code)), pinyin(std::move(lh.pinyin)), total(lh.total),avaliable(lh.avaliable), cost(lh.cost), value(lh.value), profit(lh.profit), profit_percent(lh.profit_percent){}
-};
 
 class  QuotesData
 {

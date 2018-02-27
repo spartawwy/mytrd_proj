@@ -1,94 +1,81 @@
 #include "trade_agent.h"
 
+#include <windows.h>
+
 #include <boost/lexical_cast.hpp>
+#include <Tlib/core/tsystem_utility_functions.h>
+
 #include <qmessagebox.h>
 
 #include <TLib/core/tsystem_utility_functions.h>
-
-
-
-TradeAgent::TradeAgent()
-    :/* app_(app)
-     ,*/ TdxApiHMODULE(nullptr)
-     , client_id_(-1)
-     , CloseTdx(nullptr)
-     , Logon(nullptr)
-     , Logoff(nullptr)
-     , QueryData(nullptr) 
-     , SendOrder(nullptr) 
-     , CancelOrder(nullptr)
-     , GetQuote(nullptr) 
-     , Repay(nullptr) 
-     , QueryDatas(nullptr)
-     , QueryHistoryData(nullptr)
-     , SendOrders(nullptr)
-     , CancelOrders(nullptr)
-     , GetQuotes(nullptr) 
+ 
+TradeAgent::TradeAgent() 
+	: p_agent_interface_(nullptr)
+	, CreateObject_(nullptr)
+	, DestroyObject_(nullptr)
 {
-    memset(&account_data_, 0, sizeof(account_data_));
+    //memset(&account_data_, 0, sizeof(account_data_));
 }
 
 TradeAgent::~TradeAgent()
 {
-    FreeDynamic();
+	if( DestroyObject_ )
+		DestroyObject_(p_agent_interface_);
 }
-void FreeDynamic()
+ 
+
+bool TradeAgent::Init(std::string &broker_tag, std::string &account_no)
 {
+	char dll_name_str[128] = {0};
+	sprintf_s(dll_name_str, sizeof(dll_name_str), "trd_%s_%s.dll", broker_tag.c_str(), account_no.c_str());
+	HMODULE md = LoadLibrary(dll_name_str);
+	if( !md )
+		return false;
+	 
+	//auto p_val = GetProcAddress(md, "fnagent_fang_zheng");
+	CreateObject_ = (CreateObjectDelegate)GetProcAddress(md, "CreateObject");
+	DestroyObject_ = (DestroyObjectDelegate)GetProcAddress(md, "DestroyObject");
+	if( !CreateObject_ || !DestroyObject_ )
+		return false;
+		 
+	p_agent_interface_ = CreateObject();
+	if( !p_agent_interface_ )
+		return false;
 
-}
+	if( !p_agent_interface_->Setup(const_cast<char*>(account_no.c_str())) )
+	{
+		return false;
+	}
 
-bool TradeAgent::Setup(TypeBroker broker_type, std::string &account_no)
-{
-    assert(account_no.length() > 0);
-    broker_type_ = broker_type;
-
-    FreeDynamic();
-
-    OpenTdx = nullptr;
-
-    char path_str[256] = {0};
-    sprintf_s(path_str, "trade_%s.dll\0", account_no.c_str());
-    TdxApiHMODULE = LoadLibrary(path_str);
-    if( TdxApiHMODULE == nullptr )
-    {
-        QMessageBox::information(nullptr, "info", "load trade.dll fail");
-        //throw excepton;
-        return false;
-    }
-
-    OpenTdx = (OpenTdxDelegate)GetProcAddress(TdxApiHMODULE, "OpenTdx");
-    CloseTdx = (CloseTdxDelegate)GetProcAddress(TdxApiHMODULE, "CloseTdx");
-    Logon = (LogonDelegate)GetProcAddress(TdxApiHMODULE, "Logon");
-    Logoff = (LogoffDelegate)GetProcAddress(TdxApiHMODULE, "Logoff");
-    QueryData = (QueryDataDelegate)GetProcAddress(TdxApiHMODULE, "QueryData");
-    SendOrder = (SendOrderDelegate)GetProcAddress(TdxApiHMODULE, "SendOrder");
-    CancelOrder = (CancelOrderDelegate)GetProcAddress(TdxApiHMODULE, "CancelOrder");
-    GetQuote = (GetQuoteDelegate)GetProcAddress(TdxApiHMODULE, "GetQuote");
-    Repay = (RepayDelegate)GetProcAddress(TdxApiHMODULE, "Repay");
-
-
-    //以下是普通批量版功能函数
-    QueryDatas = (QueryDatasDelegate)GetProcAddress(TdxApiHMODULE, "QueryDatas");
-    QueryHistoryData = (QueryHistoryDataDelegate)GetProcAddress(TdxApiHMODULE, "QueryHistoryData");
-    SendOrders = (SendOrdersDelegate)GetProcAddress(TdxApiHMODULE, "SendOrders");
-    CancelOrders = (CancelOrdersDelegate)GetProcAddress(TdxApiHMODULE, "CancelOrders");
-    GetQuotes = (GetQuotesDelegate)GetProcAddress(TdxApiHMODULE, "GetQuotes");
-
-    //       //以下是高级批量版功能函数
-    //QueryMultiAccountsDatasDelegate QueryMultiAccountsDatas = (QueryMultiAccountsDatasDelegate)GetProcAddress(TdxApiHMODULE, "QueryMultiAccountsDatas");
-    //SendMultiAccountsOrdersDelegate SendMultiAccountsOrders = (SendMultiAccountsOrdersDelegate)GetProcAddress(TdxApiHMODULE, "SendMultiAccountsOrders");
-    //CancelMultiAccountsOrdersDelegate CancelMultiAccountsOrders = (CancelMultiAccountsOrdersDelegate)GetProcAddress(TdxApiHMODULE, "CancelMultiAccountsOrders");
-    //GetMultiAccountsQuotesDelegate GetMultiAccountsQuotes = (GetMultiAccountsQuotesDelegate)GetProcAddress(TdxApiHMODULE, "GetMultiAccountsQuotes");
-
-    OpenTdx();
-    return true;
+	return true;
 }
 
 bool TradeAgent::IsInited() const
 {
-    return TdxApiHMODULE != nullptr && OpenTdx != nullptr;
+    //return TdxApiHMODULE != nullptr && OpenTdx != nullptr;
+	return true;
 }
 
+bool TradeAgent::Login(char* ip, short port, char* ver, short  yybid, char* account_no
+								  , char* trade_account, char* trade_pwd, char* txpwd, char* error)
+{
+	assert(p_agent_interface_);
+	if( !p_agent_interface_->Login(ip, port, ver, yybid, account_no
+		, trade_account, trade_pwd, txpwd, error) )
+	{
+		// todo: log error
+		return false;
+	}
+
+	return p_agent_interface_->InstallAccountData(error);
+}
+
+void TradeAgent::SendOrder(int ClientID, int Category, int PriceType, char* Gddm, char* Zqdm, float Price, int Quantity, char* Result, char* ErrInfo)
+{
+	assert(p_agent_interface_);
+	p_agent_interface_->SendOrder(ClientID, Category, PriceType, Gddm, Zqdm, Price, Quantity, Result,  ErrInfo);
+}
+#if 0
 void TradeAgent::SetupAccountInfo( char*str)
 {
     std::string result_str(str);
@@ -155,24 +142,11 @@ void TradeAgent::SetupAccountInfo( char*str)
         ++i;
     }
 }
+#endif
 
 const T_AccountData * TradeAgent::account_data(TypeMarket type_market) const
 {
-    T_AccountData* p_account = nullptr;
-    for(int i=0; i < sizeof(account_data_)/sizeof(account_data_[0]); ++i)
-    {
-        if( account_data_[i].type == type_market )
-        {
-            return &account_data_[i];
-        }
-    }
-    return p_account;
+	assert(p_agent_interface_);
+	return p_agent_interface_->account_data(type_market);
 }
-
-void TradeAgent::FreeDynamic()
-{
-    if( CloseTdx )
-        CloseTdx();
-    if( TdxApiHMODULE )
-        FreeLibrary(TdxApiHMODULE);
-}
+ 

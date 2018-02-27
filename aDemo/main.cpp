@@ -41,8 +41,20 @@ int main()
 		{
 			p_agent_interface->Setup(ACCOUNT_NO);
 			auto ret = p_agent_interface->Login(PASSWORD_STR);
-            ret = p_agent_interface->InstallAccountData();
+            ret = p_agent_interface->InstallAccountData(); 
 			ret = ret;
+
+			char gddm[64] = {"sfdsfs"};
+			char zqdm[64] = {"sfdsfs"};
+			char result[1024] = {0};
+			char error_info[1024] = {0};
+			p_agent_interface->SendOrder(0
+				, 1
+				, 0
+				, gddm
+				, zqdm
+				, 11.0, 100
+				, result, error_info); 
 		}
 		
 		if( DestroyObject )

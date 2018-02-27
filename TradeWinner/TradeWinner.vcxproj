@@ -297,6 +297,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\agent_interface.h" />
     <ClInclude Include="..\include\common_base.h" />
     <ClInclude Include="..\include\TdxHqApi.h" />
     <ClInclude Include="..\include\TdxTradeApi.h" />

@@ -17,9 +17,10 @@ public:
 	virtual ~Agent_FANG_ZHENG();
 
 	virtual bool Setup(char* account_no) override;
-	virtual bool Login(char* password) override;
+	virtual bool Login(char* ip, short port, char* ver, short yybid, char* account_no
+		, char* trade_account, char* trade_pwd, char* txpwd, char* error) override;
 
-    virtual bool InstallAccountData() override;
+    virtual bool InstallAccountData(char *error) override;
 };
 
 //extern AGENT_FANG_ZHENG_API int nagent_fang_zheng;

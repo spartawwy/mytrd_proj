@@ -128,7 +128,7 @@ bool WinnerApp::Init()
 
 #endif
 
-#ifdef USE_TRADE_FLAG
+#if 0
 	//=========================trade account login =================
 	 
 	Buffer result(1024);
@@ -256,62 +256,24 @@ bool WinnerApp::LoginBroker(int broker_id, int depart_id, const std::string& acc
 	if( !p_broker_info) 
 		return false;
 	auto p_user_account_info = db_moudle_.FindUserAccountInfo(user_info_.id); 
-	//assert(p_user_account_info && p_user_broker_info);
-
-	/*trade_client_id_ = trade_agent_.Logon("122.224.113.121"
-	, 7708, "2.20", 1, "32506627"
-	, "32506627", "626261", "", error_info);*/
-	//p_user_account_info->comm_pwd_;
+	    
 #if 1
-	trade_client_id_ = trade_agent_.Logon(const_cast<char*>(p_broker_info->ip.c_str())
+	bool ret = trade_agent_.Logon(const_cast<char*>(p_broker_info->ip.c_str())
 		, p_broker_info->port
 		, const_cast<char*>(p_broker_info->com_ver.c_str())
 		, 1
 		, const_cast<char*>(account.c_str())
 		, const_cast<char*>(account.c_str())  // default trade no is account no  
 		, const_cast<char*>(password.c_str())
-		, p_broker_info->type == TypeBroker::ZHONGY_GJ ? password.c_str() : ""// communication password 
+		, ""// communication password 
 		, error_info);
-#elif 0
-	trade_client_id_ = trade_agent_.Logon("218.205.84.239" //"115.238.180.23"
-		, 80
-		, "4.02" //"2.43" //"8.19"  // "2.24" 
-		, 152
-		, const_cast<char*>(account.c_str())
-		, const_cast<char*>(account.c_str())  // default trade no is account no  
-		, const_cast<char*>(password.c_str())
-		, p_broker_info->type == TypeBroker::ZHONGY_GJ ? password.c_str() : ""// communication password 
-		//, const_cast<char*>(password.c_str())
-		, error_info);
-#elif 0
-	trade_client_id_ = trade_agent_.Logon("218.205.84.239" // tdx yhzq  
-		, 80
-		, "4.02" //"2.43" //"8.19"  // "2.24" 
-		, 152
-		, const_cast<char*>(account.c_str())
-		, const_cast<char*>(account.c_str())  // default trade no is account no  
-		, const_cast<char*>(password.c_str())
-		, p_broker_info->type == TypeBroker::ZHONGY_GJ ? password.c_str() : ""// communication password 
-		//, const_cast<char*>(password.c_str())
-		, error_info);
-#elif 1
-	trade_client_id_ = trade_agent_.Logon("113.108.128.105" //"218.75.75.28" // 
-		, 443
-		, "2.50" // "4.02" //"2.43" //"8.19"  // "2.24" 
-		, 1
-		, const_cast<char*>(account.c_str())
-		, ""//const_cast<char*>(account.c_str())  // default trade no is account no  
-		, const_cast<char*>(password.c_str())
-		, p_broker_info->type == TypeBroker::ZHONGY_GJ ? password.c_str() : ""// communication password 
-		//, const_cast<char*>(password.c_str())
-		, error_info);
-
-#endif
-	if( trade_client_id_ == -1 ) 
+	if( !ret ) 
 	{
 		// QMessageBox::information(nullptr, "alert", "login fail!");
 		return false;
 	} 
+#endif  
+	
 	p_user_broker_info_ = p_broker_info;
 	p_user_account_info_  = p_user_account_info;
 	return true;
@@ -405,7 +367,7 @@ T_CodeMapPosition WinnerApp::QueryPosition()
 
 	char error[1024] = {0};
 #ifdef USE_TRADE_FLAG
-	trade_agent_.QueryData(trade_client_id_, (int)TypeQueryCategory::STOCK, result->data(), error);
+	trade_agent_.QueryData((int)TypeQueryCategory::STOCK, result->data(), error);
 	if( strlen(error) != 0 )
 	{ 
 		qDebug() << "query  fail! " << "\n";
@@ -549,7 +511,7 @@ T_Capital WinnerApp::QueryCapital()
 
 	char error[1024] = {0};
 #ifdef USE_TRADE_FLAG
-	trade_agent_.QueryData(trade_client_id_, (int)TypeQueryCategory::CAPITAL, result->data(), error);
+	trade_agent_.QueryData((int)TypeQueryCategory::CAPITAL, result->data(), error);
 	if( strlen(error) != 0 )
 	{ 
 		qDebug() << "query  fail! " << "\n";
