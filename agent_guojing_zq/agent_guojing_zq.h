@@ -19,6 +19,8 @@ public:
 	virtual bool Setup(char* account_no) override;
 	virtual bool Login(char* password) override;
 
+    virtual bool InstallAccountData() override;
+    //virtual const T_AccountData * account_data(TypeMarket type_market) const override;
 };
 
 //extern AGENT_FANG_ZHENG_API int nagent_fang_zheng;

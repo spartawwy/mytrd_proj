@@ -19,6 +19,7 @@ public:
 	virtual bool Setup(char* account_no) override;
 	virtual bool Login(char* password) override;
 
+    virtual bool InstallAccountData() override;
 };
 
 //extern AGENT_FANG_ZHENG_API int nagent_fang_zheng;

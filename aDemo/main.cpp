@@ -41,6 +41,7 @@ int main()
 		{
 			p_agent_interface->Setup(ACCOUNT_NO);
 			auto ret = p_agent_interface->Login(PASSWORD_STR);
+            ret = p_agent_interface->InstallAccountData();
 			ret = ret;
 		}
 		

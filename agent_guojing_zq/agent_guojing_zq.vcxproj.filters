@@ -24,7 +24,7 @@
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="..\include\agent_interface.h">
-      <Filter>header</Filter>
+      <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

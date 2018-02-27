@@ -11,6 +11,7 @@ public:
 
 	TradeDelegater();
 
+    HMODULE TdxApiHMODULE;
 	OpenTdxDelegate OpenTdx;
 	CloseTdxDelegate CloseTdx;
 	LogonDelegate Logon;

@@ -80,6 +80,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\agent_interface.h" />
     <ClInclude Include="..\include\trade_delegate_base.h" />
   </ItemGroup>
   <ItemGroup>

@@ -21,6 +21,9 @@
     <ClInclude Include="..\include\trade_delegate_base.h">
       <Filter>source</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\agent_interface.h">
+      <Filter>source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="trade_delegate_base.cpp">
