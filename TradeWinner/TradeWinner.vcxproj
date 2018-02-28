@@ -158,6 +158,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="advance_section_task.cpp" />
     <ClCompile Include="batches_buy_task.cpp" />
     <ClCompile Include="batches_sell_task.cpp" />
     <ClCompile Include="breakdown_task.cpp" />
@@ -302,6 +303,7 @@
     <ClInclude Include="..\include\TdxHqApi.h" />
     <ClInclude Include="..\include\TdxTradeApi.h" />
     <ClInclude Include="..\StkQuoter\stk_quoter_api.h" />
+    <ClInclude Include="advance_section_task.h" />
     <ClInclude Include="batches_buy_task.h" />
     <ClInclude Include="batches_sell_task.h" />
     <ClInclude Include="breakdown_task.h" />
@@ -540,6 +542,9 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="readme.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

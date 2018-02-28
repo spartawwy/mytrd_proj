@@ -85,6 +85,7 @@ enum class TypeTask : char
 
 	EQUAL_SECTION,
     INDEX_RISKMAN, // 8
+	ADVANCE_SECTION,
 };
 
 enum class TypeQuoteLevel : char
@@ -287,6 +288,13 @@ struct T_IndexRelateTask
 	T_IndexRelateTask(const T_IndexRelateTask &lh) : rel_type(lh.rel_type), is_down_trigger(lh.is_down_trigger), stock_code(lh.stock_code), is_buy(lh.is_buy){}
 };
 
+struct T_AdvanceSectionTask
+{
+	std::string portion_sections;
+	std::string portion_states;
+	bool is_original;
+};
+
 struct T_TaskInformation
 {
     unsigned int id;
@@ -302,6 +310,7 @@ struct T_TaskInformation
 	unsigned int quantity;    // 买入数量, 每次数量
 	T_SectionTask secton_task;
 	T_IndexRelateTask index_rel_task;
+	T_AdvanceSectionTask advance_section_task;
 	int target_price_level;   // 0--即时价  1--买一和卖一 2--买二和卖二 3--买三和卖三 ...
 	int start_time; 
 	int end_time;

@@ -79,8 +79,17 @@ CREATE TABLE EqualSectionTask(id INTEGER,
                                 max_position INTEGER, min_position INTEGER,
 								PRIMARY KEY(id));
 
+CREATE TABLE AdvanceSectionTask(id INTEGER,
+								price_sections TEXT,
+								is_original BOOL,
+								PRIMARY KEY(id));
 CREATE TABLE IndexRelateTask(id INTEGER, index_task_type INTEGER, relate_stock TEXT, is_down_trigger bool, is_buy bool,  PRIMARY KEY(id));
-        
+
+CREATE TABLE AdvanceSectionTask(id INTEGER,
+								portion_sections TEXT, //seperate by ';'
+								portion_states TEXT,   //seperate by ';'
+								is_original BOOL,
+								PRIMARY KEY(id));          
  */
 using namespace  TSystem;
 DBMoudle::DBMoudle(WinnerApp *app)
