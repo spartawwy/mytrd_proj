@@ -344,12 +344,7 @@ struct T_StockCodeName
     T_StockCodeName(const T_StockCodeName &lh) : code(lh.code), name(lh.name){}
 };
 
-struct T_Capital
-{
-    double remain;
-    double available;
-    double total;
-};
+
 //struct T_StockPosition
 //{
 //    std::string  code;

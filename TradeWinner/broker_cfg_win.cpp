@@ -78,7 +78,7 @@ void BrokerCfgWin::DoOkBtnClicked()
     assert(p_broker_info);
     if( !app_->trade_agent().Init(p_broker_info->remark, acc_no_input) )
 	{
-		MessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("登录失败! 请选择对应券商并输入正确证券账号!"));
+		QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("登录失败! 请选择对应券商并输入正确证券账号!"));
 		return;
 	}
     //int department_id = ui_.cb_department->currentData().toInt();

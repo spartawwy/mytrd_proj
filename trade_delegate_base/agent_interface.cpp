@@ -80,8 +80,9 @@ const T_AccountData * AgentInterface::account_data(TypeMarket type_market) const
     return p_account;
 }
 
-void AgentInterface::SendOrder(int ClientID, int Category, int PriceType, char* Gddm, char* Zqdm, float Price, int Quantity, char* Result, char* ErrInfo)
+void AgentInterface::SendOrder(int Category, int PriceType, char* Gddm, char* Zqdm, float Price, int Quantity, char* Result, char* ErrInfo)
 {
 	assert(trade_delegater_);
-	trade_delegater_->SendOrder(ClientID, Category, PriceType, Gddm, Zqdm, Price, Quantity, Result,  ErrInfo);
+    assert(trade_client_id_ != -1);
+	trade_delegater_->SendOrder(trade_client_id_, Category, PriceType, Gddm, Zqdm, Price, Quantity, Result,  ErrInfo);
 }

@@ -36,17 +36,53 @@ struct T_AccountData
 
 struct T_PositionData
 {
-	std::string code;
-	std::string pinyin;
+	char code[32];
+	char pinyin[32];
 	int total;
 	int avaliable;
 	double cost;
 	double value;
 	double profit;
 	double profit_percent;
-	T_PositionData() : code(), pinyin(), total(0), avaliable(0), cost(0.0), value(0.0), profit(0.0), profit_percent(0.0){}
-	T_PositionData(const T_PositionData &lh) : code(lh.code), pinyin(lh.pinyin), total(lh.total),avaliable(lh.avaliable), cost(lh.cost), value(lh.value), profit(lh.profit), profit_percent(lh.profit_percent){}
-	T_PositionData(const T_PositionData &&lh) : code(std::move(lh.code)), pinyin(std::move(lh.pinyin)), total(lh.total),avaliable(lh.avaliable), cost(lh.cost), value(lh.value), profit(lh.profit), profit_percent(lh.profit_percent){}
+    T_PositionData() : total(0), avaliable(0), cost(0.0), value(0.0), profit(0.0), profit_percent(0.0)
+    { 
+        code[0] = '\0'; pinyin[0] = '\0';
+    }
+	T_PositionData(const T_PositionData &lh) : total(lh.total),avaliable(lh.avaliable), cost(lh.cost), value(lh.value), profit(lh.profit), profit_percent(lh.profit_percent)
+    {
+        strcpy_s(code, lh.code); strcpy_s(pinyin, lh.pinyin); 
+    }
+    T_PositionData& operator = (const T_PositionData &lh)
+    {
+        if( this == &lh ) return *this;
+        strcpy_s(code, lh.code); 
+        strcpy_s(pinyin, lh.pinyin); 
+        total = lh.total; 
+        avaliable = lh.avaliable; 
+        cost = lh.cost; 
+        value = lh.value; 
+        profit = lh.profit; 
+        profit_percent = lh.profit_percent; 
+        return *this;
+    }
+	/*T_PositionData(const T_PositionData &&lh) : total(lh.total),avaliable(lh.avaliable), cost(lh.cost), value(lh.value), profit(lh.profit), profit_percent(lh.profit_percent)
+    { 
+    }*/
+};
+
+struct T_Capital
+{
+    double remain;
+    double available;
+    double total;
+    T_Capital(): remain(0.0), available(0.0), total(0.0){}
+    T_Capital(const T_Capital&lh) : remain(lh.remain), available(lh.available), total(lh.total) {}
+    T_Capital& operator = (const T_Capital&lh) 
+    {
+        if( this == &lh ) return *this;
+        remain = lh.remain; available = lh.available; total = lh.total;
+        return *this;
+    }
 };
 
 class Buffer

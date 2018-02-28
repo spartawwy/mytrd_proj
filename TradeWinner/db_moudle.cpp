@@ -850,7 +850,9 @@ void DBMoudle::GetStockCode(const std::string &code, std::vector<T_StockCodeName
         T_StockCodeName code_name;
         code_name.code = *vals;
         code_name.name = *(vals + 1);*/
-        ret.emplace_back(*vals, *(vals + 1));
+        std::string name = *(vals + 1);
+        utf8ToGbk(name);
+        ret.emplace_back(*vals, std::move(name));
         return 0;
     });
     return;
@@ -874,6 +876,7 @@ std::string DBMoudle::GetStockName(const std::string &code_num)
     db_conn_->ExecuteSQL(sql.c_str(),[&name, this](int num_cols, char** vals, char** names)->int
     { 
         name = *vals; 
+        utf8ToGbk(name);
         return 0;
     });
     return name;

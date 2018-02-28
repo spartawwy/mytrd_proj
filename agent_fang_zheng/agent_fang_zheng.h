@@ -21,6 +21,10 @@ public:
 		, char* trade_account, char* trade_pwd, char* txpwd, char* error) override;
 
     virtual bool InstallAccountData(char *error) override;
+      
+    virtual int QueryPosition(T_PositionData *out_pos_data, int max_pos_size, char* error) override;
+    virtual bool QueryCapital(T_Capital *capital) override;
+
 };
 
 //extern AGENT_FANG_ZHENG_API int nagent_fang_zheng;

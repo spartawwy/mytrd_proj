@@ -3,8 +3,10 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "agent_guojing_zq.h"
+#include "agent_utility_use.h"
 
 #include "trade_delegate_base.h"
  
@@ -16,8 +18,7 @@ Agent_GUOJING_ZQ::Agent_GUOJING_ZQ()
 }
 
 Agent_GUOJING_ZQ::~Agent_GUOJING_ZQ()
-{
-    FreeDynamic();
+{ 
 }
 
 
@@ -66,8 +67,7 @@ bool Agent_GUOJING_ZQ::Login(char* ip, short port, char* ver, short yybid, char*
     }
  
 #endif
-    /*if( trade_client_id_ != -1 )
-        strcpy_s(password_, password);*/
+    
     return trade_client_id_ != -1;
 }
 
@@ -136,6 +136,107 @@ bool Agent_GUOJING_ZQ::InstallAccountData(char *error)
     return i > 0;
 }
  
+
+int Agent_GUOJING_ZQ::QueryPosition(T_PositionData *out_pos_data, int max_pos_size, char* error)
+{
+    assert(trade_delegater_);
+    if( trade_client_id_ == -1 )
+        return -1;
+
+    auto result = std::make_shared<Buffer>(5*1024);
+      
+    trade_delegater_->QueryData(trade_client_id_, (int)TypeQueryCategory::STOCK, result->data(), error);
+	if( strlen(error) != 0 )
+	{  
+		return -1;
+	} 
+	std::string str_result = result->c_data();
+	UtilityUse::replace_all_distinct(str_result, "\n", "\t");
+	/*qDebug() << " line 382" << "\n";
+	qDebug() << str_result.c_str() << " ----\n";*/
+	auto result_array = UtilityUse::split(str_result, "\t");
+
+	//std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
+     
+	int start = 13;
+	int content_col = 12;
+#if 0
+    if( p_user_broker_info_->type == TypeBroker::ZHONGY_GJ )
+		start = 15;
+	else if ( p_user_broker_info_->type == TypeBroker::PING_AN )
+	{
+		start = 23;
+		content_col = 21;
+	} 
+#endif
+
+    int index = 0;
+	for( unsigned int n = 0 ; n < (result_array.size() - start) / content_col; ++n )
+	{
+		T_PositionData  pos_data;
+
+        std::string stock_code = result_array.at( start + n * content_col);
+		UtilityUse::replace_all_distinct(stock_code, "\t", "");
+        strcpy_s(pos_data.code, stock_code.c_str());
+		double qty_can_sell = 0;
+		try
+		{
+            strcpy_s(pos_data.pinyin, result_array.at( start + n * content_col + 1).c_str());
+            pos_data.total = std::stoi(result_array.at( start + n * content_col + 2 ));
+			pos_data.avaliable = std::stoi(result_array.at(start + n * content_col + 3));
+            pos_data.cost = std::stod(result_array.at(start + n * content_col + 4));
+			pos_data.value = std::stod(result_array.at(start + n * content_col + 6));
+			pos_data.profit = std::stod(result_array.at(start + n * content_col + 7));
+			pos_data.profit_percent = std::stod(result_array.at(start + n * content_col + 8));
+
+		}catch(std::exception &)
+		{ 
+            // todo: log error
+			continue;
+		} 
+        if( index < max_pos_size )
+            out_pos_data[index++] = pos_data;
+	}
+	return index;
+}
+
+bool Agent_GUOJING_ZQ::QueryCapital(T_Capital *capital)
+{
+    assert(capital);
+
+    auto result = std::make_shared<Buffer>(5*1024);
+    char error[1024] = {0};
+    trade_delegater_->QueryData(trade_client_id_, (int)TypeQueryCategory::CAPITAL, result->data(), error);
+	if( strlen(error) != 0 )
+	{  
+		return false;
+	} 
+    std::string str_result = result->c_data();
+    UtilityUse::replace_all_distinct(str_result, "\n", "\t");
+
+	auto result_array = UtilityUse::split(str_result, "\t");
+	if( result_array.size() < 16 )
+		return false;
+	try
+	{
+		/*if( p_user_broker_info_->type == TypeBroker::PING_AN )
+		{
+			capital.remain = boost::lexical_cast<double>(result_array.at(19));
+			capital.available = boost::lexical_cast<double>(result_array.at(20));
+			capital.total = boost::lexical_cast<double>(result_array.at(25));
+		}else*/
+		{
+            capital->remain = std::stod(result_array.at(11));
+			capital->available = std::stod(result_array.at(13));
+			capital->total = std::stod(result_array.at(14));
+		}
+	}catch(std::exception &)
+	{ 
+        return false;
+	}
+
+	return true;
+}
 
 AgentInterface * __cdecl CreateObject()
 {

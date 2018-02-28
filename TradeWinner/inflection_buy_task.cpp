@@ -134,8 +134,7 @@ void InflectionBuyTask::HandleQuoteData()
             TSystem::utility::FormatStr("触发任务:%d 拐点买入 %s 价格:%.2f 数量:%d 阀值:%d秒", para_.id, this->code_data(), price, para_.quantity, this->para_.continue_second)); 
         this->app_->AppendLog2Ui("触发任务:%d 拐点买入 %s 价格:%.2f 数量:%d 阀值:%d秒", para_.id, this->code_data(), price, para_.quantity, this->para_.continue_second);
         // sell the stock
-        this->app_->trade_agent().SendOrder(this->app_->trade_client_id()
-            , (int)TypeOrderCategory::BUY, 0
+        this->app_->trade_agent().SendOrder((int)TypeOrderCategory::BUY, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
             , price, para_.quantity
             , result, error_info); 

@@ -729,10 +729,10 @@ void WinnerWin::FlushFromStationListWidget(QString str)
      
     std::for_each( std::begin(stockCodeNames), std::end(stockCodeNames), [p_list, this](T_StockCodeName& entry)
     { 
-        auto str = QTextCodec::codecForName( "utf-8" )->toUnicode(entry.name.c_str());
-        
-        QString tmp_str = QString("%1/%2").arg(entry.code.c_str()).arg(str);
-        p_list->addItem(tmp_str);
+        /*auto str = QTextCodec::codecForName( "utf-8" )->toUnicode(entry.name.c_str()); 
+        QString tmp_str = QString("%1/%2").arg(entry.code.c_str()).arg(QString::fromLocal8Bit(entry.name.c_str()));
+*/
+        p_list->addItem( QString("%1/%2").arg(entry.code.c_str()).arg(QString::fromLocal8Bit(entry.name.c_str())) );
     });
     if( p_list->count() > 0 )
     {

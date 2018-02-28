@@ -22,7 +22,10 @@ public:
     //void SetupAccountInfo(char *str);
     const T_AccountData * account_data(TypeMarket type_market) const;
 
-	void SendOrder(int ClientID, int Category, int PriceType, char* Gddm, char* Zqdm, float Price, int Quantity, char* Result, char* ErrInfo);
+	void SendOrder(int Category, int PriceType, char* Gddm, char* Zqdm, float Price, int Quantity, char* Result, char* ErrInfo);
+
+    int QueryPosition(T_PositionData *out_pos_data, int max_pos_size, char* error);
+    bool QueryCapital(T_Capital *capital);
 
 private:
       

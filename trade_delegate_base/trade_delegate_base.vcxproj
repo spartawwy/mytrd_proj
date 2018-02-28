@@ -68,6 +68,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -82,10 +83,12 @@
   <ItemGroup>
     <ClInclude Include="..\include\agent_interface.h" />
     <ClInclude Include="..\include\trade_delegate_base.h" />
+    <ClInclude Include="..\include\agent_utility_use.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="agent_interface.cpp" />
     <ClCompile Include="trade_delegate_base.cpp" />
+    <ClCompile Include="agent_utility_use.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

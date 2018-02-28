@@ -24,12 +24,18 @@
     <ClInclude Include="..\include\agent_interface.h">
       <Filter>source</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\agent_utility_use.h">
+      <Filter>header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="trade_delegate_base.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="agent_interface.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="agent_utility_use.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

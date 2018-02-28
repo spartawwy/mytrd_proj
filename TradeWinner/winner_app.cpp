@@ -258,7 +258,7 @@ bool WinnerApp::LoginBroker(int broker_id, int depart_id, const std::string& acc
 	auto p_user_account_info = db_moudle_.FindUserAccountInfo(user_info_.id); 
 	    
 #if 1
-	bool ret = trade_agent_.Logon(const_cast<char*>(p_broker_info->ip.c_str())
+	bool ret = trade_agent_.Login(const_cast<char*>(p_broker_info->ip.c_str())
 		, p_broker_info->port
 		, const_cast<char*>(p_broker_info->com_ver.c_str())
 		, 1
@@ -363,10 +363,9 @@ std::shared_ptr<StrategyTask> WinnerApp::FindStrategyTask(int task_id)
 
 T_CodeMapPosition WinnerApp::QueryPosition()
 { 
-	auto result = std::make_shared<Buffer>(5*1024);
-
-	char error[1024] = {0};
-#ifdef USE_TRADE_FLAG
+#if 0 
+	auto result = std::make_shared<Buffer>(5*1024); 
+	char error[1024] = {0}; 
 	trade_agent_.QueryData((int)TypeQueryCategory::STOCK, result->data(), error);
 	if( strlen(error) != 0 )
 	{ 
@@ -374,7 +373,7 @@ T_CodeMapPosition WinnerApp::QueryPosition()
 		return T_CodeMapPosition();
 	}
 	qDebug() << QString::fromLocal8Bit( result->data() ) << "\n";
-#endif
+ 
 	std::string str_result = result->c_data();
 
 	/*TSystem::utility::replace_all_distinct(str_result, "\n\t", "\t");
@@ -429,7 +428,25 @@ T_CodeMapPosition WinnerApp::QueryPosition()
 				iter->second = pos_data;
 		}
 	} 
+#endif 
+    T_PositionData  pos_data[256];
+    char error[1024] = {0};
+    
+    const int stock_kind_count = trade_agent_.QueryPosition(pos_data, sizeof(pos_data)/sizeof(pos_data[0]), error);
+    if( stock_kind_count <= 0 )
+        return stocks_position_;
 
+    std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
+    stocks_position_.clear();
+    for(int i = 0; i < stock_kind_count; ++ i)
+    {
+        auto iter = stocks_position_.find(pos_data[i].code);
+		if( iter == stocks_position_.end() )
+		{
+			stocks_position_.insert( std::make_pair(pos_data[i].code, pos_data[i]) );
+		}else
+			iter->second = pos_data[i];
+    }
 	return stocks_position_;
 }
 
@@ -472,7 +489,7 @@ void WinnerApp::AddPosition(const std::string& code, int pos)
 	if( iter == stocks_position_.end() )
 	{
 		T_PositionData  pos_data;
-		pos_data.code = code;
+        strcpy_s(pos_data.code, code.c_str());
 		pos_data.total = pos; 
 		stocks_position_.insert(std::make_pair(code, std::move(pos_data)));
 	}else
@@ -504,20 +521,21 @@ void WinnerApp::SubPosition(const std::string& code, int pos)
 }
 
 T_Capital WinnerApp::QueryCapital()
-{
-	T_Capital capital = {0};
-
+{ 
+    T_Capital capital;
+    trade_agent_.QueryCapital(&capital); 
+#if 0 
 	auto result = std::make_shared<Buffer>(5*1024);
 
 	char error[1024] = {0};
-#ifdef USE_TRADE_FLAG
+     
 	trade_agent_.QueryData((int)TypeQueryCategory::CAPITAL, result->data(), error);
 	if( strlen(error) != 0 )
 	{ 
 		qDebug() << "query  fail! " << "\n";
 	}
 	qDebug() << QString::fromLocal8Bit( result->data() ) << "\n";
-#endif
+ 
 	std::string str_result = result->c_data();
 	TSystem::utility::replace_all_distinct(str_result, "\n", "\t");
 
@@ -540,7 +558,7 @@ T_Capital WinnerApp::QueryCapital()
 	}catch(boost::exception &e)
 	{ 
 	}
-
+#endif
 	return capital;
 }
 
@@ -811,8 +829,7 @@ bool WinnerApp::SellAllPosition(IndexTask * task)
             price -= 0.01;
 #ifdef USE_TRADE_FLAG
             // send order 
-            this->trade_agent().SendOrder(this->trade_client_id()
-                    , (int)TypeOrderCategory::SELL
+            this->trade_agent().SendOrder((int)TypeOrderCategory::SELL
 					, 0
                     , const_cast<T_AccountData *>(this->trade_agent().account_data(GetStockMarketType( std::get<0>(entry) )))->shared_holder_code
 					, const_cast<char*>(std::get<0>(entry).c_str())

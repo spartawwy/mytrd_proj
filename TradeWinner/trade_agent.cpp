@@ -27,7 +27,7 @@ TradeAgent::~TradeAgent()
 bool TradeAgent::Init(std::string &broker_tag, std::string &account_no)
 {
 	char dll_name_str[128] = {0};
-	sprintf_s(dll_name_str, sizeof(dll_name_str), "trd_%s_%s.dll", broker_tag.c_str(), account_no.c_str());
+	sprintf_s(dll_name_str, sizeof(dll_name_str), "agent_%s.dll", broker_tag.c_str());
 	HMODULE md = LoadLibrary(dll_name_str);
 	if( !md )
 		return false;
@@ -38,7 +38,7 @@ bool TradeAgent::Init(std::string &broker_tag, std::string &account_no)
 	if( !CreateObject_ || !DestroyObject_ )
 		return false;
 		 
-	p_agent_interface_ = CreateObject();
+	p_agent_interface_ = CreateObject_();
 	if( !p_agent_interface_ )
 		return false;
 
@@ -70,11 +70,25 @@ bool TradeAgent::Login(char* ip, short port, char* ver, short  yybid, char* acco
 	return p_agent_interface_->InstallAccountData(error);
 }
 
-void TradeAgent::SendOrder(int ClientID, int Category, int PriceType, char* Gddm, char* Zqdm, float Price, int Quantity, char* Result, char* ErrInfo)
+void TradeAgent::SendOrder(int Category, int PriceType, char* Gddm, char* Zqdm, float Price, int Quantity, char* Result, char* ErrInfo)
 {
 	assert(p_agent_interface_);
-	p_agent_interface_->SendOrder(ClientID, Category, PriceType, Gddm, Zqdm, Price, Quantity, Result,  ErrInfo);
+    p_agent_interface_->SendOrder(Category, PriceType, Gddm, Zqdm, Price, Quantity, Result,  ErrInfo);
 }
+
+
+int TradeAgent::QueryPosition(T_PositionData *out_pos_data, int max_pos_size, char* error)
+{
+    assert(p_agent_interface_);
+    return p_agent_interface_->QueryPosition(out_pos_data, max_pos_size, error);
+}
+
+bool TradeAgent::QueryCapital(T_Capital *capital)
+{
+    assert(p_agent_interface_);
+    return p_agent_interface_->QueryCapital(capital);
+}
+
 #if 0
 void TradeAgent::SetupAccountInfo( char*str)
 {

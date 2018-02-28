@@ -23,7 +23,7 @@ public:
 		memset(password_, 0, sizeof(password_));
 	}
 
-	virtual ~AgentInterface(){};
+	virtual ~AgentInterface(){ FreeDynamic(); };
 
 	virtual bool Setup(char* account_no){ return false; }
     
@@ -34,9 +34,13 @@ public:
     virtual bool InstallAccountData(char *error){ return false; }
     virtual const T_AccountData * account_data(TypeMarket type_market) const;
 
-	virtual void SendOrder(int ClientID, int Category, int PriceType, char* Gddm, char* Zqdm, float Price, int Quantity, char* Result, char* ErrInfo);
+	virtual void SendOrder(int Category, int PriceType, char* Gddm, char* Zqdm, float Price, int Quantity, char* Result, char* ErrInfo);
 
-	//TradeDelegater * trade_delegater() { return trade_delegater_; }
+    // ps: out_pos_data[] have to be large enough, error arrary len is larger than 1024
+    virtual int QueryPosition(T_PositionData *out_pos_data, int max_pos_size, char* error) { return -1; }
+	
+    virtual bool QueryCapital(T_Capital *capital) { return false; }
+    //TradeDelegater * trade_delegater() { return trade_delegater_; }
 
 protected:
 	bool __Setup(char* account_no);
