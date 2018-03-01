@@ -43,6 +43,7 @@ public:
     QAction *actionRestart;
     QAction *actionStopAllTask;
     QAction *actionOpenCalcWin;
+    QAction *actionAboutSoft;
     QWidget *centralWidget;
     QTabWidget *tabwid_holder;
     QWidget *tab_task_list;
@@ -235,6 +236,8 @@ public:
         actionStopAllTask->setObjectName(QStringLiteral("actionStopAllTask"));
         actionOpenCalcWin = new QAction(TradeWinnerClass);
         actionOpenCalcWin->setObjectName(QStringLiteral("actionOpenCalcWin"));
+        actionAboutSoft = new QAction(TradeWinnerClass);
+        actionAboutSoft->setObjectName(QStringLiteral("actionAboutSoft"));
         centralWidget = new QWidget(TradeWinnerClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         tabwid_holder = new QTabWidget(centralWidget);
@@ -978,6 +981,7 @@ public:
         menuBar->addAction(menu_help->menuAction());
         menu_system->addAction(actionClose);
         menu_system->addAction(actionRestart);
+        menu_help->addAction(actionAboutSoft);
         menu_operate->addAction(actionStopAllTask);
         tool_menu->addAction(actionOpenCalcWin);
 
@@ -996,6 +1000,7 @@ public:
         actionRestart->setText(QApplication::translate("TradeWinnerClass", "\351\207\215\346\226\260\345\220\257\345\212\250", 0));
         actionStopAllTask->setText(QApplication::translate("TradeWinnerClass", "\345\201\234\346\255\242\346\211\200\346\234\211\344\273\273\345\212\241", 0));
         actionOpenCalcWin->setText(QApplication::translate("TradeWinnerClass", "\350\256\241\347\256\227\345\231\250", 0));
+        actionAboutSoft->setText(QApplication::translate("TradeWinnerClass", "\345\205\263\344\272\216\346\234\254\350\275\257\344\273\266", 0));
         tabwid_holder->setTabText(tabwid_holder->indexOf(tab_task_list), QApplication::translate("TradeWinnerClass", "\344\273\273\345\212\241\345\210\227\350\241\250", 0));
         label_buytask_alert_price->setText(QApplication::translate("TradeWinnerClass", "\350\202\241\347\245\250\344\275\216\344\272\216:", 0));
         label_buytask_stock->setText(QApplication::translate("TradeWinnerClass", "\350\202\241\347\245\250\344\273\243\347\240\201:", 0));

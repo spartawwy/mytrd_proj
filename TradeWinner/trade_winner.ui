@@ -2642,6 +2642,7 @@ background-color: rgb(255, 255,255);</string>
     <property name="title">
      <string>帮助</string>
     </property>
+    <addaction name="actionAboutSoft"/>
    </widget>
    <widget class="QMenu" name="menu_operate">
     <property name="title">
@@ -2687,6 +2688,11 @@ background-color: rgb(255, 255,255);</string>
   <action name="actionOpenCalcWin">
    <property name="text">
     <string>计算器</string>
+   </property>
+  </action>
+  <action name="actionAboutSoft">
+   <property name="text">
+    <string>关于本软件</string>
    </property>
   </action>
  </widget>

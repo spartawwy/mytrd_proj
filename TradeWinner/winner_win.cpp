@@ -221,6 +221,8 @@ void WinnerWin::Init()
     ret = connect(ui.actionStopAllTask, SIGNAL(triggered(bool)), this->app_, SLOT(SlotStopAllTasks(bool)));
     // ndedt
     ret = connect(ui.actionOpenCalcWin, SIGNAL(triggered(bool)), this, SLOT(SlotOpenCalcWin(bool)));
+    ret = connect(ui.actionAboutSoft, SIGNAL(triggered(bool)), this, SLOT(SlotOpenAboutWin(bool)));
+
     ui.tbview_tasks->setContextMenuPolicy(Qt::CustomContextMenu);
     ui.tbview_tasks->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui.tbview_tasks->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -640,7 +642,10 @@ void WinnerWin::closeEvent(QCloseEvent * event)
     if( ret_button == QMessageBox::Cancel )
         event->ignore();
     else
+    {
+        about_soft_win_.close();
         app_->Stop();
+    }
 }
 
 void WinnerWin::changeEvent(QEvent * event)
@@ -843,6 +848,11 @@ void WinnerWin::SlotOpenCalcWin(bool)
     //::SetWindowPos(HWND(calc_win_->winId()), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW); 
     calc_win_->show();
     calc_win_->activateWindow();
+}
+
+void WinnerWin::SlotOpenAboutWin(bool)
+{
+    about_soft_win_.show(); 
 }
 
 void WinnerWin::TriggerFlashWinTimer(bool enable)

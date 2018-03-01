@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_WinnerWin_t {
-    QByteArrayData data[76];
-    char stringdata[1310];
+    QByteArrayData data[77];
+    char stringdata[1327];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -102,9 +102,10 @@ QT_MOC_LITERAL(69, 1194, 16),
 QT_MOC_LITERAL(70, 1211, 19),
 QT_MOC_LITERAL(71, 1231, 15),
 QT_MOC_LITERAL(72, 1247, 15),
-QT_MOC_LITERAL(73, 1263, 20),
-QT_MOC_LITERAL(74, 1284, 6),
-QT_MOC_LITERAL(75, 1291, 17)
+QT_MOC_LITERAL(73, 1263, 16),
+QT_MOC_LITERAL(74, 1280, 20),
+QT_MOC_LITERAL(75, 1301, 6),
+QT_MOC_LITERAL(76, 1308, 17)
     },
     "WinnerWin\0DoQueryCapital\0\0SlotAppendLog\0"
     "char*\0SlotTabChanged\0SlotTbvTasksContextMenu\0"
@@ -141,8 +142,9 @@ QT_MOC_LITERAL(75, 1291, 17)
     "AssignHintListAndLineEdit\0HintList*&\0"
     "p_list\0QLineEdit*&\0p_edit\0QDoubleSpinBox*&\0"
     "p_dbspb_alert_price\0p_dbspb_percent\0"
-    "SlotOpenCalcWin\0TriggerFlashWinTimer\0"
-    "enable\0DoTabTasksDbClick\0"
+    "SlotOpenCalcWin\0SlotOpenAboutWin\0"
+    "TriggerFlashWinTimer\0enable\0"
+    "DoTabTasksDbClick\0"
 };
 #undef QT_MOC_LITERAL
 
@@ -152,7 +154,7 @@ static const uint qt_meta_data_WinnerWin[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      52,   14, // methods
+      53,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -160,58 +162,59 @@ static const uint qt_meta_data_WinnerWin[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,  274,    2, 0x0a,
-       3,    1,  275,    2, 0x0a,
-       5,    1,  278,    2, 0x0a,
-       6,    1,  281,    2, 0x0a,
-       8,    1,  284,    2, 0x0a,
-       9,    1,  287,    2, 0x0a,
-      10,    1,  290,    2, 0x0a,
-      11,    1,  293,    2, 0x0a,
-      12,    1,  296,    2, 0x0a,
-      14,    1,  299,    2, 0x0a,
-      14,    2,  302,    2, 0x0a,
-      14,    1,  307,    2, 0x2a,
-      19,    0,  310,    2, 0x0a,
-      20,    1,  311,    2, 0x0a,
-      22,    1,  314,    2, 0x0a,
-      23,    1,  317,    2, 0x0a,
-      26,    0,  320,    2, 0x0a,
-      27,    1,  321,    2, 0x0a,
-      28,    0,  324,    2, 0x0a,
-      29,    0,  325,    2, 0x0a,
-      30,    2,  326,    2, 0x0a,
-      32,    0,  331,    2, 0x0a,
-      33,    2,  332,    2, 0x0a,
-      38,    0,  337,    2, 0x0a,
-      39,    1,  338,    2, 0x0a,
-      40,    1,  341,    2, 0x0a,
-      41,    0,  344,    2, 0x0a,
-      42,    0,  345,    2, 0x0a,
-      43,    0,  346,    2, 0x0a,
-      44,    0,  347,    2, 0x0a,
-      45,    0,  348,    2, 0x0a,
-      46,    1,  349,    2, 0x0a,
-      47,    1,  352,    2, 0x0a,
-      48,    1,  355,    2, 0x0a,
-      49,    1,  358,    2, 0x0a,
-      50,    1,  361,    2, 0x0a,
-      51,    0,  364,    2, 0x0a,
-      52,    1,  365,    2, 0x0a,
-      53,    1,  368,    2, 0x0a,
-      54,    1,  371,    2, 0x0a,
-      55,    1,  374,    2, 0x0a,
-      56,    1,  377,    2, 0x0a,
-      57,    1,  380,    2, 0x0a,
-      58,    0,  383,    2, 0x0a,
-      59,    1,  384,    2, 0x0a,
-      60,    1,  387,    2, 0x0a,
-      62,    1,  390,    2, 0x0a,
-      64,    4,  393,    2, 0x0a,
-      72,    1,  402,    2, 0x0a,
-      73,    1,  405,    2, 0x0a,
-      73,    0,  408,    2, 0x2a,
-      75,    1,  409,    2, 0x0a,
+       1,    0,  279,    2, 0x0a,
+       3,    1,  280,    2, 0x0a,
+       5,    1,  283,    2, 0x0a,
+       6,    1,  286,    2, 0x0a,
+       8,    1,  289,    2, 0x0a,
+       9,    1,  292,    2, 0x0a,
+      10,    1,  295,    2, 0x0a,
+      11,    1,  298,    2, 0x0a,
+      12,    1,  301,    2, 0x0a,
+      14,    1,  304,    2, 0x0a,
+      14,    2,  307,    2, 0x0a,
+      14,    1,  312,    2, 0x2a,
+      19,    0,  315,    2, 0x0a,
+      20,    1,  316,    2, 0x0a,
+      22,    1,  319,    2, 0x0a,
+      23,    1,  322,    2, 0x0a,
+      26,    0,  325,    2, 0x0a,
+      27,    1,  326,    2, 0x0a,
+      28,    0,  329,    2, 0x0a,
+      29,    0,  330,    2, 0x0a,
+      30,    2,  331,    2, 0x0a,
+      32,    0,  336,    2, 0x0a,
+      33,    2,  337,    2, 0x0a,
+      38,    0,  342,    2, 0x0a,
+      39,    1,  343,    2, 0x0a,
+      40,    1,  346,    2, 0x0a,
+      41,    0,  349,    2, 0x0a,
+      42,    0,  350,    2, 0x0a,
+      43,    0,  351,    2, 0x0a,
+      44,    0,  352,    2, 0x0a,
+      45,    0,  353,    2, 0x0a,
+      46,    1,  354,    2, 0x0a,
+      47,    1,  357,    2, 0x0a,
+      48,    1,  360,    2, 0x0a,
+      49,    1,  363,    2, 0x0a,
+      50,    1,  366,    2, 0x0a,
+      51,    0,  369,    2, 0x0a,
+      52,    1,  370,    2, 0x0a,
+      53,    1,  373,    2, 0x0a,
+      54,    1,  376,    2, 0x0a,
+      55,    1,  379,    2, 0x0a,
+      56,    1,  382,    2, 0x0a,
+      57,    1,  385,    2, 0x0a,
+      58,    0,  388,    2, 0x0a,
+      59,    1,  389,    2, 0x0a,
+      60,    1,  392,    2, 0x0a,
+      62,    1,  395,    2, 0x0a,
+      64,    4,  398,    2, 0x0a,
+      72,    1,  407,    2, 0x0a,
+      73,    1,  410,    2, 0x0a,
+      74,    1,  413,    2, 0x0a,
+      74,    0,  416,    2, 0x2a,
+      76,    1,  417,    2, 0x0a,
 
  // slots: parameters
     QMetaType::Void,
@@ -263,7 +266,8 @@ static const uint qt_meta_data_WinnerWin[] = {
     QMetaType::Void, QMetaType::QString,   63,
     QMetaType::Void, 0x80000000 | 65, 0x80000000 | 67, 0x80000000 | 69, 0x80000000 | 69,   66,   68,   70,   71,
     QMetaType::Void, QMetaType::Bool,    2,
-    QMetaType::Void, QMetaType::Bool,   74,
+    QMetaType::Void, QMetaType::Bool,    2,
+    QMetaType::Void, QMetaType::Bool,   75,
     QMetaType::Void,
     QMetaType::Void, QMetaType::QModelIndex,   61,
 
@@ -325,10 +329,22 @@ void WinnerWin::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 46: _t->ChangeFromStationText((*reinterpret_cast< QString(*)>(_a[1]))); break;
         case 47: _t->AssignHintListAndLineEdit((*reinterpret_cast< HintList*(*)>(_a[1])),(*reinterpret_cast< QLineEdit*(*)>(_a[2])),(*reinterpret_cast< QDoubleSpinBox*(*)>(_a[3])),(*reinterpret_cast< QDoubleSpinBox*(*)>(_a[4]))); break;
         case 48: _t->SlotOpenCalcWin((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 49: _t->TriggerFlashWinTimer((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 50: _t->TriggerFlashWinTimer(); break;
-        case 51: _t->DoTabTasksDbClick((*reinterpret_cast< const QModelIndex(*)>(_a[1]))); break;
+        case 49: _t->SlotOpenAboutWin((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 50: _t->TriggerFlashWinTimer((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 51: _t->TriggerFlashWinTimer(); break;
+        case 52: _t->DoTabTasksDbClick((*reinterpret_cast< const QModelIndex(*)>(_a[1]))); break;
         default: ;
+        }
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        switch (_id) {
+        default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+        case 22:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTableView* >(); break;
+            }
+            break;
         }
     }
 }
@@ -358,13 +374,13 @@ int WinnerWin::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 52)
+        if (_id < 53)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 52;
+        _id -= 53;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 52)
-            *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 52;
+        if (_id < 53)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 53;
     }
     return _id;
 }

@@ -7,6 +7,8 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_trade_winner.h"
 
+#include "about_soft_win.h"
+
 #include "common.h"
 
 //class MyThread;
@@ -109,6 +111,7 @@ public slots:
     void AssignHintListAndLineEdit(HintList *& p_list, QLineEdit *&p_edit, QDoubleSpinBox *&p_dbspb_alert_price, QDoubleSpinBox *&p_dbspb_percent);
 
     void SlotOpenCalcWin(bool);
+    void SlotOpenAboutWin(bool);
 
     void TriggerFlashWinTimer(bool enable=true);
 
@@ -144,6 +147,8 @@ private:
 	 
 
     Ui::TradeWinnerClass ui;
+    AboutSoftWin  about_soft_win_;
+
     WinnerApp *app_;
     QMenu *tbv_tasks_popMenu_;
 

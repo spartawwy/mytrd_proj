@@ -182,6 +182,9 @@
     <ClCompile Include="index_trade_win.cpp">
       <Filter>win</Filter>
     </ClCompile>
+    <ClCompile Include="about_soft_win.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="trade_winner.ui">
@@ -222,6 +225,9 @@
     </CustomBuild>
     <CustomBuild Include="calc_win.h">
       <Filter>win</Filter>
+    </CustomBuild>
+    <CustomBuild Include="about_soft.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -314,6 +320,12 @@
     </ClInclude>
     <ClInclude Include="..\include\agent_interface.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_about_soft.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="about_soft_win.h">
+      <Filter>win</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
