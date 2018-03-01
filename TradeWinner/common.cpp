@@ -165,6 +165,11 @@ std::string TagOfOrderLog()
     //return  "OrderData_" + TSystem::Today()
 }
 
+std::string TagOfEqSecLog(const std::string& code)
+{
+    return TSystem::utility::FormatStr("EqSec_%s_%d", code.c_str(), TSystem::Today());
+}
+
 std::tuple<int, std::string> CurrentDateTime()
 {
     time_t rawtime;

@@ -372,6 +372,7 @@ bool IsStrNum(const std::string& str);
 
 std::string TagOfLog();
 std::string TagOfOrderLog();
+std::string TagOfEqSecLog(const std::string& code);
 
 
 std::tuple<int, std::string> CurrentDateTime();
