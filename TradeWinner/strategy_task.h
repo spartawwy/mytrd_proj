@@ -11,12 +11,13 @@
 
 #include "common.h"
 
+enum class TypeAction : char { NOOP = 0, PREPARE_BUY, PREPARE_SELL, CLEAR};
 
 class WinnerApp;
 class StrategyTask
 {
-public:
-    
+public: 
+
     StrategyTask(T_TaskInformation &task_info, WinnerApp *app);
 
     virtual ~StrategyTask()

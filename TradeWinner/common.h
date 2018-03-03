@@ -391,6 +391,8 @@ QString IndexCode2IndexName(const QString& code);
 void utf8ToGbk(std::string& strUtf8);
 void gbkToUtf8(std::string& strGbk);
 
+double Round(double dVal, short iPlaces);
+
 #define USE_TRADE_FLAG
 
 

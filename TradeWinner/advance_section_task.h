@@ -6,17 +6,26 @@
 class AdvanceSectionTask : public StrategyTask
 {
 public:
-	enum class PortionState : char { WAIT_BUY = 0, WAIT_SELL };
+	enum class PortionState : char { WAIT_BUY = 0, WAIT_SELL, UNKNOW = 255 };
 	class Portion
 	{
 	public:
 		Portion(int index,double bottom, double top, PortionState state);
+		
+		void state(PortionState val) {  state_ = val; }
+		PortionState state() const { return state_; }
+
+		int index() const { return index_; } 
+		double bottom_price() const{ return bottom_price_; } 
+		double mid_price() const{ return mid_price_; } 
+		double top_price() const{ return top_price_; } 
+
 	private:
 		int index_; 
 		double bottom_price_;
 		double mid_price_;
 		double top_price_;
-		PortionState state_;
+		PortionState state_; 
 	};
 
 	AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *app);
@@ -28,6 +37,8 @@ protected:
 private:
 	//unsigned int section_num_;
 	std::vector<Portion> portions_;
+	int pre_index_; 
+	bool has_create_pos_;
 
 };
 

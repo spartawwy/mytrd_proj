@@ -6,9 +6,7 @@
 class EqualSectionTask: public StrategyTask
 {
 public:
-
-	enum class TypeAction : char { NOOP = 0, PREPARE_BUY, PREPARE_SELL, CLEAR};
-
+	 
 	static void CalculateSections(double price, IN T_TaskInformation &task_info, OUT std::vector<T_SectionAutom> &sections);
 	static void TranslateSections(IN std::vector<T_SectionAutom> &sections, OUT std::string &sections_str);
 

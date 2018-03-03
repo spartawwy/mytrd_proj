@@ -290,3 +290,23 @@ void gbkToUtf8(std::string& strGbk)
 
     strGbk = ByteUtf8.data();
 }
+
+double Round(double dVal, short iPlaces)  
+{
+#if 0
+	char s[20];
+	double dRetval; 
+	sprintf_s(s, sizeof(s), "%.*lf\0", iPlaces, dVal);
+	sscanf_s(s,  "%lf", &dRetval);  
+#else 
+		double dRetval;
+		double dMod = 0.0000001;
+		if( dVal < 0.0 ) dMod = -0.0000001;
+		dRetval = dVal;
+		dRetval += (5.0/pow(10.0, iPlaces+1.0));
+		dRetval *= pow(10.0, iPlaces);
+		dRetval = floor(dRetval+dMod);
+		dRetval /= pow(10.0, iPlaces);
+#endif
+		return(dRetval);
+}
