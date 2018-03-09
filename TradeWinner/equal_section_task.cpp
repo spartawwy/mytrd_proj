@@ -28,10 +28,9 @@ format: section0_type$section0_price#section1_type$section1_price
 
 #include "winner_app.h"
 
-#define DO_LOG(tag, b)  do{ app_->local_logger().LogLocal((tag), b); }while(0);
-
+ 
 static const int cst_max_sec = 5;
-static const double cst_max_stock_price = 9999.0;
+static const double cst_max_stock_price = MAX_STOCK_PRICE;
 const std::string cst_rebounce_debug = "EqualSec";
 
 void EqualSectionTask::CalculateSections(double price, IN T_TaskInformation &task_info, OUT std::vector<T_SectionAutom> &sections)
@@ -136,21 +135,8 @@ EqualSectionTask::EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app)
 
 }
 
-static double Get2UpRebouncePercent(double alert, double bottom, double cur)
-{
-	double percent_inflect = 0.0; 
-	if( cur > bottom )
-		percent_inflect = (cur - bottom) * 100 / alert;
-	return percent_inflect;
-}
-
-static double Get2DownRebouncePercent(double alert, double top, double cur)
-{
-	double percent_inflect =  (top - cur) * 100 / alert; 
-	return percent_inflect;
-}
  
-EqualSectionTask::TypeAction EqualSectionTask::JudgeTypeAction(std::shared_ptr<QuotesData> & quote_data)
+TypeAction EqualSectionTask::JudgeTypeAction(std::shared_ptr<QuotesData> & quote_data)
 {
 	TypeAction  action = TypeAction::NOOP;
 	

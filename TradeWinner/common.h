@@ -25,7 +25,14 @@
 #define EQSEC_MAX_STOP_PRICE 999.00
 #define EQSEC_MIN_CLEAR_PRICE 0.0
 
+#define MAX_STOCK_PRICE 9999.0
+#define MIN_STOCK_PRICE 0.0
+
 #define APP_CODE_TEXT "GBK"
+
+#define DO_LOG(tag, b)  do{ app_->local_logger().LogLocal((tag), b); }while(0);
+#define USE_TRADE_FLAG
+
 #if 0
 std::vector<std::string> split(const std::string& line, const std::string& seperator = " ", 
 		const std::string& quotation = "\"");
@@ -393,7 +400,9 @@ void gbkToUtf8(std::string& strGbk);
 
 double Round(double dVal, short iPlaces);
 
-#define USE_TRADE_FLAG
+double Get2UpRebouncePercent(double alert, double bottom, double cur);
+double Get2DownRebouncePercent(double alert, double top, double cur);
 
+ 
 
 #endif

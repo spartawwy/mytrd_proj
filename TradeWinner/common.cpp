@@ -310,3 +310,19 @@ double Round(double dVal, short iPlaces)
 #endif
 		return(dRetval);
 }
+
+double Get2UpRebouncePercent(double alert, double bottom, double cur)
+{
+    double percent_inflect = 0.0; 
+    if( cur > bottom )
+        percent_inflect = (cur - bottom) * 100 / alert;
+    return percent_inflect;
+}
+
+double Get2DownRebouncePercent(double alert, double top, double cur)
+{
+    double percent_inflect = 0.0; 
+    if( top > cur )
+        percent_inflect =  (top - cur) * 100 / alert; 
+    return percent_inflect;
+}

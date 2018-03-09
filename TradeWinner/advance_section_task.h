@@ -3,10 +3,11 @@
 
 #include "strategy_task.h"
  
+class WinnerApp;
 class AdvanceSectionTask : public StrategyTask
 {
 public:
-	enum class PortionState : char { WAIT_BUY = 0, WAIT_SELL, UNKNOW = 255 };
+	enum class PortionState : char { WAIT_BUY = 0, WAIT_SELL, UNKNOW = 255 }; // UNKNOW means wait create position
 	class Portion
 	{
 	public:
@@ -35,10 +36,22 @@ public:
 protected:
 
 private:
+
+    //void ResetRebBottomPrice(){ reb_bottom_price_ = MAX_STOCK_PRICE;};
+
+private:
+
+    WinnerApp *app_;
 	//unsigned int section_num_;
 	std::vector<Portion> portions_;
+
 	int pre_index_; 
-	bool has_create_pos_;
+	bool is_any_portion_unknow_;
+
+    //------used for rebounce trade
+    double reb_bottom_price_;
+    double reb_top_price_;
+    double reb_base_price_;
 
 };
 
