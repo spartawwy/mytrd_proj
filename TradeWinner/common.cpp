@@ -311,18 +311,18 @@ double Round(double dVal, short iPlaces)
 		return(dRetval);
 }
 
-double Get2UpRebouncePercent(double alert, double bottom, double cur)
+double Get2UpRebouncePercent(double base, double bottom, double cur)
 {
     double percent_inflect = 0.0; 
     if( cur > bottom )
-        percent_inflect = (cur - bottom) * 100 / alert;
+        percent_inflect = (cur - bottom) * 100 / base;
     return percent_inflect;
 }
 
-double Get2DownRebouncePercent(double alert, double top, double cur)
+double Get2DownRebouncePercent(double base, double top, double cur)
 {
     double percent_inflect = 0.0; 
-    if( top > cur )
-        percent_inflect =  (top - cur) * 100 / alert; 
+    if( cur < top )
+        percent_inflect =  (top - cur) * 100 / base; 
     return percent_inflect;
 }

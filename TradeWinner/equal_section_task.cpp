@@ -454,8 +454,8 @@ BEFORE_TRADE:
         //auto sh_hld_code  = const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code;
         std::string cn_order_str = order_type == TypeOrderCategory::BUY ? "买入" : "卖出";
         this->app_->local_logger().LogLocal(TagOfOrderLog(), 
-            TSystem::utility::FormatStr("区间任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, para_.quantity)); 
-        this->app_->AppendLog2Ui("区间任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, para_.quantity);
+            TSystem::utility::FormatStr("区间任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty)); 
+        this->app_->AppendLog2Ui("区间任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty);
 #if 1
         // order the stock
         this->app_->trade_agent().SendOrder((int)order_type, 0
@@ -467,54 +467,54 @@ BEFORE_TRADE:
 #endif
 		cur_type_action_ = TypeAction::NOOP; // for rebounce
         // judge result 
-        if( strlen(error_info) > 0 )
+        if( strlen(error_info) == 0 ) // trade ok
+        { 
+            auto ret_str = new std::string(utility::FormatStr("区间任务:%d %s %s %.2f %d 成功!", para_.id, cn_order_str.c_str(), para_.stock.c_str(), price, qty));
+            this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
+            this->app_->EmitSigShowUi(ret_str, true);
+ 
+            para_.secton_task.is_original = false;
+
+            bool is_to_clear = false;
+            if( para_.rebounce > 0.0 ) // use rebounce 
+            {
+                if( cur_type_action_ == TypeAction::CLEAR ) is_to_clear = true;
+            }else if( this->sections_[index].section_type == TypeEqSection::CLEAR )
+                is_to_clear = true;
+         
+            if( !is_to_clear )
+            {  // re calculate
+                CalculateSections(iter->cur_price, para_, sections_);
+			    // for rebouce -------
+			    bottom_price_ = cst_max_stock_price;
+			    top_price_ = 0.0;
+			    cond4_sell_backtrigger_price_ = 0.0;
+			    cond4_buy_backtrigger_price_ = cst_max_stock_price;
+                // save to db: save cur_price as start_price in assistant_field 
+                app_->db_moudle().UpdateEqualSection(para_.id, para_.secton_task.is_original, iter->cur_price);
+                app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
+                this->timed_mutex_wrapper_.unlock();
+            }else
+            {
+                auto ret_str = new std::string(utility::FormatStr("区间任务:%d %s 破底清仓!", para_.id, para_.stock.c_str()));
+                this->app_->AppendLog2Ui(ret_str->c_str());
+                this->app_->EmitSigShowUi(ret_str);
+
+                is_waitting_removed_ = true;
+                app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
+                this->timed_mutex_wrapper_.unlock();
+                this->app_->RemoveTask(this->task_id(), TypeTask::EQUAL_SECTION); // invoker delete self
+            }
+        }else  // trade fail
         {
             auto ret_str = new std::string(utility::FormatStr("error %d %s %s %.2f %d error:%s"
-                , para_.id, cn_order_str.c_str(), para_.stock.c_str(), price, para_.quantity, error_info));
+                , para_.id, cn_order_str.c_str(), para_.stock.c_str(), price, qty, error_info));
             this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
             this->app_->AppendLog2Ui(ret_str->c_str());
             this->app_->EmitSigShowUi(ret_str, true);
-
-        }else
-        {
-            auto ret_str = new std::string(utility::FormatStr("区间任务:%d %s %s %.2f %d 成功!", para_.id, cn_order_str.c_str(), para_.stock.c_str(), price, para_.quantity));
-            this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
-            this->app_->EmitSigShowUi(ret_str, true);
-        }
-        para_.secton_task.is_original = false;
-
-        bool is_to_clear = false;
-        if( para_.rebounce > 0.0 ) // use rebounce 
-        {
-            if( cur_type_action_ == TypeAction::CLEAR ) is_to_clear = true;
-        }else if( this->sections_[index].section_type == TypeEqSection::CLEAR )
-            is_to_clear = true;
-         
-        if( !is_to_clear )
-        {
-            // re calculate
-            CalculateSections(iter->cur_price, para_, sections_);
-			// for rebouce -------
-			bottom_price_ = cst_max_stock_price;
-			top_price_ = 0.0;
-			cond4_sell_backtrigger_price_ = 0.0;
-			cond4_buy_backtrigger_price_ = cst_max_stock_price;
-            // save to db: save cur_price as start_price in assistant_field 
-            app_->db_moudle().UpdateEqualSection(para_.id, para_.secton_task.is_original, iter->cur_price);
             app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
             this->timed_mutex_wrapper_.unlock();
-        }else
-        {
-            auto ret_str = new std::string(utility::FormatStr("区间任务:%d %s 破底清仓!", para_.id, para_.stock.c_str()));
-            this->app_->AppendLog2Ui(ret_str->c_str());
-            this->app_->EmitSigShowUi(ret_str);
-
-            is_waitting_removed_ = true;
-            app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
-            this->timed_mutex_wrapper_.unlock();
-            this->app_->RemoveTask(this->task_id(), TypeTask::EQUAL_SECTION); // invoker delete self
         }
-        
     });
 
 }

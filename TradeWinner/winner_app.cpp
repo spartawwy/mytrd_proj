@@ -361,74 +361,9 @@ std::shared_ptr<StrategyTask> WinnerApp::FindStrategyTask(int task_id)
 	return nullptr;
 }
 
+// ps: except app's init, make sure it's called in trade_strand
 T_CodeMapPosition WinnerApp::QueryPosition()
 { 
-#if 0 
-	auto result = std::make_shared<Buffer>(5*1024); 
-	char error[1024] = {0}; 
-	trade_agent_.QueryData((int)TypeQueryCategory::STOCK, result->data(), error);
-	if( strlen(error) != 0 )
-	{ 
-		qDebug() << "query  fail! " << "\n";
-		return T_CodeMapPosition();
-	}
-	qDebug() << QString::fromLocal8Bit( result->data() ) << "\n";
- 
-	std::string str_result = result->c_data();
-
-	/*TSystem::utility::replace_all_distinct(str_result, "\n\t", "\t");
-	TSystem::utility::replace_all_distinct(str_result, "\t\n", "\t");
-	qDebug() << " line 378" << "\n";
-	qDebug() << str_result.c_str() << " ----\n"; no effect*/
-
-	TSystem::utility::replace_all_distinct(str_result, "\n", "\t");
-	/*qDebug() << " line 382" << "\n";
-	qDebug() << str_result.c_str() << " ----\n";*/
-	auto result_array = TSystem::utility::split(str_result, "\t");
-
-	std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
-
-
-	int start = 14;
-	int content_col = 13;
-	if( p_user_broker_info_->type == TypeBroker::ZHONGY_GJ )
-		start = 15;
-	else if ( p_user_broker_info_->type == TypeBroker::PING_AN )
-	{
-		start = 23;
-		content_col = 21;
-	} 
-	{ 
-		for( int n = 0; n < (result_array.size() - start) / content_col; ++n )
-		{
-			T_PositionData  pos_data;
-			pos_data.code = result_array.at( start + n * content_col);
-			TSystem::utility::replace_all_distinct(pos_data.code, "\t", "");
-			double qty_can_sell = 0;
-			try
-			{
-				pos_data.pinyin = result_array.at( start + n * content_col + 1);
-				pos_data.total = boost::lexical_cast<double>(result_array.at( start + n * content_col + 2 ));
-				pos_data.avaliable = boost::lexical_cast<double>(result_array.at(start + n * content_col + 3));
-				pos_data.cost = boost::lexical_cast<double>(result_array.at(start + n * content_col + 4));
-				pos_data.value = boost::lexical_cast<double>(result_array.at(start + n * content_col + 6));
-				pos_data.profit = boost::lexical_cast<double>(result_array.at(start + n * content_col + 7));
-				pos_data.profit_percent = boost::lexical_cast<double>(result_array.at(start + n * content_col + 8));
-
-			}catch(boost::exception &e)
-			{ 
-				continue;
-			} 
-
-			auto iter = stocks_position_.find(pos_data.code);
-			if( iter == stocks_position_.end() )
-			{
-				stocks_position_.insert(std::make_pair(pos_data.code, std::move(pos_data)));
-			}else
-				iter->second = pos_data;
-		}
-	} 
-#endif 
     T_PositionData  pos_data[256];
     char error[1024] = {0};
     
@@ -499,19 +434,19 @@ void WinnerApp::AddPosition(const std::string& code, int pos)
 }
 
 // sub avaliable position
-void WinnerApp::SubPosition(const std::string& code, int pos)
+void WinnerApp::SubAvaliablePosition(const std::string& code, int pos)
 {
 	assert( pos > 0 );
 	std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
 	auto iter = stocks_position_.find(code);
 	if( iter == stocks_position_.end() )
 	{
-		local_logger().LogLocal("error: WinnerApp::SubPosition can't find " + code);
+		local_logger().LogLocal("error: WinnerApp::SubAvaliablePosition can't find " + code);
 	}else
 	{
 		if( iter->second.avaliable < pos )
 		{
-			local_logger().LogLocal( utility::FormatStr("error: WinnerApp::SubPosition %s avaliable < %d ", code.c_str(), pos) );
+			local_logger().LogLocal( utility::FormatStr("error: WinnerApp::SubAvaliablePosition %s avaliable < %d ", code.c_str(), pos) );
 		}else
 		{
 			iter->second.avaliable -= pos; 

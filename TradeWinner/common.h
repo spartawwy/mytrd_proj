@@ -299,6 +299,7 @@ struct T_AdvanceSectionTask
 {
 	std::string portion_sections;
 	std::string portion_states;
+    double pre_trade_price;
 	bool is_original;
 };
 
@@ -400,8 +401,8 @@ void gbkToUtf8(std::string& strGbk);
 
 double Round(double dVal, short iPlaces);
 
-double Get2UpRebouncePercent(double alert, double bottom, double cur);
-double Get2DownRebouncePercent(double alert, double top, double cur);
+double Get2UpRebouncePercent(double base, double bottom, double cur);
+double Get2DownRebouncePercent(double base, double top, double cur);
 
  
 

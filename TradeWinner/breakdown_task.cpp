@@ -73,7 +73,7 @@ void BreakDownTask::HandleQuoteData()
                   
                 }else
                 {
-                    this->app_->SubPosition(para_.stock, qty);
+                    this->app_->SubAvaliablePosition(para_.stock, qty);
                     auto str = new std::string(utility::FormatStr("执行任务:%d 破位卖出 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, qty));
                     this->app_->EmitSigShowUi(str, true);
                 }

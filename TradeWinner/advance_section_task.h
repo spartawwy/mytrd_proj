@@ -27,6 +27,7 @@ public:
 		double mid_price_;
 		double top_price_;
 		PortionState state_; 
+
 	};
 
 	AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *app);
@@ -44,14 +45,17 @@ private:
     WinnerApp *app_;
 	//unsigned int section_num_;
 	std::vector<Portion> portions_;
-
-	int pre_index_; 
+     
 	bool is_any_portion_unknow_;
 
     //------used for rebounce trade
     double reb_bottom_price_;
     double reb_top_price_;
     double reb_base_price_;
+
+    unsigned int is_not_enough_capital_continue_;
+
+    bool  is_wait_trade_result_; 
 
 };
 
