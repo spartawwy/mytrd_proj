@@ -31,6 +31,7 @@ void MyThread::run()
 		auto lctr_val = KEYUP(VK_LCONTROL);
 		auto rctr_val = KEYUP(VK_RCONTROL);
 		qDebug() << "my thread line 67 | lctr_val: " << lctr_val << " rctr_val: " << rctr_val << "\n";
+        WriteLog("Enter MyThread");
 		//----end ---------
 		if( (KEYDOWN(VK_LCONTROL) || KEYDOWN(VK_RCONTROL)) && !(KEYDOWN(VK_LCONTROL) && KEYDOWN(VK_RCONTROL)) )
 		{ 
@@ -50,8 +51,10 @@ void MyThread::run()
 			if (is_prepare_buy && KEYUP(VK_OEM_MINUS))
 			{
 				is_prepare_buy = false;
+                WriteLog("Triger buy %s", stock_name_.toLocal8Bit().data());
+                qDebug() << "Triger buy\n";
 				app_->HandleOrder(true, stock_name_.toLocal8Bit().data());
-				qDebug() << "Triger buy\n";
+				
 			} 
 		}
 		if( KEYUP(VK_OEM_MINUS) )
@@ -59,6 +62,7 @@ void MyThread::run()
 			if (is_prepare_sell && KEYUP(VK_OEM_PLUS))
 			{
 				is_prepare_sell = false; 
+                WriteLog("Triger sell %s", stock_name_.toLocal8Bit().data());
 				qDebug() << "Triger sell\n";
 				app_->HandleOrder(false, stock_name_.toLocal8Bit().data());
 			}

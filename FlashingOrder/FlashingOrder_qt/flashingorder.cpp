@@ -64,7 +64,7 @@ BOOL CALLBACK EnumWindowCallBack(HWND hWnd, LPARAM lParam)
 		if( strstr(buf, MAIN_PROCESS_WIN_TAG) )
 		{
 			//wprintf(L"%s/n", buf);    
-			qDebug() << "hwnd: " << (int)hWnd << "  " << QString::fromLocal8Bit(buf) << "\n";
+			qDebug() << "hwnd: " << (int)hWnd << "  " << QString::fromLocal8Bit(buf) << "\n"; 
 			EnumChildWindows(hWnd, EnumChildWindowCallBack, lParam);    // 继续查找子窗口 
 			return FALSE;
 		}else
@@ -83,7 +83,8 @@ int CallBackFunc(void)
 	QString name;
 	if( AppInstance().GetWinTileAndStockName(title, name) )
 	{ 
-		AppInstance().EmitKeySig(name);
+        WriteLog("EmitKeySig %s", name.toLocal8Bit().data());
+		AppInstance().EmitKeySig(name); // => DoKeySig
 		//qDebug() << "todo " << (is_buy ? "buy " : "sell ") << name.c_str() << "\n";
 		return 1; 
 	}
@@ -162,33 +163,7 @@ bool FlashingOrder::Init(int argc, char *argv[])
 	}
 	
     DoReadCfg();
-#if 0 
-    // -------read config file ------------
-    QString iniFilePath = "flashingorder.ini";  
-    QSettings settings(iniFilePath, QSettings::IniFormat);  
-    QString app_title = QString::fromLocal8Bit(settings.value("config/broker_app_title").toString().toLatin1().constData());
-    qDebug() << app_title << "\n";
-    target_win_title_tag_ = app_title.toLocal8Bit();
-    qty_buy_ = settings.value("config/buy_quantity").toInt();
-    qty_sell_ = settings.value("config/sell_quantity").toInt();
-    quote_level_ = (TypeQuoteLevel)settings.value("config/quote_level").toInt();
-    
-    ui.spinBox_buy_quantity->setSingleStep(100);
-    ui.spinBox_buy_quantity->setValue(qty_buy_);
-    
-    ui.spinBox_sell_quantity->setSingleStep(100);
-    ui.spinBox_sell_quantity->setValue(qty_sell_);
-
-    ui.combox_bt_price_level->addItem(QString::fromLocal8Bit("即时价"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_CUR)));
-    ui.combox_bt_price_level->addItem(QString::fromLocal8Bit("买一和卖一"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_1)));
-    ui.combox_bt_price_level->addItem(QString::fromLocal8Bit("买二和卖二"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_2)));
-    ui.combox_bt_price_level->addItem(QString::fromLocal8Bit("买三和卖三"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_3)));
-    ui.combox_bt_price_level->addItem(QString::fromLocal8Bit("买四和卖四"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_4)));
-    ui.combox_bt_price_level->addItem(QString::fromLocal8Bit("买五和卖五"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_5)));
-    
-    //-----------end-----------------
-#endif 
-
+  
 	if( !ticker_->Init() )
 	{
 		QMessageBox::information(nullptr, "错误", "ticker init fail");
@@ -255,6 +230,7 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
 {
 	assert(ticker_);
 	assert(msg_win_);
+    WriteLog("FlashingOrder::HandleOrder %s", stock_name.c_str());
 #if 1
 	Buffer result(1024);
 	char error[1024] = {0};
@@ -266,12 +242,14 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
 	if( iter == stock_name2code_.end() )
 	{
 		qDebug() << "FlashingOrder::HandleOrder cant find " << stock_name.c_str() << "\n";
+        WriteLog("FlashingOrder::HandleOrder cant find %s", stock_name.c_str());
 		return;
 	}
 	QuotesData quote_data;
 	if( !ticker_->GetQuotes(const_cast<char*>(iter->second.c_str()), quote_data) )
 	{
 		qDebug() << "FlashingOrder::HandleOrder GetQuotes fail " << stock_name.c_str() << "\n";
+        WriteLog("FlashingOrder::HandleOrder GetQuotes fail %s", stock_name.c_str());
 		return;
 	} 
     double target_price = 0.0;
@@ -298,7 +276,7 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
     char buf[2048] = {0};
     sprintf(buf, "%s 股票:%s 数目:%d %s %s!", (is_buy ? "买入" : "卖出")
         , stock_name.c_str(), (is_buy ? qty_buy_ : qty_sell_), (strlen(error) == 0 ? "成功" : "失败"), error);
-     
+    WriteLog(buf);
     EmitShowMsgSig(QString::fromLocal8Bit("闪电交易助手提示"), QString::fromLocal8Bit(buf));
 #endif
 }
@@ -363,6 +341,7 @@ void FlashingOrder::DoSaveCfg()
 void FlashingOrder::DoKeySig(QString str)
 {
 	qDebug() << "Enter DoKeySig\n";
+    WriteLog("Enter DoKeySig");
 	key_sig_mutex_.lock();
 	thread_.stock_name(str);
 	key_sig_wait_cond_.wakeAll();
