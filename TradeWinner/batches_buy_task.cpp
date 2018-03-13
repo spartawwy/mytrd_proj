@@ -1,5 +1,6 @@
 #include "batches_buy_task.h"
 
+#include <TLib/core/tsystem_time.h>
 #include <TLib/core/tsystem_utility_functions.h>
 
 #include "winner_app.h"
@@ -8,6 +9,7 @@ BatchesBuyTask::BatchesBuyTask(T_TaskInformation &task_info, WinnerApp *app)
     : StrategyTask(task_info, app)
     , time_point_open_warning_(0) 
     , times_has_buy_(0)
+    , is_wait_trade_result_(false)
 { 
     step_items_.resize(100);
 
@@ -33,7 +35,10 @@ BatchesBuyTask::BatchesBuyTask(T_TaskInformation &task_info, WinnerApp *app)
             break;
         step_items_[i].up_price = para_.alert_price * (100 - i * para_.step) / 100;
         step_items_[i].bottom_price = para_.alert_price * (100 - (i + 1) * para_.step) / 100;
-        //app_->local_logger().LogLocal(utility::FormatStr("BatchesBuyTask %d up_price:%.2f btm_price:%.2f", para_.id, step_items_[i].up_price, step_items_[i].bottom_price));
+        if( i < 10 )
+            app_->local_logger().LogLocal(TagOfCurTask()
+                , utility::FormatStr("%d index:%d step:%.2f up_price:%.2f btm_price:%.2f"
+                , para_.id, i, para_.step, step_items_[i].up_price, step_items_[i].bottom_price));
     }
 }
 
@@ -56,7 +61,11 @@ void BatchesBuyTask::HandleQuoteData()
 
     if( is_waitting_removed_ )
         return;
-
+    if( is_wait_trade_result_ )
+    {
+        app_->local_logger().LogLocal(TagOfCurTask(), "BatchesBuyTask::HandleQuoteData wait trade result!");
+        return;
+    }
     assert( !quote_data_queue_.empty() );
     auto data_iter = quote_data_queue_.rbegin();
     std::shared_ptr<QuotesData> & iter = *data_iter;
@@ -72,12 +81,11 @@ void BatchesBuyTask::HandleQuoteData()
         if( index < 0 )
             return;
         if( step_items_[index].has_buy )
-            return;
-        step_items_[index].has_buy = true;
-        if( ++times_has_buy_ >= para_.bs_times )
-            is_waitting_removed_ = true;
-
-        app_->trade_strand().PostTask([iter, this]()
+            return; 
+        app_->local_logger().LogLocal(TagOfCurTask(), utility::FormatStr(" trigger stepItem %d: bottom: %.2f up:%.2f", index, step_items_[index].bottom_price, step_items_[index].up_price));
+        
+        is_wait_trade_result_ = true;
+        app_->trade_strand().PostTask([iter, index, this]()
         {
         // send order 
         char result[1024] = {0};
@@ -113,6 +121,9 @@ void BatchesBuyTask::HandleQuoteData()
 
         }else
         {  
+            step_items_[index].has_buy = true;
+            if( ++times_has_buy_ >= para_.bs_times )
+                is_waitting_removed_ = true;
             auto ret_str = new std::string(utility::FormatStr("执行任务:%d 分批买入 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, para_.quantity));
             this->app_->EmitSigShowUi(ret_str, true);
         }
@@ -142,6 +153,12 @@ void BatchesBuyTask::HandleQuoteData()
         }
 
         });
+        is_wait_trade_result_ = false;
     } 
 
+}
+
+std::string BatchesBuyTask::TagOfCurTask()
+{ 
+    return TSystem::utility::FormatStr("BatBuy_%s_%d", para_.stock.c_str(), TSystem::Today());
 }
