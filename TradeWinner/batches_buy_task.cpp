@@ -5,6 +5,17 @@
 
 #include "winner_app.h"
   
+/*
+--------------------
+       alert price 
+--------------------
+       index 0
+--------------------
+       index 1
+--------------------
+       index n
+--------------------
+*/
 BatchesBuyTask::BatchesBuyTask(T_TaskInformation &task_info, WinnerApp *app)
     : StrategyTask(task_info, app)
     , time_point_open_warning_(0) 
@@ -15,7 +26,7 @@ BatchesBuyTask::BatchesBuyTask(T_TaskInformation &task_info, WinnerApp *app)
 
     //app_->local_logger().LogLocal(utility::FormatStr("construct BatchesBuyTask %d step: %.2f %% ", para_.id, para_.step));
 
-    auto array_ordered = utility::split(task_info.assistant_field, ";");
+    auto array_ordered = utility::split(task_info.assistant_field, ";"); //  index 1 buyed flag;index 2 buyed flag
      
     for( int i = 0; i < array_ordered.size(); ++i )
     {
@@ -31,10 +42,12 @@ BatchesBuyTask::BatchesBuyTask(T_TaskInformation &task_info, WinnerApp *app)
 
     for( int i = 0; i < step_items_.size(); ++i )
     {
-        if( 100.0 - i * para_.step < 0.0 )
+        if( 100.0 - (i + 1) * para_.step < 0.0 )
             break;
-        step_items_[i].up_price = para_.alert_price * (100 - i * para_.step) / 100;
-        step_items_[i].bottom_price = para_.alert_price * (100 - (i + 1) * para_.step) / 100;
+        step_items_[i].up_price = para_.alert_price * (100 - (i + 1) * para_.step) / 100;
+        auto bot = 100 - (i + 2) * para_.step;
+        bot = bot < 0.0 ? 0 : bot;
+        step_items_[i].bottom_price = para_.alert_price * bot / 100;
         if( i < 10 )
             app_->local_logger().LogLocal(TagOfCurTask()
                 , utility::FormatStr("%d index:%d step:%.2f up_price:%.2f btm_price:%.2f"
@@ -49,7 +62,7 @@ void BatchesBuyTask::HandleQuoteData()
     {
         for( int i = 0; i < step_items_.size(); ++i )
         { 
-            if( 100 - i * para_.step < 0 )
+            if( 100 - (i + 1) * para_.step < 0 )
                 break;
             if( (price > step_items_[i].bottom_price || Equal(price, step_items_[i].bottom_price))
                 && price < step_items_[i].up_price
@@ -131,7 +144,7 @@ void BatchesBuyTask::HandleQuoteData()
         para_.assistant_field.clear();
         for( int i = 0; i < step_items_.size(); ++i )
         {
-            if( 100.0 - i * para_.step < 0.0 )
+            if( 100.0 - (i + 1) * para_.step < 0.0 )
                 break;
             if( step_items_[i].has_buy ) 
             {
