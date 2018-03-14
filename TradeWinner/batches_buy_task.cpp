@@ -26,7 +26,7 @@ BatchesBuyTask::BatchesBuyTask(T_TaskInformation &task_info, WinnerApp *app)
 
     //app_->local_logger().LogLocal(utility::FormatStr("construct BatchesBuyTask %d step: %.2f %% ", para_.id, para_.step));
 
-    auto array_ordered = utility::split(task_info.assistant_field, ";"); //  index 1 buyed flag;index 2 buyed flag
+    auto array_ordered = utility::split(task_info.assistant_field, ";"); //  esction index which is buyed
      
     for( int i = 0; i < array_ordered.size(); ++i )
     {
