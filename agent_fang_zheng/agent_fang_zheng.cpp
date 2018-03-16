@@ -21,6 +21,13 @@ Agent_FANG_ZHENG::Agent_FANG_ZHENG()
 
 Agent_FANG_ZHENG::~Agent_FANG_ZHENG()
 { 
+#if 0
+    if( trade_client_id_ != -1 && trade_delegater_ )
+    {
+        trade_delegater_->Logoff(trade_client_id_);
+        trade_delegater_->CloseTdx();
+    }
+#endif
 }
 
 bool Agent_FANG_ZHENG::Setup(char* account_no)

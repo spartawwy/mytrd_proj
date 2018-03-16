@@ -29,6 +29,7 @@ public:
 
 private:
       
+     void *hmd_;
      //WinnerApp *app_;
      AgentInterface *p_agent_interface_;
 	 CreateObjectDelegate CreateObject_;

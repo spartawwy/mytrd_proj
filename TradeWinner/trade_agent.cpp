@@ -10,7 +10,8 @@
 #include <TLib/core/tsystem_utility_functions.h>
  
 TradeAgent::TradeAgent() 
-	: p_agent_interface_(nullptr)
+	: hmd_(nullptr)
+    , p_agent_interface_(nullptr)
 	, CreateObject_(nullptr)
 	, DestroyObject_(nullptr)
 {
@@ -21,6 +22,8 @@ TradeAgent::~TradeAgent()
 {
 	if( DestroyObject_ )
 		DestroyObject_(p_agent_interface_);
+    if( hmd_ )
+        FreeLibrary((HMODULE)hmd_);
 }
  
 
@@ -28,13 +31,13 @@ bool TradeAgent::Init(std::string &broker_tag, std::string &account_no)
 {
 	char dll_name_str[128] = {0};
 	sprintf_s(dll_name_str, sizeof(dll_name_str), "agent_%s.dll", broker_tag.c_str());
-	HMODULE md = LoadLibrary(dll_name_str);
-	if( !md )
+	hmd_ = LoadLibrary(dll_name_str);
+	if( !hmd_ )
 		return false;
 	 
 	//auto p_val = GetProcAddress(md, "fnagent_fang_zheng");
-	CreateObject_ = (CreateObjectDelegate)GetProcAddress(md, "CreateObject");
-	DestroyObject_ = (DestroyObjectDelegate)GetProcAddress(md, "DestroyObject");
+	CreateObject_ = (CreateObjectDelegate)GetProcAddress((HMODULE)hmd_, "CreateObject");
+	DestroyObject_ = (DestroyObjectDelegate)GetProcAddress((HMODULE)hmd_, "DestroyObject");
 	if( !CreateObject_ || !DestroyObject_ )
 		return false;
 		 

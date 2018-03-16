@@ -19,6 +19,8 @@ public:
 private:
 
 	TypeAction JudgeTypeAction(std::shared_ptr<QuotesData> & quote_data);
+    void PrintSections();
+
     std::string TagOfCurTask(); 
 	std::vector<T_SectionAutom> sections_;
 
