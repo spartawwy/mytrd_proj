@@ -8,8 +8,9 @@
 
 typedef void(__stdcall* LogoffDelegate)(int ClientID);
 
-#define  TEST_FANG_ZHENG 
+//#define  TEST_FANG_ZHENG 
 //#define  TEST_GUOJING_ZQ   // 
+#define   TEST_PING_AN
 
 // har* ip, short port, char* ver, short yybid, char* account_no
 // , char* trade_account, char* trade_pwd, char* txpwd, char* error
@@ -26,6 +27,15 @@ typedef void(__stdcall* LogoffDelegate)(int ClientID);
 	#define DYNAMIC_DLL_NAME "agent_guojing_zq.dll"
 	#define ACCOUNT_NO  "40482392"
 	#define  PASSWORD_STR "200672"
+
+#elif defined TEST_PING_AN 
+    #define DYNAMIC_DLL_NAME "agent_ping_an.dll"
+    #define SERVER_IP "202.69.19.56"
+    #define SERVER_PORT 7738
+    #define SERVER_VER "6.0"
+    #define SERVER_YYBID 1 
+    #define ACCOUNT_NO  "302819182466"
+    #define  PASSWORD_STR "258012"
 
 #else
 	#define DYNAMIC_DLL_NAME  " "
@@ -75,7 +85,7 @@ int main()
 	auto double_val2 = Round(0.35975456, 3);
 	auto double_val3 = Round(0.05975456, 7);
 #endif
-	return 0;
+	//return 0;
 	// end -----------
 
 	HMODULE md = LoadLibrary(DYNAMIC_DLL_NAME);
