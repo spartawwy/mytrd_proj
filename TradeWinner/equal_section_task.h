@@ -18,7 +18,7 @@ public:
 
 private:
 
-	TypeAction JudgeTypeAction(std::shared_ptr<QuotesData> & quote_data);
+	TypeAction JudgeTypeAction(std::shared_ptr<QuotesData> & iter, int *qty_op);
     void PrintSections();
 
     std::string TagOfCurTask(); 

@@ -192,18 +192,11 @@ bool Agent_PING_AN::QueryCapital(T_Capital *capital)
 	if( result_array.size() < 16 )
 		return false;
 	try
-	{
-		/*if( p_user_broker_info_->type == TypeBroker::PING_AN )
-		{
-			capital.remain = boost::lexical_cast<double>(result_array.at(19));
-			capital.available = boost::lexical_cast<double>(result_array.at(20));
-			capital.total = boost::lexical_cast<double>(result_array.at(25));
-		}else*/
-		{
-            capital->remain = std::stod(result_array.at(11));
-			capital->available = std::stod(result_array.at(13));
-			capital->total = std::stod(result_array.at(14));
-		}
+	{ 
+        capital->remain = std::stod(result_array.at(19));
+		capital->available = std::stod(result_array.at(20));
+        //result_array.at(24) ×ÜÊÐÖµ
+		capital->total = std::stod(result_array.at(25));
 	}catch(std::exception &)
 	{ 
         return false;
