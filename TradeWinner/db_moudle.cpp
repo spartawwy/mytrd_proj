@@ -7,90 +7,90 @@
 #include <SQLite/sqlite_connection.h>
 #include <TLib/core/tsystem_core_common.h>
 #include <TLib/core/tsystem_sqlite_functions.h>
- 
+
 #include "winner_app.h"
 /*CREATE TABLE BrokerInfo (id INTEGER, ip TEXT, port INTEGER, type INTEGER, remark TEXT, com_ver text, PRIMARY KEY(id));
 CREATE TABLE AccountInfo(id INTEGER, account_no TEXT, trade_account_no TEXT, trade_pwd  TEXT, comm_pwd TEXT, broker_id INTEGER, department_id text, remark TEXT, PRIMARY KEY(id));
 CREATE TABLE UserInformation(  id INTEGER
-    , level INTEGER
-    , name TEXT UNIQUE
-    , nick_name TEXT
-    , password TEXT
-    , account_id INTEGER
-    , remark TEXT, PRIMARY KEY(id) );
+, level INTEGER
+, name TEXT UNIQUE
+, nick_name TEXT
+, password TEXT
+, account_id INTEGER
+, remark TEXT, PRIMARY KEY(id) );
 CREATE TABLE Department(no integer, broker_type integer, name text, primary key(no, broker_type));
 CREATE TABLE stock(code text not null, name text, pinyin text, temp_code text, remark text, primary key(code));
 CREATE TABLE TaskInfo( id INTEGER,
-                 type INTEGER,
-                 user_id INTEGER,
-                stock  TEXT not null,
-                alert_price  DOUBLE,
-                back_alert_trigger  BOOL,
-                rebounce  DOUBLE,
-                continue_second   INTEGER,
-                step  DOUBLE,
-                quantity  INTEGER,
-                target_price_level INTEGER,
-                start_time   INTEGER,
-                end_time     INTEGER,
-                is_loop      BOOL,
-                state        INTEGER,
-                stock_pinyin TEXT,
-                bs_times     INTEGER,
-                assistant_field  TEXT,
-                PRIMARY KEY(id));
+type INTEGER,
+user_id INTEGER,
+stock  TEXT not null,
+alert_price  DOUBLE,
+back_alert_trigger  BOOL,
+rebounce  DOUBLE,
+continue_second   INTEGER,
+step  DOUBLE,
+quantity  INTEGER,
+target_price_level INTEGER,
+start_time   INTEGER,
+end_time     INTEGER,
+is_loop      BOOL,
+state        INTEGER,
+stock_pinyin TEXT,
+bs_times     INTEGER,
+assistant_field  TEXT,
+PRIMARY KEY(id));
 CREATE TABLE OrderMessage( longdate INTEGER, timestamp TEXT, msg_type TEXT, msg_id INTEGER, user_id INTEGER,
-                stock  TEXT not null,
-                alert_price  DOUBLE,
-                back_alert_trigger  BOOL,
-                rebounce  DOUBLE,
-                top_or_buttom_price DOUBLE,
-                continue_second   INTEGER,
-                step  DOUBLE,
-                quantity  INTEGER,
-                target_price_level INTEGER);
+stock  TEXT not null,
+alert_price  DOUBLE,
+back_alert_trigger  BOOL,
+rebounce  DOUBLE,
+top_or_buttom_price DOUBLE,
+continue_second   INTEGER,
+step  DOUBLE,
+quantity  INTEGER,
+target_price_level INTEGER);
 CREATE TABLE HisTask( id INTEGER,
-                longdate INTEGER,
-                timestamp TEXT,
-                type INTEGER,
-                user_id INTEGER,
-                stock  TEXT not null,
-                alert_price  DOUBLE,
-                back_alert_trigger  BOOL,
-                rebounce  DOUBLE,
-                continue_second   INTEGER,
-                step  DOUBLE,
-                quantity  INTEGER,
-                target_price_level INTEGER,
-                start_time   INTEGER,
-                end_time     INTEGER,
-                is_loop      BOOL,
-                state        INTEGER,
-                stock_pinyin TEXT,
-                bs_times     INTEGER,
-                PRIMARY KEY(id));
-				
+longdate INTEGER,
+timestamp TEXT,
+type INTEGER,
+user_id INTEGER,
+stock  TEXT not null,
+alert_price  DOUBLE,
+back_alert_trigger  BOOL,
+rebounce  DOUBLE,
+continue_second   INTEGER,
+step  DOUBLE,
+quantity  INTEGER,
+target_price_level INTEGER,
+start_time   INTEGER,
+end_time     INTEGER,
+is_loop      BOOL,
+state        INTEGER,
+stock_pinyin TEXT,
+bs_times     INTEGER,
+PRIMARY KEY(id));
+
 CREATE TABLE EqualSectionTask(id INTEGER, 
-								raise_percent DOUBLE, fall_percent DOUBLE, 
-								raise_infection DOUBLE, fall_infection DOUBLE,  
-								multi_qty INTEGER, 
-								max_trig_price DOUBLE, min_trig_price DOUBLE,
-								is_original BOOL,
-                                max_position INTEGER, min_position INTEGER,
-								PRIMARY KEY(id));
+raise_percent DOUBLE, fall_percent DOUBLE, 
+raise_infection DOUBLE, fall_infection DOUBLE,  
+multi_qty INTEGER, 
+max_trig_price DOUBLE, min_trig_price DOUBLE,
+is_original BOOL,
+max_position INTEGER, min_position INTEGER,
+PRIMARY KEY(id));
 
 CREATE TABLE AdvanceSectionTask(id INTEGER,
-								price_sections TEXT,
-								is_original BOOL,
-								PRIMARY KEY(id));
+price_sections TEXT,
+is_original BOOL,
+PRIMARY KEY(id));
 CREATE TABLE IndexRelateTask(id INTEGER, index_task_type INTEGER, relate_stock TEXT, is_down_trigger bool, is_buy bool,  PRIMARY KEY(id));
 
 CREATE TABLE AdvanceSectionTask(id INTEGER,
-								portion_sections TEXT, //seperate by ';'
-								portion_states TEXT,   //seperate by ';'
-								is_original BOOL,
-								PRIMARY KEY(id));          
- */
+portion_sections TEXT, //seperate by ';'
+portion_states TEXT,   //seperate by ';'
+is_original BOOL,
+PRIMARY KEY(id));          
+*/
 using namespace  TSystem;
 DBMoudle::DBMoudle(WinnerApp *app)
     : app_(app)
@@ -109,83 +109,83 @@ DBMoudle::~DBMoudle()
 void DBMoudle::Init()
 {
     if( !db_conn_ )
-		Open(db_conn_);
+        Open(db_conn_);
 
     if( !utility::ExistTable("accountInfo", *db_conn_) )
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
-                , "DBMoudle::Init"
-                , "can't find table accountInfo");
+        , "DBMoudle::Init"
+        , "can't find table accountInfo");
 
-     std::string sql = "SELECT max(id) FROM AccountInfo ";
-     db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
-     {
-         try
-         {
-           this->max_accoun_id_ = boost::lexical_cast<int>(*(vals));
-         }catch(boost::exception& )
-         {
+    std::string sql = "SELECT max(id) FROM AccountInfo ";
+    db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+    {
+        try
+        {
+            this->max_accoun_id_ = boost::lexical_cast<int>(*(vals));
+        }catch(boost::exception& )
+        {
             return 0;
-         }  
-         return 0;
-     });
+        }  
+        return 0;
+    });
 
-     sql = "SELECT max(id) FROM TaskInfo ";
-     db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
-     {
-		 if( !(*vals) )
-			 return 0;
-         try
-         {
-             //this->max_task_id_ = boost::lexical_cast<int>(*(vals));
-             int max_tsk_id = boost::lexical_cast<int>(*(vals));
-             if( max_tsk_id > app_->Cookie_MaxTaskId() )
-                 app_->Cookie_MaxTaskId(max_tsk_id);
-
-         }catch(boost::exception& )
-         {
+    sql = "SELECT max(id) FROM TaskInfo ";
+    db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+    {
+        if( !(*vals) )
             return 0;
-         }  
-         return 0;
-     });
-      
+        try
+        {
+            //this->max_task_id_ = boost::lexical_cast<int>(*(vals));
+            int max_tsk_id = boost::lexical_cast<int>(*(vals));
+            if( max_tsk_id > app_->Cookie_MaxTaskId() )
+                app_->Cookie_MaxTaskId(max_tsk_id);
+
+        }catch(boost::exception& )
+        {
+            return 0;
+        }  
+        return 0;
+    });
+
 }
 
 void DBMoudle::LoadAllUserBrokerInfo()
 {
     assert( user_account_info_map_.size() <= 0 );
-     
+
     std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
     Open(db_conn);
 
     if( !utility::ExistTable("UserInformation", *db_conn) || !utility::ExistTable("accountInfo", *db_conn) || !utility::ExistTable("brokerInfo", *db_conn) )
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
-                , "DBMoudle::LoadInformation"
-                , "can't find table UserInformation or accountInfo or brokerInfo");
+        , "DBMoudle::LoadInformation"
+        , "can't find table UserInformation or accountInfo or brokerInfo");
 
-     std::string sql = "SELECT id, type, ip, port, com_ver, remark FROM brokerInfo ORDER BY id ";
-     db_conn->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
-     {
-         T_BrokerInfo  broker_info;
-         try
-         {
-         broker_info.id = boost::lexical_cast<int>(*(vals));
-         broker_info.type = static_cast<TypeBroker>(boost::lexical_cast<int>(*(vals + 1)));
-         broker_info.ip = *(vals + 2);
-         broker_info.port = boost::lexical_cast<int>(*(vals + 3));
-         broker_info.com_ver = *(vals + 4);
-         broker_info.remark = *(vals + 5);
-         }catch(boost::exception& )
-         {
+    std::string sql = "SELECT id, type, ip, port, com_ver, remark FROM brokerInfo ORDER BY id ";
+    db_conn->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+    {
+        T_BrokerInfo  broker_info;
+        try
+        {
+            broker_info.id = boost::lexical_cast<int>(*(vals));
+            broker_info.type = static_cast<TypeBroker>(boost::lexical_cast<int>(*(vals + 1)));
+            broker_info.ip = *(vals + 2);
+            broker_info.port = boost::lexical_cast<int>(*(vals + 3));
+            broker_info.com_ver = *(vals + 4);
+            broker_info.remark = *(vals + 5);
+        }catch(boost::exception& )
+        {
             return 0;
-         } 
-         broker_info_map_.insert(std::make_pair(broker_info.id, std::move(broker_info)));
-         return 0;
-     });
-      
-     // SELECT every user 's current account information and broker information ----------
-     sql = "SELECT u.level, a.broker_id, a.account_no, a.trade_account_no, a.trade_pwd, a.comm_pwd, a.department_id, a.id, u.id "
-     " FROM UserInformation u INNER JOIN accountInfo a INNER JOIN brokerInfo b ON u.account_id=a.id AND a.broker_id=b.id ORDER BY u.id";
-    
+        } 
+        broker_info_map_.insert(std::make_pair(broker_info.id, std::move(broker_info)));
+        return 0;
+    });
+
+    // SELECT every user 's current account information and broker information ----------
+    sql = "SELECT u.level, a.broker_id, a.account_no, a.trade_account_no, a.trade_pwd, a.comm_pwd, a.department_id, a.id, u.id "
+        " FROM UserInformation u INNER JOIN accountInfo a INNER JOIN brokerInfo b ON u.account_id=a.id AND a.broker_id=b.id ORDER BY u.id";
+
     db_conn->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
     {
         T_UserAccountInfo  user_account_info;
@@ -205,8 +205,8 @@ void DBMoudle::LoadAllUserBrokerInfo()
         user_account_info.trade_pwd_ = *(vals + 4);
         user_account_info.comm_pwd_ = *(vals + 5);
         user_account_info.department_id_ = *(vals + 6);
-        
-        
+
+
         this->user_account_info_map_.insert( std::make_pair(user_id, std::move(user_account_info)) );
         return 0;
     });
@@ -215,25 +215,25 @@ void DBMoudle::LoadAllUserBrokerInfo()
 void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInformation> > &taskinfos)
 {
     if( !db_conn_ )
-		Open(db_conn_);
+        Open(db_conn_);
 
     if( !utility::ExistTable("TaskInfo", *db_conn_) )
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
-                , "DBMoudle::LoadAllTaskInfo"
-                , "can't find table TaskInfo: ");
+        , "DBMoudle::LoadAllTaskInfo"
+        , "can't find table TaskInfo: ");
 
     std::string sql  = utility::FormatStr("SELECT id, type, stock, alert_price, back_alert_trigger, rebounce, continue_second, step, quantity, target_price_level, start_time, end_time, is_loop, state, user_id, stock_pinyin, bs_times, assistant_field"
         " FROM TaskInfo WHERE user_id=%d AND type NOT IN (%d, %d) order by id ", app_->user_info().id, (int)TypeTask::EQUAL_SECTION, (int)TypeTask::INDEX_RISKMAN);
-    
+
     //std::make_shared<std::string>();
     db_conn_->ExecuteSQL(sql.c_str(),[&taskinfos, this](int num_cols, char** vals, char** names)->int
     {
         auto task_info = std::make_shared<T_TaskInformation>();
-        
+
         try
         {
             task_info->id = boost::lexical_cast<int>(*(vals));
-           	task_info->type = static_cast<TypeTask>(boost::lexical_cast<int>(*(vals + 1)));
+            task_info->type = static_cast<TypeTask>(boost::lexical_cast<int>(*(vals + 1)));
             task_info->stock = *(vals + 2);
             if( task_info->stock.length() < 6 )
             {
@@ -242,9 +242,9 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
             }
             task_info->alert_price = boost::lexical_cast<double>(*(vals + 3));
             task_info->back_alert_trigger = boost::lexical_cast<bool>(*(vals + 4));
-			task_info->rebounce = boost::lexical_cast<double>(*(vals + 5));
+            task_info->rebounce = boost::lexical_cast<double>(*(vals + 5));
             task_info->continue_second = boost::lexical_cast<int>(*(vals + 6));
-			task_info->step = boost::lexical_cast<double>(*(vals + 7));
+            task_info->step = boost::lexical_cast<double>(*(vals + 7));
             task_info->quantity = boost::lexical_cast<int>(*(vals + 8));
             if( task_info->quantity <= 0 || task_info->quantity % 100 != 0 )
             {
@@ -256,10 +256,10 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
             task_info->end_time = boost::lexical_cast<int>(*(vals + 11));
             task_info->is_loop = boost::lexical_cast<int>(*(vals + 12));
             task_info->state = boost::lexical_cast<int>(*(vals + 13)); 
-			task_info->stock_pinyin = *(vals + 15); 
+            task_info->stock_pinyin = *(vals + 15); 
             utf8ToGbk(task_info->stock_pinyin);
-			task_info->bs_times = boost::lexical_cast<int>(*(vals + 16));
-			//if( task_info->type == TypeTask::BATCHES_BUY || task_info->type == TypeTask::BATCHES_SELL )
+            task_info->bs_times = boost::lexical_cast<int>(*(vals + 16));
+            //if( task_info->type == TypeTask::BATCHES_BUY || task_info->type == TypeTask::BATCHES_SELL )
             task_info->assistant_field = *(vals + 17);
 
         }catch(boost::exception& )
@@ -271,31 +271,31 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
         return 0;
     });
 
-	// equal section task
-	sql = utility::FormatStr("SELECT t.id, t.type, t.stock, t.stock_pinyin, t.alert_price, t.back_alert_trigger, t.rebounce, t.continue_second, "
-		" t.quantity, t.target_price_level, t.start_time, t.end_time, t.state, t.user_id, "
-		" e.raise_percent, e.fall_percent, e.raise_infection, e.fall_infection, e.multi_qty, e.max_trig_price, e.min_trig_price, e.is_original, t.assistant_field, e.max_position, e.min_position "
+    // equal section task
+    sql = utility::FormatStr("SELECT t.id, t.type, t.stock, t.stock_pinyin, t.alert_price, t.back_alert_trigger, t.rebounce, t.continue_second, "
+        " t.quantity, t.target_price_level, t.start_time, t.end_time, t.state, t.user_id, "
+        " e.raise_percent, e.fall_percent, e.raise_infection, e.fall_infection, e.multi_qty, e.max_trig_price, e.min_trig_price, e.is_original, t.assistant_field, e.max_position, e.min_position "
         " FROM TaskInfo t INNER JOIN EqualSectionTask e ON t.id=e.id WHERE t.user_id=%d order by t.id ", app_->user_info().id);
     db_conn_->ExecuteSQL(sql.c_str(),[&taskinfos, this](int num_cols, char** vals, char** names)->int
     {
         auto task_info = std::make_shared<T_TaskInformation>();
-        
+
         try
         {
             task_info->id = boost::lexical_cast<int>(*(vals));
-           	task_info->type = static_cast<TypeTask>(boost::lexical_cast<int>(*(vals + 1)));
+            task_info->type = static_cast<TypeTask>(boost::lexical_cast<int>(*(vals + 1)));
             task_info->stock = *(vals + 2);
             if( task_info->stock.length() < 6 )
             {
                 app_->local_logger().LogLocal("error", utility::FormatStr("task %d stock %s", task_info->id, task_info->stock.c_str()));
                 return 0;
             }
-            
-			task_info->stock_pinyin = *(vals + 3);
+
+            task_info->stock_pinyin = *(vals + 3);
             utf8ToGbk(task_info->stock_pinyin);
             task_info->alert_price = boost::lexical_cast<double>(*(vals + 4));
-			task_info->back_alert_trigger = boost::lexical_cast<bool>(*(vals + 5)); 
-			task_info->rebounce = boost::lexical_cast<double>(*(vals + 6));
+            task_info->back_alert_trigger = boost::lexical_cast<bool>(*(vals + 5)); 
+            task_info->rebounce = boost::lexical_cast<double>(*(vals + 6));
             task_info->continue_second = boost::lexical_cast<int>(*(vals + 7)); 
             task_info->quantity = boost::lexical_cast<int>(*(vals + 8));
             if( task_info->quantity <= 0 || task_info->quantity % 100 != 0 )
@@ -308,16 +308,16 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
             task_info->end_time = boost::lexical_cast<int>(*(vals + 11)); 
             task_info->state = boost::lexical_cast<int>(*(vals + 12));
             //auto userid = boost::lexical_cast<int>(*(vals + 13));
-			  
-			task_info->secton_task.raise_percent = boost::lexical_cast<double>(*(vals + 14));
-			task_info->secton_task.fall_percent = boost::lexical_cast<double>(*(vals + 15));
-			task_info->secton_task.raise_infection = boost::lexical_cast<double>(*(vals + 16));
-			task_info->secton_task.fall_infection = boost::lexical_cast<double>(*(vals + 17));
-			task_info->secton_task.multi_qty = boost::lexical_cast<int>(*(vals + 18));
-			task_info->secton_task.max_trig_price = boost::lexical_cast<double>(*(vals + 19));
-			task_info->secton_task.min_trig_price = boost::lexical_cast<double>(*(vals + 20));
-			task_info->secton_task.is_original = boost::lexical_cast<bool>(*(vals + 21));
-			
+
+            task_info->secton_task.raise_percent = boost::lexical_cast<double>(*(vals + 14));
+            task_info->secton_task.fall_percent = boost::lexical_cast<double>(*(vals + 15));
+            task_info->secton_task.raise_infection = boost::lexical_cast<double>(*(vals + 16));
+            task_info->secton_task.fall_infection = boost::lexical_cast<double>(*(vals + 17));
+            task_info->secton_task.multi_qty = boost::lexical_cast<int>(*(vals + 18));
+            task_info->secton_task.max_trig_price = boost::lexical_cast<double>(*(vals + 19));
+            task_info->secton_task.min_trig_price = boost::lexical_cast<double>(*(vals + 20));
+            task_info->secton_task.is_original = boost::lexical_cast<bool>(*(vals + 21));
+
             task_info->assistant_field = *(vals + 22);
             task_info->secton_task.max_position = boost::lexical_cast<int>(*(vals + 23));
             task_info->secton_task.min_position = boost::lexical_cast<int>(*(vals + 24));
@@ -330,16 +330,16 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
     });
 
     //IndexRelateTask task --------------- 
-        
+
     sql = utility::FormatStr("SELECT t.id, t.type, t.stock, t.stock_pinyin, t.alert_price, t.continue_second, "
-		    " t.quantity, t.target_price_level, t.start_time, t.end_time, t.state, t.user_id, "
-		    " i.index_task_type, i.relate_stock, i.is_down_trigger, i.is_buy"
-            " FROM TaskInfo t INNER JOIN IndexRelateTask i ON t.id=i.id WHERE t.user_id=%d order by i.id ", app_->user_info().id);
+        " t.quantity, t.target_price_level, t.start_time, t.end_time, t.state, t.user_id, "
+        " i.index_task_type, i.relate_stock, i.is_down_trigger, i.is_buy"
+        " FROM TaskInfo t INNER JOIN IndexRelateTask i ON t.id=i.id WHERE t.user_id=%d order by i.id ", app_->user_info().id);
     db_conn_->ExecuteSQL(sql.c_str(),[&taskinfos, this](int num_cols, char** vals, char** names)->int
     {
         auto task_info = std::make_shared<T_TaskInformation>();
-		
-		task_info->id = boost::lexical_cast<int>(*(vals));
+
+        task_info->id = boost::lexical_cast<int>(*(vals));
         task_info->type = static_cast<TypeTask>(boost::lexical_cast<int>(*(vals + 1)));
         task_info->stock = *(vals + 2);
         if( task_info->stock.length() < 6 )
@@ -364,7 +364,7 @@ void DBMoudle::LoadAllTaskInfo(std::unordered_map<int, std::shared_ptr<T_TaskInf
         taskinfos.insert( std::make_pair(task_info->id, std::move(task_info)) );
         return 0;
     });
-        
+
 }
 
 T_UserAccountInfo * DBMoudle::FindUserAccountInfo(int user_id)
@@ -374,7 +374,7 @@ T_UserAccountInfo * DBMoudle::FindUserAccountInfo(int user_id)
         return nullptr;
     return &iter->second;
 }
- 
+
 T_BrokerInfo * DBMoudle::FindUserBrokerByUser(int user_id)
 {
     auto p_account_info = FindUserAccountInfo(user_id);
@@ -397,32 +397,32 @@ T_BrokerInfo * DBMoudle::FindUserBrokerByBroker(int id)
 std::shared_ptr<T_UserAccountInfo> DBMoudle::FindAccountInfoByAccNoAndBrokerId(const std::string& accno, int broker_id)
 {
     std::shared_ptr<T_UserAccountInfo>  p_info = nullptr;
-   if( !db_conn_ )
-		Open(db_conn_);
+    if( !db_conn_ )
+        Open(db_conn_);
     if( !utility::ExistTable("UserInformation", *db_conn_) || !utility::ExistTable("accountinfo", *db_conn_))
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
-                , "DBMoudle::FindUserAccountInfoByAccNoAndBrokerId"
-                , "can't find table UserInformation or accountinfo ");
+        , "DBMoudle::FindUserAccountInfoByAccNoAndBrokerId"
+        , "can't find table UserInformation or accountinfo ");
 
     /*std::string sql = utility::FormatStr("SELECT u.id, u.level, u.name, u.nick_name, u.password, u.account_id, u.remark "
-        " FROM UserInformation u LEFT JOIN accountinfo a ON u.account_id = a.id WHERE a.account_no='%s' and a.broker_id = %d"
-        , accno.c_str(), broker_id);*/
+    " FROM UserInformation u LEFT JOIN accountinfo a ON u.account_id = a.id WHERE a.account_no='%s' and a.broker_id = %d"
+    , accno.c_str(), broker_id);*/
     std::string sql = utility::FormatStr("SELECT broker_id, account_no, trade_account_no, trade_pwd, comm_pwd, department_id, id, remark "
         " FROM AccountInfo WHERE account_no='%s' and broker_id = %d"
         , accno.c_str(), broker_id);
     db_conn_->ExecuteSQL(sql.c_str(),[&p_info, this](int num_cols, char** vals, char** names)->int
     {
-         p_info = std::make_shared<T_UserAccountInfo>();
-         try
-         { 
-             p_info->broker_id_  = boost::lexical_cast<int>(*(vals));
-             p_info->account_no_in_broker_ = *(vals + 1);
-             p_info->trade_no_in_broker_ = *(vals + 2);
-             p_info->trade_pwd_ = *(vals + 3);
-             p_info->comm_pwd_ = *(vals + 4);
-             p_info->department_id_  = *(vals + 5);
-             p_info->account_id = boost::lexical_cast<int>(*(vals + 6));
-         }catch(boost::exception& )
+        p_info = std::make_shared<T_UserAccountInfo>();
+        try
+        { 
+            p_info->broker_id_  = boost::lexical_cast<int>(*(vals));
+            p_info->account_no_in_broker_ = *(vals + 1);
+            p_info->trade_no_in_broker_ = *(vals + 2);
+            p_info->trade_pwd_ = *(vals + 3);
+            p_info->comm_pwd_ = *(vals + 4);
+            p_info->department_id_  = *(vals + 5);
+            p_info->account_id = boost::lexical_cast<int>(*(vals + 6));
+        }catch(boost::exception& )
         {
             return 0;
         } 
@@ -476,7 +476,7 @@ bool DBMoudle::AddAccountInfo(T_AccountInformation &info)
         , info.department_id.c_str()
         , info.remark.c_str());
     if( !db_conn_ )
-		Open(db_conn_);
+        Open(db_conn_);
     if( !utility::ExistTable("AccountInfo", *db_conn_) )
     {
         // throw exception
@@ -496,32 +496,32 @@ bool DBMoudle::UpdateAccountInfo(T_AccountInformation &info)
 {
     std::string sql = 
         utility::FormatStr("UPDATE AccountInfo SET account_no='%s', trade_account_no='%s', trade_pwd='%s'"
-                           ", comm_pwd='%s', broker_id=%d, department_id='%s', remark='%s' "
-                           "WHERE id = %d"
-                            , info.account_no.c_str()
-                            , info.trade_acc_no.c_str()
-                            , info.trade_pwd.c_str()
-                            , info.comm_pwd.c_str()
-                            , info.broker_id
-                            , info.department_id.c_str()
-                            , info.remark.c_str()
-                            , info.id);
-   if( !db_conn_ )
-		Open(db_conn_);
+        ", comm_pwd='%s', broker_id=%d, department_id='%s', remark='%s' "
+        "WHERE id = %d"
+        , info.account_no.c_str()
+        , info.trade_acc_no.c_str()
+        , info.trade_pwd.c_str()
+        , info.comm_pwd.c_str()
+        , info.broker_id
+        , info.department_id.c_str()
+        , info.remark.c_str()
+        , info.id);
+    if( !db_conn_ )
+        Open(db_conn_);
     if( !utility::ExistTable("AccountInfo", *db_conn_) )
     {
         // throw exception
         return false; 
     }
-     
+
     return db_conn_->ExecuteSQL(sql.c_str());
 }
 
 int DBMoudle::FindBorkerIdByAccountID(int account_id)
 {
     // assert all broker_id > 0
-   if( !db_conn_ )
-		Open(db_conn_);
+    if( !db_conn_ )
+        Open(db_conn_);
     if( !utility::ExistTable("AccountInfo", *db_conn_) )
     {
         // throw exception
@@ -558,11 +558,11 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
         , info->end_time
         , info->is_loop
         , info->state
-		, str_stock_py.c_str()
+        , str_stock_py.c_str()
         , info->bs_times
         , info->assistant_field.c_str());
-   if( !db_conn_ )
-		Open(db_conn_);
+    if( !db_conn_ )
+        Open(db_conn_);
     if( !utility::ExistTable("TaskInfo", *db_conn_) )
     {  // throw exception
         return false; 
@@ -575,7 +575,7 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
         return false; 
     }
     bool ret = true;
-     
+
     {
         WriteLock locker(taskinfo_table_mutex_);
         ret = db_conn_->ExecuteSQL(sql.c_str());
@@ -596,8 +596,8 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
                 , (int)info->secton_task.is_original
                 , info->secton_task.max_position
                 , info->secton_task.min_position);
-             WriteLock locker(equalsection_table_mutex_);
-             ret = db_conn_->ExecuteSQL(sql.c_str()); 
+            WriteLock locker(equalsection_table_mutex_);
+            ret = db_conn_->ExecuteSQL(sql.c_str()); 
         }else if( info->type == TypeTask::INDEX_RISKMAN )
         {
             sql = utility::FormatStr("INSERT INTO IndexRelateTask VALUES( %d, %d, '%s', %d, %d )"
@@ -609,7 +609,7 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
             WriteLock locker(index_rel_table_mutex_);
             ret = db_conn_->ExecuteSQL(sql.c_str());  
         }
-         
+
         if( !ret )
         {  
             sql = utility::FormatStr("DELETE FROM TaskInfo WHERE id=%d", app_->Cookie_MaxTaskId() + 1);
@@ -630,11 +630,11 @@ bool DBMoudle::DelTaskInfo(int task_id, TypeTask type)
 
     if( !utility::ExistTable("TaskInfo", *db_conn_) )
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
-                , "DBMoudle::DelTaskInfo"
-                , "can't find table TaskInfo");
-     
+        , "DBMoudle::DelTaskInfo"
+        , "can't find table TaskInfo");
+
     std::string sql = utility::FormatStr("DELETE FROM TaskInfo WHERE id=%d ", task_id);
-     
+
     {
         WriteLock locker(taskinfo_table_mutex_);
         db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
@@ -642,25 +642,25 @@ bool DBMoudle::DelTaskInfo(int task_id, TypeTask type)
             return 0;
         });
     }
-	if( type == TypeTask::EQUAL_SECTION )
-	{
-		// del related recorde in table EqualSectionTask
-		std::string sql = utility::FormatStr("DELETE FROM EqualSectionTask WHERE id=%d ", task_id);
-		WriteLock locker(equalsection_table_mutex_);
-		db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+    if( type == TypeTask::EQUAL_SECTION )
+    {
+        // del related recorde in table EqualSectionTask
+        std::string sql = utility::FormatStr("DELETE FROM EqualSectionTask WHERE id=%d ", task_id);
+        WriteLock locker(equalsection_table_mutex_);
+        db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
         { 
             return 0;
         });
     }else if( type == TypeTask::INDEX_RISKMAN )
-	{
-		// del related recorde in table IndexRelateTask
-		std::string sql = utility::FormatStr("DELETE FROM IndexRelateTask WHERE id=%d ", task_id);
-		WriteLock locker(index_rel_table_mutex_);
-		db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+    {
+        // del related recorde in table IndexRelateTask
+        std::string sql = utility::FormatStr("DELETE FROM IndexRelateTask WHERE id=%d ", task_id);
+        WriteLock locker(index_rel_table_mutex_);
+        db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
         { 
             return 0;
         });
-	}
+    }
     return true;
 }
 
@@ -673,8 +673,8 @@ bool DBMoudle::UpdateTaskInfo(T_TaskInformation &info)
 
     if( !utility::ExistTable("TaskInfo", *db_conn_) )
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
-                , "DBMoudle::UpdateTaskInfo"
-                , "can't find table TaskInfo");
+        , "DBMoudle::UpdateTaskInfo"
+        , "can't find table TaskInfo");
 
     auto str_stock_py = info.stock_pinyin;
     gbkToUtf8(str_stock_py);
@@ -697,7 +697,7 @@ bool DBMoudle::UpdateTaskInfo(T_TaskInformation &info)
         , str_stock_py.c_str()
         , info.bs_times
         , info.assistant_field.c_str()
-         , info.id);
+        , info.id);
     bool ret = true; 
     {
         WriteLock locker(taskinfo_table_mutex_);
@@ -711,27 +711,27 @@ bool DBMoudle::UpdateTaskInfo(T_TaskInformation &info)
 
 void DBMoudle::UpdateEqualSection(int taskid, bool is_original, double start_price)
 { 
-	if( !db_conn_ )
+    if( !db_conn_ )
     {
         Open(db_conn_);
     }
 
-	std::string sql = utility::FormatStr("UPDATE TaskInfo SET assistant_field='%.2f' WHERE id=%d ", start_price, taskid); 
-	{
-		WriteLock locker(taskinfo_table_mutex_);
-		db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
-		{ 
-			return 0;
-		});
-	}
-	sql = utility::FormatStr("UPDATE EqualSectionTask SET is_original=%d WHERE id=%d ", (int)is_original, taskid); 
-	{
-		WriteLock locker(equalsection_table_mutex_);
-		db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
-		{ 
-			return 0;
-		});
-	}
+    std::string sql = utility::FormatStr("UPDATE TaskInfo SET assistant_field='%.2f' WHERE id=%d ", start_price, taskid); 
+    {
+        WriteLock locker(taskinfo_table_mutex_);
+        db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+        { 
+            return 0;
+        });
+    }
+    sql = utility::FormatStr("UPDATE EqualSectionTask SET is_original=%d WHERE id=%d ", (int)is_original, taskid); 
+    {
+        WriteLock locker(equalsection_table_mutex_);
+        db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+        { 
+            return 0;
+        });
+    }
 }
 
 bool DBMoudle::AddHisTask(std::shared_ptr<T_TaskInformation>& info)
@@ -758,7 +758,7 @@ bool DBMoudle::AddHisTask(std::shared_ptr<T_TaskInformation>& info)
         , info->end_time
         , info->is_loop
         , info->state
-		, str_stock_py.c_str()
+        , str_stock_py.c_str()
         , info->bs_times);
     std::shared_ptr<SQLite::SQLiteConnection> db_conn = nullptr;
     Open(db_conn);
@@ -780,11 +780,11 @@ bool DBMoudle::IsTaskExists(int user_id, TypeTask type, const std::string& stock
 
     if( !utility::ExistTable("TaskInfo", *db_conn_) )
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
-                , "DBMoudle::Init"
-                , "can't find table TaskInfo");
+        , "DBMoudle::Init"
+        , "can't find table TaskInfo");
     bool exists = false;
     std::string sql = utility::FormatStr("SELECT id FROM TaskInfo WHERE user_id=%d AND type=%d AND stock like '%%%s%%'", user_id, int(type), stock.c_str());
-    
+
     ReadLock locker(taskinfo_table_mutex_);
     db_conn_->ExecuteSQL(sql.c_str(),[&exists, this](int num_cols, char** vals, char** names)->int
     {
@@ -807,7 +807,7 @@ int DBMoudle::CheckLogin(const std::string& name, const std::string& pwd, T_User
         return ret;
 
     std::string sql = utility::FormatStr("SELECT u.id, u.level, u.name, u.nick_name, u.password, u.account_id, u.remark, a.account_no FROM UserInformation u LEFT JOIN accountinfo a ON u.account_id = a.id WHERE u.name='%s' AND u.password='%s'", name.c_str(), pwd.c_str());
-     
+
     db_conn_->ExecuteSQL(sql.c_str(),[&, this](int num_cols, char** vals, char** names)->int
     { 
         ret = boost::lexical_cast<int>(*vals);
@@ -838,7 +838,7 @@ void DBMoudle::GetStockCode(const std::string &code, std::vector<T_StockCodeName
     {
         Open(db_conn_);
     }
-   
+
     std::string sql;
     if( IsStrAlpha(code) )
     {
@@ -853,12 +853,12 @@ void DBMoudle::GetStockCode(const std::string &code, std::vector<T_StockCodeName
 
     if( !utility::ExistTable("stock", *db_conn_) )
         return;
-     
+
     db_conn_->ExecuteSQL(sql.c_str(),[&ret, this](int num_cols, char** vals, char** names)->int
     { /*
-        T_StockCodeName code_name;
-        code_name.code = *vals;
-        code_name.name = *(vals + 1);*/
+      T_StockCodeName code_name;
+      code_name.code = *vals;
+      code_name.name = *(vals + 1);*/
         std::string name = *(vals + 1);
         utf8ToGbk(name);
         ret.emplace_back(*vals, std::move(name));
@@ -876,7 +876,7 @@ std::string DBMoudle::GetStockName(const std::string &code_num)
     {
         Open(db_conn_);
     }
-   
+
     std::string name;
     if( !utility::ExistTable("stock", *db_conn_) )
         return "";
@@ -900,7 +900,7 @@ void DBMoudle::Open(std::shared_ptr<SQLite::SQLiteConnection>& db_conn)
 
     if( db_conn->Open(db_file.c_str(), SQLite::SQLiteConnection::OpenMode::READ_WRITE) != SQLite::SQLiteCode::OK )
         ThrowTException( CoreErrorCategory::ErrorCode::BAD_CONTENT
-                , "DBMoudle::Open"
-                , "can't open database: " + db_file);
-    
+        , "DBMoudle::Open"
+        , "can't open database: " + db_file);
+
 }
