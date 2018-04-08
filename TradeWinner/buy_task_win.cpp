@@ -20,10 +20,13 @@
 #include "batches_buy_task.h"
 
 //
- 
-static const QString cst_str_inflection_buy = QString::fromLocal8Bit("拐点买入");
-static const QString cst_str_breakout_buy = QString::fromLocal8Bit("突破买入");
-static const QString cst_str_batches_buy = QString::fromLocal8Bit("分批买入");
+const char  cst_str_inflection_buy[64] = "拐点买入";
+const char  cst_str_breakout_buy[64] = "突破买入";
+const char  cst_str_batches_buy[64] = "分批买入";
+
+//static const QString cst_str_inflection_buy = QString::fromLocal8Bit("拐点买入");
+//static const QString cst_str_breakout_buy = QString::fromLocal8Bit("突破买入");
+//static const QString cst_str_batches_buy = QString::fromLocal8Bit("分批买入");
 
 void WinnerWin::InitBuyTaskWin()
 {
@@ -43,9 +46,9 @@ void WinnerWin::InitBuyTaskWin()
     ui.dbspbox_bt_step_range->setMinimum(0.1);
 
 #endif
-    ui.combox_buy_type->addItem(cst_str_inflection_buy);
-    ui.combox_buy_type->addItem(cst_str_breakout_buy);
-    ui.combox_buy_type->addItem(cst_str_batches_buy);
+    ui.combox_buy_type->addItem(QString::fromLocal8Bit(cst_str_inflection_buy));
+    ui.combox_buy_type->addItem(QString::fromLocal8Bit(cst_str_breakout_buy));
+    ui.combox_buy_type->addItem(QString::fromLocal8Bit(cst_str_batches_buy));
      
     ui.combox_bt_price_level->addItem(QString::fromLocal8Bit("即时价"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_CUR)));
     ui.combox_bt_price_level->addItem(QString::fromLocal8Bit("买一和卖一"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_1)));

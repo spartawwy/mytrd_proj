@@ -22,10 +22,15 @@
 #include "message_win.h"
 
 //
-static const QString cst_str_breakout_sell = QString::fromLocal8Bit("破位卖出");
-static const QString cst_str_inflection_sell = QString::fromLocal8Bit("拐点卖出");
-static const QString cst_str_follow_sell = QString::fromLocal8Bit("跟踪止盈");
-static const QString cst_str_batches_sell = QString::fromLocal8Bit("分批出货");
+const char cst_str_breakout_sell[64]= "破位卖出";
+const char cst_str_inflection_sell[64]= "拐点卖出";
+const char cst_str_follow_sell[64]= "跟踪止盈";
+const char cst_str_batches_sell[64]= "分批出货";
+//
+//static const QString cst_str_breakout_sell = QString::fromLocal8Bit("破位卖出");
+//static const QString cst_str_inflection_sell = QString::fromLocal8Bit("拐点卖出");
+//static const QString cst_str_follow_sell = QString::fromLocal8Bit("跟踪止盈");
+//static const QString cst_str_batches_sell = QString::fromLocal8Bit("分批出货");
 
 void WinnerWin::InitSellTaskWin()
 { 
@@ -74,10 +79,10 @@ void WinnerWin::InitSellTaskWin()
 
 void WinnerWin::SetupSellTaskWin()
 {
-    ui.combox_sell_type->addItem(cst_str_breakout_sell);
-    ui.combox_sell_type->addItem(cst_str_inflection_sell);
-    ui.combox_sell_type->addItem(cst_str_follow_sell);
-    ui.combox_sell_type->addItem(cst_str_batches_sell);
+    ui.combox_sell_type->addItem(QString::fromLocal8Bit(cst_str_breakout_sell));
+    ui.combox_sell_type->addItem(QString::fromLocal8Bit(cst_str_inflection_sell));
+    ui.combox_sell_type->addItem(QString::fromLocal8Bit(cst_str_follow_sell));
+    ui.combox_sell_type->addItem(QString::fromLocal8Bit(cst_str_batches_sell));
 
     ui.combox_price_level->addItem(QString::fromLocal8Bit("即时价"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_CUR)));
     ui.combox_price_level->addItem(QString::fromLocal8Bit("买一和卖一"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_1)));
@@ -120,7 +125,7 @@ void WinnerWin::FillSellTaskWin(TypeTask type, T_TaskInformation& info)
 	switch(type)
 	{
 	case TypeTask::BREAK_SELL: 
-        ui.combox_sell_type->setCurrentText(cst_str_breakout_sell);
+        ui.combox_sell_type->setCurrentText(QString::fromLocal8Bit(cst_str_breakout_sell));
 		break;
 	case TypeTask::INFLECTION_SELL: 
         ui.combox_sell_type->setCurrentText(cst_str_inflection_sell);
@@ -211,7 +216,7 @@ void WinnerWin::DoAddTask()
         task_info->state = 1;		
 	};
 
-    if( ui.combox_sell_type->currentText() == cst_str_breakout_sell )
+    if( ui.combox_sell_type->currentText() == QString::fromLocal8Bit(cst_str_breakout_sell) )
     {
         if( !check_le_stock(TypeTask::BREAK_SELL) )
             return;
@@ -344,7 +349,7 @@ void WinnerWin::DoAlertPercentChanged(double val)
 {
     if( cur_price_ > 0 )
     {
-        if( ui.combox_sell_type->currentText() == cst_str_breakout_sell )
+        if( ui.combox_sell_type->currentText() == QString::fromLocal8Bit(cst_str_breakout_sell) )
         {
             if( val < 100 )
                 ui.dbspbox_alert_price->setValue(cur_price_ * (100 - val ) / 100);
@@ -411,7 +416,7 @@ void WinnerWin::DoSellTypeChanged(const QString&str)
 	   ui.wid_step_range->hide();
 	   ui.wid_retreat->show();
 
-   }else if( str == cst_str_breakout_sell )
+   }else if( str == QString::fromLocal8Bit(cst_str_breakout_sell) )
    { 
     ChangeTabSellAssistantImg(TypeTask::BREAK_SELL);
     ui.label_alert_price->setText(QString::fromLocal8Bit("股票低于:"));
