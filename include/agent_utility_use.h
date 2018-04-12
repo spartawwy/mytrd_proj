@@ -10,5 +10,7 @@ std::string&   replace_all(std::string&   str, const   std::string&   old_value,
 std::string&   replace_all_distinct(std::string&   str, const   std::string&   old_value, const  std::string&   new_value);
 std::vector<std::string> split(const std::string& source, const std::string& seperator = " ", 
 							   const std::string& quotation = "\"");
+
+void WriteLog(const char *fmt, ...);
 }
 #endif // AGENT_UTILITY_USE_SDF3KSDFDS_H_

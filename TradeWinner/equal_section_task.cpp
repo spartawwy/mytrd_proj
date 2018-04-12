@@ -171,7 +171,7 @@ TypeAction EqualSectionTask::JudgeTypeAction(std::shared_ptr<QuotesData> & iter,
 			{  
 				if( EQSEC_MIN_POSITION != para_.secton_task.min_position && total_position <= para_.secton_task.min_position )
 				{
-					//app_->local_logger().LogLocal(TSystem::utility::FormatStr("warning: %d EqualSectionTask %s switch section_type:%d, curprice:%.2f but position achieve min_position", para_.id, para_.stock.c_str(), (int)sections_[index].section_type, iter->cur_price));
+					DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("warning: %d switch section_type:%d, curprice:%.2f but position:%d achieve min_position:%d", para_.id, (int)sections_[index].section_type, iter->cur_price, total_position, para_.secton_task.min_position));
 					return TypeAction::NOOP;
 				} 
 				 
@@ -260,7 +260,7 @@ void EqualSectionTask::HandleQuoteData()
 
     int total_position = GetTototalPosition();
     int avaliable_pos = GetAvaliablePosition();
-    DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("avaliablepos: %d", avaliable_pos));
+    //DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("avaliablepos: %d", avaliable_pos));
 	int index = 0;
 
 	if( para_.rebounce > 0.0 ) // use rebounce 
@@ -366,8 +366,8 @@ void EqualSectionTask::HandleQuoteData()
 				if( iter->cur_price > cond4_sell_backtrigger_price_ ) cond4_sell_backtrigger_price_ = iter->cur_price;
 				if( para_.back_alert_trigger && cond4_sell_backtrigger_price_ > prepare_rebounce_price_ && iter->cur_price < prepare_rebounce_price_ + 0.1 )
 				{
-                    DO_LOG(TagOfCurTask(), utility::FormatStr("eqsec task %d backtrigger backtrig:%.2f prepare_reb_price:%.2f cur:%.2f to sell"
-                        , para_.id, cond4_sell_backtrigger_price_, prepare_rebounce_price_, iter->cur_price)); 
+                    DO_LOG(TagOfCurTask(), utility::FormatStr("eqsec task %d backtrigger backtrig:%.2f prepare_reb_price:%.2f cur:%.2f total:%d to sell"
+                        , para_.id, cond4_sell_backtrigger_price_, prepare_rebounce_price_, iter->cur_price, total_position)); 
 					order_type = TypeOrderCategory::SELL; 
 					goto BEFORE_TRADE;
 				}
@@ -375,7 +375,7 @@ void EqualSectionTask::HandleQuoteData()
                 DO_LOG(TagOfCurTask(), utility::FormatStr("eqsec task %d rebounce:%.2f para %.2f", para_.id, rebounce, para_.rebounce)); 
 				if( rebounce > para_.rebounce - 0.0001 )
 				{ 
-                    DO_LOG(TagOfCurTask(), utility::FormatStr("eqsec task %d rebounce:%.2f to sell", para_.id, rebounce)); 
+                    DO_LOG(TagOfCurTask(), utility::FormatStr("eqsec task %d rebounce:%.2f total:%d to sell", para_.id, rebounce, total_position)); 
 					order_type = TypeOrderCategory::SELL; 
 					goto BEFORE_TRADE; 
 				}else
