@@ -18,11 +18,10 @@
 #include "breakup_buy_task.h"
 #include "inflection_buy_task.h"
 #include "batches_buy_task.h"
-
-//
-const char  cst_str_inflection_buy[64] = "拐点买入";
-const char  cst_str_breakout_buy[64] = "突破买入";
-const char  cst_str_batches_buy[64] = "分批买入";
+ 
+#define  STR_INFLECTION_BUY  "拐点买入"
+#define  STR_BREAKOUT_BUY    "突破买入"
+#define  STR_BATCHES_BUY     "分批买入"
 
 //static const QString cst_str_inflection_buy = QString::fromLocal8Bit("拐点买入");
 //static const QString cst_str_breakout_buy = QString::fromLocal8Bit("突破买入");
@@ -46,9 +45,9 @@ void WinnerWin::InitBuyTaskWin()
     ui.dbspbox_bt_step_range->setMinimum(0.1);
 
 #endif
-    ui.combox_buy_type->addItem(QString::fromLocal8Bit(cst_str_inflection_buy));
-    ui.combox_buy_type->addItem(QString::fromLocal8Bit(cst_str_breakout_buy));
-    ui.combox_buy_type->addItem(QString::fromLocal8Bit(cst_str_batches_buy));
+    ui.combox_buy_type->addItem(QString::fromLocal8Bit(STR_INFLECTION_BUY));
+    ui.combox_buy_type->addItem(QString::fromLocal8Bit(STR_BREAKOUT_BUY));
+    ui.combox_buy_type->addItem(QString::fromLocal8Bit(STR_BATCHES_BUY));
      
     ui.combox_bt_price_level->addItem(QString::fromLocal8Bit("即时价"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_CUR)));
     ui.combox_bt_price_level->addItem(QString::fromLocal8Bit("买一和卖一"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_1)));
@@ -76,7 +75,7 @@ void WinnerWin::InitBuyTaskWin()
      
     ret = QObject::connect(ui.dbspbox_buytask_alert_percent, SIGNAL(valueChanged(double)), this, SLOT(DoBuyAlertPercentChanged(double)));
 
-    DoBuyTypeChanged(cst_str_inflection_buy);
+    DoBuyTypeChanged(QString::fromLocal8Bit(STR_INFLECTION_BUY));
     ret = QObject::connect(ui.combox_buy_type, SIGNAL(currentTextChanged(const QString&)), SLOT(DoBuyTypeChanged(const QString&)));
  
     ret = QObject::connect(ui.pbtn_buytask_all_quantity, SIGNAL(clicked()), this, SLOT(DoQueryQtyCanBuy()));
@@ -113,15 +112,15 @@ void WinnerWin::FillBuyTaskWin(TypeTask type, T_TaskInformation& info)
     switch(type)
 	{
     case TypeTask::INFLECTION_BUY: 
-        ui.combox_buy_type->setCurrentText(cst_str_inflection_buy);
+        ui.combox_buy_type->setCurrentText(QString::fromLocal8Bit(STR_INFLECTION_BUY));
         ui.spinBox_bt_retreat->setValue(info.rebounce);
 		ui.cb_bt_back_alert_trigger->setChecked(info.back_alert_trigger);
 		break;
 	case TypeTask::BREAKUP_BUY: 
-        ui.combox_buy_type->setCurrentText(cst_str_breakout_buy);
+        ui.combox_buy_type->setCurrentText(QString::fromLocal8Bit(STR_BREAKOUT_BUY));
 		break;
 	case TypeTask::BATCHES_BUY: 
-        ui.combox_buy_type->setCurrentText(cst_str_batches_buy);
+        ui.combox_buy_type->setCurrentText(QString::fromLocal8Bit(STR_BATCHES_BUY));
         ui.dbspbox_bt_step_range->setValue(info.step);
         ui.spinBox_buytask_times->setValue(info.bs_times);
 		break;
@@ -142,10 +141,10 @@ void WinnerWin::DoBuyAlertPercentChanged(double val)
 {
     if( buytask_cur_price_ > 0.0 )
     {
-        if( ui.combox_buy_type->currentText() == cst_str_breakout_buy )
+        if( ui.combox_buy_type->currentText() == QString::fromLocal8Bit(STR_BREAKOUT_BUY) )
             ui.dbspbox_buytask_alert_price->setValue(buytask_cur_price_ * (100 + val ) / 100);
-        else if( ui.combox_buy_type->currentText() == cst_str_inflection_buy 
-            || ui.combox_buy_type->currentText() == cst_str_batches_buy
+        else if( ui.combox_buy_type->currentText() == QString::fromLocal8Bit(STR_INFLECTION_BUY)
+            || ui.combox_buy_type->currentText() == QString::fromLocal8Bit(STR_BATCHES_BUY)
             )
         {
             if( val < 100 )
@@ -171,7 +170,7 @@ void WinnerWin::DoBuyTypeChanged(const QString&str)
 	m_bt_list_hint_->hide();
     ResetBuyTabTaskTime();
 
-   if( str == cst_str_inflection_buy )
+   if( str == QString::fromLocal8Bit(STR_INFLECTION_BUY) )
    {  
 	   ChangeTabBuyAssistantImg(TypeTask::INFLECTION_BUY);
 
@@ -185,7 +184,7 @@ void WinnerWin::DoBuyTypeChanged(const QString&str)
 	   ui.wid_bt_step_range->hide();
 	   ui.wid_bt_retreat->show();
 
-   }else if( str == cst_str_breakout_buy )
+   }else if( str == QString::fromLocal8Bit(STR_BREAKOUT_BUY) )
    { 
 	   ChangeTabBuyAssistantImg(TypeTask::BREAKUP_BUY); 
 
@@ -198,7 +197,7 @@ void WinnerWin::DoBuyTypeChanged(const QString&str)
 		ui.wid_bt_retreat->hide();
 		ui.wid_bt_step_range->hide();
 
-   }else if( str == cst_str_batches_buy )
+   }else if( str == QString::fromLocal8Bit(STR_BATCHES_BUY) )
    {
 	   ChangeTabBuyAssistantImg(TypeTask::BATCHES_BUY);
 	   ui.label_buytask_alert_price->setText(QString::fromLocal8Bit("股票低于:"));
@@ -279,7 +278,7 @@ void WinnerWin::DoAddBuyTask()
         task_info->state = 1;		
 	};
 
-    if( ui.combox_buy_type->currentText() == cst_str_breakout_buy )
+    if( ui.combox_buy_type->currentText() == QString::fromLocal8Bit(STR_BREAKOUT_BUY) )
     {
         if( !check_le_stock(TypeTask::BREAKUP_BUY) )
             return;
@@ -308,7 +307,7 @@ void WinnerWin::DoAddBuyTask()
         app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("突破买入任务添加成功!"));
         app_->AppendLog2Ui("添加突破买入任务 : %d 成功\n", task_info->id);
 
-    }else if( ui.combox_buy_type->currentText() == cst_str_inflection_buy )
+    }else if( ui.combox_buy_type->currentText() == QString::fromLocal8Bit(STR_INFLECTION_BUY) )
     {
         if( !check_le_stock(TypeTask::INFLECTION_BUY) )
             return;
@@ -342,7 +341,7 @@ void WinnerWin::DoAddBuyTask()
         app_->AppendLog2Ui("添加拐点买入任务 : %d 成功!\n", task_info->id);
          
 #endif
-    }else if( ui.combox_buy_type->currentText() == cst_str_batches_buy )
+    }else if( ui.combox_buy_type->currentText() == QString::fromLocal8Bit(STR_BATCHES_BUY) )
     {
         if( !check_le_stock(TypeTask::BATCHES_BUY) )
             return;
