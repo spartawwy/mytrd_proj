@@ -39,6 +39,7 @@ stock_pinyin TEXT,
 bs_times     INTEGER,
 assistant_field  TEXT,
 PRIMARY KEY(id));
+
 CREATE TABLE OrderMessage( longdate INTEGER, timestamp TEXT, msg_type TEXT, msg_id INTEGER, user_id INTEGER,
 stock  TEXT not null,
 alert_price  DOUBLE,
@@ -79,17 +80,15 @@ is_original BOOL,
 max_position INTEGER, min_position INTEGER,
 PRIMARY KEY(id));
 
-CREATE TABLE AdvanceSectionTask(id INTEGER,
-price_sections TEXT,
-is_original BOOL,
-PRIMARY KEY(id));
 CREATE TABLE IndexRelateTask(id INTEGER, index_task_type INTEGER, relate_stock TEXT, is_down_trigger bool, is_buy bool,  PRIMARY KEY(id));
-
+ 
 CREATE TABLE AdvanceSectionTask(id INTEGER,
-portion_sections TEXT, //seperate by ';'
-portion_states TEXT,   //seperate by ';'
-is_original BOOL,
-PRIMARY KEY(id));          
+                                portion_sections TEXT, //seperate by ';'
+                                portion_states TEXT,   //seperate by ';'
+                                pre_trade_price DOUBLE,
+                                is_original BOOL,
+                                PRIMARY KEY(id));
+
 */
 using namespace  TSystem;
 DBMoudle::DBMoudle(WinnerApp *app)

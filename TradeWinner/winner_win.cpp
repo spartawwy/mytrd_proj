@@ -41,9 +41,10 @@ static const int cst_tab_index_task_list = 0;
 static const int cst_tab_index_buy_task = 1;
 static const int cst_tab_index_sell_task = 2;
 static const int cst_tab_index_eqsec_task = 3;
-static const int cst_tab_capital = 4;
-static const int cst_tab_index_log = 5;
-static const int cst_tab_index_stkindex_task = 6;
+static const int cst_tab_index_adveq_task = 4;
+static const int cst_tab_capital = 5;
+static const int cst_tab_index_log = 6;
+static const int cst_tab_index_stkindex_task = 7;
 
 WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     : QMainWindow(parent)
@@ -117,6 +118,9 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     //------------------tab equal section task----------------
 	InitEqSectionTaskWin();
 	 
+    //------------------tab adveq task----------------
+	InitAdveqTaskWin();
+
     //------------------tab index trade task----------------
 	InitIndexTradeWin();
 
@@ -292,7 +296,11 @@ void WinnerWin::keyPressEvent(QKeyEvent *event)
 		}else if( ui.le_eqsec_stock->hasFocus() )
 		{
 			m_eqsec_list_hint_->close();
-		}
+        }else if( ui.le_adveq_stock->hasFocus() )
+        {
+            m_adveq_list_hint_->close();
+        }
+
     }else
     {
         if( ui.le_stock->hasFocus() )
@@ -304,7 +312,11 @@ void WinnerWin::keyPressEvent(QKeyEvent *event)
         }else if( ui.le_eqsec_stock->hasFocus() )
 		{
 			m_eqsec_list_hint_->setFocus();
-		}
+		}else if( ui.le_adveq_stock->hasFocus() )
+        {
+            m_adveq_list_hint_->setFocus();
+        }
+
     }
 }
 
@@ -792,7 +804,8 @@ void WinnerWin::ChangeFromStationText(QString text)
             cur_price_ = p_info->cur_price;
         else if( ui.tabwid_holder->currentIndex() == cst_tab_index_buy_task )
             buytask_cur_price_ = p_info->cur_price;
-		 
+		/*else if( ui.tabwid_holder->currentIndex() == cst_tab_advsec_task )
+            adveq_cur_price_ = p_info->cur_price; */
     }else
     {
         if( ui.tabwid_holder->currentIndex() == cst_tab_index_sell_task )
@@ -823,6 +836,12 @@ void WinnerWin::AssignHintListAndLineEdit(HintList *& p_list, QLineEdit *&p_edit
         p_list = m_eqsec_list_hint_;
         p_edit = ui.le_eqsec_stock;
         p_dbspb_alert_price = ui.dbspbox_eqsec_start_price;
+        p_dbspb_percent = nullptr;
+    }else if( ui.tabwid_holder->currentIndex() == cst_tab_index_adveq_task )
+    {   
+        p_list = m_adveq_list_hint_;
+        p_edit = ui.le_adveq_stock;
+        //p_dbspb_alert_price = ui.dbspbox_eqsec_start_price;
         p_dbspb_percent = nullptr;
     }else if( ui.tabwid_holder->currentIndex() == cst_tab_index_stkindex_task )
     {   

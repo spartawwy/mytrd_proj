@@ -159,6 +159,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="advance_section_task.cpp" />
+    <ClCompile Include="adveq_task_win.cpp" />
     <ClCompile Include="batches_buy_task.cpp" />
     <ClCompile Include="batches_sell_task.cpp" />
     <ClCompile Include="breakdown_task.cpp" />
