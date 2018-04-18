@@ -147,6 +147,7 @@ void AdvanceSectionTask::HandleQuoteData()
     {
         bool is_on_border = true;
         int local_qty_sell = 0;
+#if 0 
         for( int i = 0; i < cur_index - 1; ++i )
         { 
             assert(cur_price > portions_[i].mid_price());
@@ -180,6 +181,39 @@ void AdvanceSectionTask::HandleQuoteData()
                 }
             }
         }
+#else
+        if( cur_price > portions_[cur_index].mid_price() )
+        {
+            if( cur_index - 1 >= 0 && local_qty_sell + para_.quantity <= para_avaliable_pos )
+            { 
+                if( portions_[cur_index-1].state() == PortionState::WAIT_SELL )
+                {
+                    if( is_do_change )
+                    {
+                        DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("set portion %d WAIT_BUY", cur_index-1));
+                        portions_[cur_index-1].state(PortionState::WAIT_BUY);
+                    }
+                    local_qty_sell += para_.quantity;
+                }
+            }
+        }
+        for( int i = cur_index-1; i >= 1; --i )
+        {
+            assert(cur_price > portions_[i].mid_price());
+            if( local_qty_sell + para_.quantity > para_avaliable_pos )
+                break;
+            if( portions_[i-1].state() == PortionState::WAIT_SELL )
+            {
+                if( is_do_change )
+                {
+                    DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("set portion %d WAIT_BUY", i));
+                    portions_[i].state(PortionState::WAIT_BUY);
+                }
+                local_qty_sell += para_.quantity;
+                is_on_border = false;
+            }
+        }
+#endif 
         return std::make_tuple(local_qty_sell, portions_[cur_index].mid_price(), is_on_border);
     };
 
