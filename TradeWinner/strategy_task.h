@@ -66,6 +66,7 @@ protected:
    int HandleSellByStockPosition(double price, bool remove_task = true);
    int GetTototalPosition();
    int GetAvaliablePosition();
+   void ShowError(const std::string &msg);
 
    WinnerApp  *app_;
    T_TaskInformation  para_;

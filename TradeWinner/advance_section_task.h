@@ -7,7 +7,7 @@ class WinnerApp;
 class AdvanceSectionTask : public StrategyTask
 {
 public:
-	enum class PortionState : char { WAIT_BUY = 0, WAIT_SELL, UNKNOW = 255 }; // UNKNOW means wait create position
+	enum class PortionState : unsigned char { WAIT_BUY = 0, WAIT_SELL, UNKNOW = 255 }; // UNKNOW means wait create position
 	class Portion
 	{
 	public:
@@ -37,14 +37,14 @@ public:
 protected:
 
 private:
-
+    std::string TagOfCurTask();
     //void ResetRebBottomPrice(){ reb_bottom_price_ = MAX_STOCK_PRICE;};
 
 private:
 
     WinnerApp *app_;
 	//unsigned int section_num_;
-	std::vector<Portion> portions_;
+	std::vector<Portion> portions_; // from bottom portion to up portion
      
 	bool is_any_portion_unknow_;
 
@@ -54,9 +54,11 @@ private:
     double reb_base_price_;
 
     unsigned int is_not_enough_capital_continue_;
+    unsigned int is_not_position_continue_;
 
-    bool  is_wait_trade_result_; 
+    //volatile bool  is_wait_trade_result_; 
 
 };
+
 
 #endif // ADVANCE_SECTION_TASK_SSDFS3DFDS_H_
