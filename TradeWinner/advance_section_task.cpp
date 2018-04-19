@@ -53,9 +53,9 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
     int portion_num = 0;
     if( !para_.advance_section_task.is_original )
     {  
-        if( str_portion_stat_vector.size() != str_portion_vector.size() )
+        if( str_portion_stat_vector.size() + 1 != str_portion_vector.size() )
         {
-            ShowError(utility::FormatStr("error: AdvanceSectionTask %d portion_states.size != portion_sections.size", para_.id));
+            ShowError(utility::FormatStr("error: AdvanceSectionTask %d portion_states.size + 1 != portion_sections.size", para_.id));
             is_waitting_removed_ = true;
             return;
         }
@@ -428,7 +428,7 @@ BEFORE_TRADE:
             price = iter->price_b_3;
         else
             price = GetQuoteTargetPrice(*iter, order_type == TypeOrderCategory::BUY ? true : false);
-        if( is_on_border && qty <= para_.quantity )
+        if( action != TypeAction::CLEAR && is_on_border && qty <= para_.quantity )
         {
             if( order_type == TypeOrderCategory::BUY )
             {
@@ -487,19 +487,27 @@ BEFORE_TRADE:
                     judge_any_pos2sell(iter->cur_price, cur_index, avaliable_pos, true);
                     DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("Order Data Sell %d %.2f ok", qty, price));
                 }
-                // reset -----
                 
-               /* reb_bottom_price_ = MAX_STOCK_PRICE;
-                reb_top_price_ = MIN_STOCK_PRICE;
-                
-                reb_base_price_ = price; */
                 reset_flag_price(price);
                 is_not_enough_capital_continue_ = 0;
 
-                // todo: translate portions state into para.advancesection.portion_states 
+                // translate portions state into para.advancesection.portion_states 
+                para_.advance_section_task.portion_states.clear(); 
+                for(auto item: this->portions_)
+                {
+                    switch( item.state() )
+                    {
+                    case PortionState::WAIT_BUY: para_.advance_section_task.portion_states.append(std::to_string(int(PortionState::WAIT_BUY)));break;
+                    case PortionState::WAIT_SELL: para_.advance_section_task.portion_states.append(std::to_string(int(PortionState::WAIT_SELL)));break;
+                    case PortionState::UNKNOW: para_.advance_section_task.portion_states.append(std::to_string(int(PortionState::UNKNOW)));break;
+                    default: assert(false); break;
+                    }
+                }
+                para_.advance_section_task.pre_trade_price = price;
+                para_.advance_section_task.is_original = false;
+
                 // todo: save to db: save cur_price as start_price in assistant_field 
-                //if( !is_back_test_ )
-                //    app_->db_moudle().UpdateEqualSection(para_.id, para_.secton_task.is_original, iter->cur_price);
+                app_->db_moudle().UpdateAdvanceSection(para_);
 
             }else
             {
@@ -528,6 +536,28 @@ BEFORE_TRADE:
 
     return;
 
+}
+
+void AdvanceSectionTask::SetSectionState(double price, int position)
+{
+    auto cur_portion_iter = portions_.end();
+    cur_portion_iter = std::find_if( std::begin(portions_), std::end(portions_),[price, this](Portion &entry)
+	{
+		if( price >= entry.bottom_price() && price < entry.top_price() ) return true;
+		else return false;
+	});
+    if( cur_portion_iter == std::end(portions_) )
+        return;
+	auto cur_index = cur_portion_iter->index();
+
+    int remain_pos = position;
+    for( int i = cur_index; i < portions_.size(); ++i )
+    {
+        if( remain_pos < para_.quantity )
+            break;
+        portions_[i].state(PortionState::WAIT_SELL);
+        remain_pos -= para_.quantity;
+    }
 }
 
 std::string AdvanceSectionTask::TagOfCurTask()

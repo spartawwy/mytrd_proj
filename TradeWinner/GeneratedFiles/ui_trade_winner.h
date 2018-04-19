@@ -826,7 +826,7 @@ public:
         dbspb_adveq_start_capital->setValue(1000);
         label_raise_percent_rebounce_2 = new QLabel(tab_advsec_task);
         label_raise_percent_rebounce_2->setObjectName(QStringLiteral("label_raise_percent_rebounce_2"));
-        label_raise_percent_rebounce_2->setGeometry(QRect(270, 250, 31, 21));
+        label_raise_percent_rebounce_2->setGeometry(QRect(270, 210, 31, 21));
         label_raise_percent_rebounce_2->setFont(font);
         label_raise_percent_rebounce_2->setAlignment(Qt::AlignCenter);
         spinBox_adveq_qty = new QSpinBox(tab_advsec_task);

@@ -616,6 +616,10 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
     if( info->type == TypeTask::EQUAL_SECTION && !utility::ExistTable("EqualSectionTask", *db_conn_) )
     {  // throw exception
         return false; 
+    }else if( info->type == TypeTask::ADVANCE_SECTION && !utility::ExistTable("AdvanceSectionTask", *db_conn_))
+    {
+        return false;
+
     }else if( info->type == TypeTask::INDEX_RISKMAN && !utility::ExistTable("IndexRelateTask", *db_conn_) )
     {   // throw exception
         return false; 
@@ -644,6 +648,19 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
                 , info->secton_task.min_position);
             WriteLock locker(equalsection_table_mutex_);
             ret = db_conn_->ExecuteSQL(sql.c_str()); 
+
+        }else if( info->type == TypeTask::ADVANCE_SECTION )
+        {
+             sql = utility::FormatStr("INSERT INTO AdvanceSectionTask VALUES(%d, '%s', '%s', %.2f, %d) "
+                , app_->Cookie_MaxTaskId() + 1
+                , info->advance_section_task.portion_sections.c_str() 
+                , info->advance_section_task.portion_states.c_str() 
+                , info->advance_section_task.pre_trade_price
+                , (int)info->advance_section_task.is_original
+                );
+            WriteLock locker(equalsection_table_mutex_);
+            ret = db_conn_->ExecuteSQL(sql.c_str()); 
+
         }else if( info->type == TypeTask::INDEX_RISKMAN )
         {
             sql = utility::FormatStr("INSERT INTO IndexRelateTask VALUES( %d, %d, '%s', %d, %d )"
@@ -697,6 +714,16 @@ bool DBMoudle::DelTaskInfo(int task_id, TypeTask type)
         { 
             return 0;
         });
+    }else if( type == TypeTask::ADVANCE_SECTION )
+    {
+        // del related recorde in table IndexRelateTask
+        std::string sql = utility::FormatStr("DELETE FROM AdvanceSectionTask WHERE id=%d ", task_id);
+        WriteLock locker(index_rel_table_mutex_);
+        db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+        { 
+            return 0;
+        });
+
     }else if( type == TypeTask::INDEX_RISKMAN )
     {
         // del related recorde in table IndexRelateTask
@@ -771,6 +798,25 @@ void DBMoudle::UpdateEqualSection(int taskid, bool is_original, double start_pri
         });
     }
     sql = utility::FormatStr("UPDATE EqualSectionTask SET is_original=%d WHERE id=%d ", (int)is_original, taskid); 
+    {
+        WriteLock locker(equalsection_table_mutex_);
+        db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+        { 
+            return 0;
+        });
+    }
+}
+
+void DBMoudle::UpdateAdvanceSection(T_TaskInformation &info)
+{
+    if( !db_conn_ )
+    {
+        Open(db_conn_);
+    }
+     
+    std::string sql = utility::FormatStr("UPDATE AdvanceSectionTask SET portion_sections='%s', portion_states='%s', pre_trade_price=%.2f, is_original=%d WHERE id=%d "
+        , info.advance_section_task.portion_sections.c_str(), info.advance_section_task.portion_states.c_str()
+        , info.advance_section_task.pre_trade_price, (int)info.advance_section_task.is_original, info.id); 
     {
         WriteLock locker(equalsection_table_mutex_);
         db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int

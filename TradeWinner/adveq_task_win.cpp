@@ -11,7 +11,13 @@
 
 void WinnerWin::InitAdveqTaskWin()
 {
-    // todo:
+    ui.combox_adveq_price_level->addItem(QString::fromLocal8Bit("即时价"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_CUR)));
+    ui.combox_adveq_price_level->addItem(QString::fromLocal8Bit("买一和卖一"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_1)));
+    ui.combox_adveq_price_level->addItem(QString::fromLocal8Bit("买二和卖二"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_2)));
+    ui.combox_adveq_price_level->addItem(QString::fromLocal8Bit("买三和卖三"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_3)));
+    ui.combox_adveq_price_level->addItem(QString::fromLocal8Bit("买四和卖四"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_4)));
+    ui.combox_adveq_price_level->addItem(QString::fromLocal8Bit("买五和卖五"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_BUYSELL_5)));
+	   
     m_adveq_list_hint_ = new HintList(this, ui.le_adveq_stock);
     m_adveq_list_hint_->hide();
     bool ret = QObject::connect(ui.le_adveq_stock, SIGNAL(textChanged(QString)), this, SLOT(FlushFromStationListWidget(QString)));
@@ -20,6 +26,7 @@ void WinnerWin::InitAdveqTaskWin()
 
     ResetAdveqTaskTime();
     ret = connect(ui.pbtn_add_adveq_task, SIGNAL(clicked()), this, SLOT(DoAddAdveqTask()));
+
 }
 
 void WinnerWin::DoAddAdveqTask()
@@ -92,7 +99,7 @@ void WinnerWin::DoAddAdveqTask()
         return;
 
     auto task_info = std::make_shared<T_TaskInformation>();
-    task_info->type = TypeTask::EQUAL_SECTION;
+    task_info->type = TypeTask::ADVANCE_SECTION;
 
     QString::SectionFlag flag = QString::SectionSkipEmpty;
 	QString stock_str = ui.le_adveq_stock->text().trimmed();
@@ -102,9 +109,12 @@ void WinnerWin::DoAddAdveqTask()
      
     //task_info->continue_second = 5;
     task_info->advance_section_task.is_original = true;
-      
 	task_info->rebounce = ui.spb_adveq_rebounce->value();
     task_info->quantity = ui.spinBox_adveq_qty->value();
+    task_info->target_price_level = ui.combox_adveq_price_level->currentData().toInt();
+    task_info->start_time = ui.timeEdit_adveq_begin->time().toString("Hmmss").toInt();
+    task_info->end_time = ui.timeEdit_adveq_end->time().toString("Hmmss").toInt();
+    task_info->state = 1;		
 
     double top_price = ui.dbspb_adveq_max_price->value();
     double bottom_price = ui.dbspb_adveq_min_price->value();
@@ -115,6 +125,7 @@ void WinnerWin::DoAddAdveqTask()
         app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("单区间价格过小,请调整顶底价格或区间数目!"));
         return;
     }
+    
     char buf[16] = {0}; 
     for( int i = 0; i < section_count; ++i )
     {
@@ -126,13 +137,17 @@ void WinnerWin::DoAddAdveqTask()
     }
     sprintf_s(buf, "%.2f\0", top_price);
     task_info->advance_section_task.portion_sections.append(buf);
-    task_info->advance_section_task.portion_states.append(std::to_string(int(AdvanceSectionTask::PortionState::UNKNOW)));
      
-    task_info->target_price_level = ui.combox_adveq_price_level->currentData().toInt();
-    task_info->start_time = ui.timeEdit_adveq_begin->time().toString("Hmmss").toInt();
-    task_info->end_time = ui.timeEdit_adveq_end->time().toString("Hmmss").toInt();
-    
-    task_info->state = 1;		
+    auto advance_section_task = std::make_shared<AdvanceSectionTask>(*task_info, this->app_);
+     
+    auto p_position = app_->QueryPosition(task_info->stock);
+    if( p_position && p_position->total >= task_info->quantity )
+    {
+        T_StockPriceInfo *p_info = app_->GetStockPriceInfo(task_info->stock, false);
+        if( p_info )
+            advance_section_task->SetSectionState(p_info->cur_price, p_position->total);
+    }
+
     if( !app_->db_moudle().AddTaskInfo(task_info) )
     {
         // log error
@@ -141,8 +156,7 @@ void WinnerWin::DoAddAdveqTask()
         return;
     }
     app_->AppendTaskInfo(task_info->id, task_info);
-            
-    auto advance_section_task = std::make_shared<AdvanceSectionTask>(*task_info, this->app_);
+             
     app_->AppendStrategyTask(std::shared_ptr<StrategyTask>(advance_section_task));
 
     app_->ticker_strand().PostTask([advance_section_task, this]()

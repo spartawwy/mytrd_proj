@@ -55,6 +55,7 @@ public:
     bool UpdateTaskInfo(T_TaskInformation &info);
 
 	void UpdateEqualSection(int taskid, bool is_original, double start_price);
+	void UpdateAdvanceSection(T_TaskInformation &info);
 	
     bool AddHisTask(std::shared_ptr<T_TaskInformation>& info);
 

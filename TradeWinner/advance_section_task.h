@@ -34,6 +34,8 @@ public:
 	virtual ~AdvanceSectionTask(){}
 	virtual void HandleQuoteData() override;
 
+    void SetSectionState(double price, int position);
+
 protected:
 
 private:
