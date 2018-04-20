@@ -200,7 +200,6 @@ std::tuple<int, std::string> CurrentDateTime()
 
 bool IsNowTradeTime()
 {
-	return true; //temp code
     static auto get_date = []()
     {
         time_t rawtime;
