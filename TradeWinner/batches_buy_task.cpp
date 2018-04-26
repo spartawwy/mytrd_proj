@@ -24,9 +24,14 @@ BatchesBuyTask::BatchesBuyTask(T_TaskInformation &task_info, WinnerApp *app)
     , continue_trade_fail_count_(0)
     , trade_fail_ctr_count_(0)
     , is_ok_(true)
+    , step_items_(100) // resize(100)
 { 
-    step_items_.resize(100);
-
+   /* int num = 0;
+    while( num < step_items_.size() ) 
+    {
+        step_items_[num] = std::move(std::unique_ptr<T_StepItem>(new T_StepItem()));
+        ++num;
+    }*/
     //app_->local_logger().LogLocal(utility::FormatStr("construct BatchesBuyTask %d step: %.2f %% ", para_.id, para_.step));
     std::string buyed_field;
     auto pos0 = task_info.assistant_field.find("#");
@@ -74,19 +79,20 @@ BatchesBuyTask::BatchesBuyTask(T_TaskInformation &task_info, WinnerApp *app)
                 , utility::FormatStr("%d index:%d step:%.2f up_price:%.2f btm_price:%.2f"
                 , para_.id, i, para_.step, step_items_[i].up_price, step_items_[i].bottom_price));
     }
+     
 }
 
 
 void BatchesBuyTask::HandleQuoteData()
 {
-    static auto in_which_part = [this](double price) ->int
-    {
-        for( int i = 0; i < step_items_.size(); ++i )
+    static auto in_which_part = [](BatchesBuyTask* tsk, double price) ->int
+    { 
+        for( int i = 0; i < tsk->step_items_.size(); ++i )
         { 
-            if( 100 - (i + 1) * para_.step < 0 )
+            if( 100 - (i + 1) * tsk->para_.step < 0 )
                 break;
-            if( (price > step_items_[i].bottom_price || Equal(price, step_items_[i].bottom_price))
-                && price < step_items_[i].up_price
+            if( (price > tsk->step_items_[i].bottom_price || Equal(price, tsk->step_items_[i].bottom_price))
+                && price < tsk->step_items_[i].up_price
               )
                 return i;
         }
@@ -124,7 +130,7 @@ void BatchesBuyTask::HandleQuoteData()
      
     if( iter->cur_price < para_.alert_price )
     {
-        const int index = in_which_part(iter->cur_price);
+        const int index = in_which_part(this, iter->cur_price);
         if( index < 0 )
             return;
         if( step_items_[index].has_buy )
@@ -172,12 +178,13 @@ void BatchesBuyTask::HandleQuoteData()
 		this->app_->local_logger().LogLocal(TagOfOrderLog(), 
             TSystem::utility::FormatStr("触发任务:%d 分批买入 %s 价格:%.2f 数量:%d ", para_.id, this->code_data(), price, qty)); 
         this->app_->AppendLog2Ui("触发任务:%d 分批买入 %s 价格:%.2f 数量:%d ", para_.id, this->code_data(), price, qty);
-        
+
 		// buy the stock
         this->app_->trade_agent().SendOrder((int)TypeOrderCategory::BUY, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
             , price, qty
             , result, error_info); 
+
 #endif
         // judge result 
         if( strlen(error_info) > 0 )

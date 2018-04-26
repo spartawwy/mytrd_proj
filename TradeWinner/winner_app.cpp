@@ -571,10 +571,12 @@ void WinnerApp::DoStrategyTasksTimeout()
 				        this->stock_ticker_->Register(entry);
 			        });
                 }
+
                 if( IsNowTradeTime() )
                     entry->cur_state(TaskCurrentState::STARTING);
                 else
                     entry->cur_state(TaskCurrentState::REST);
+
 				this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
             }
         }else if( entry->cur_state() > TaskCurrentState::WAITTING ) // state:  registered

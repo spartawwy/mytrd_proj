@@ -35,12 +35,13 @@ BatchesSellTask::BatchesSellTask(T_TaskInformation &task_info, WinnerApp *app)
 
 void BatchesSellTask::HandleQuoteData()
 {
-    static auto in_which_part = [this](double price) ->int
+    static auto in_which_part = [](BatchesSellTask *tsk, double price) ->int
     {
-        for( int i = 0; i < step_items_.size(); ++i )
+        assert(tsk);
+        for( int i = 0; i < tsk->step_items_.size(); ++i )
         { 
-            if( (price > step_items_[i].bottom_price || Equal(price, step_items_[i].bottom_price))
-                && price < step_items_[i].up_price
+            if( (price > tsk->step_items_[i].bottom_price || Equal(price, tsk->step_items_[i].bottom_price))
+                && price < tsk->step_items_[i].up_price
               )
                 return i;
         }
@@ -64,7 +65,7 @@ void BatchesSellTask::HandleQuoteData()
       
     if( iter->cur_price > para_.alert_price )
     {
-        int index = in_which_part(iter->cur_price);
+        int index = in_which_part(this, iter->cur_price);
         if( index < 0 )
             return;
         if( step_items_[index].has_selled )

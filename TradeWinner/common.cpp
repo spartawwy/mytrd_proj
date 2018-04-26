@@ -208,7 +208,7 @@ bool IsNowTradeTime()
 	    timeinfo = localtime( &rawtime ); // from 1900 year
         return timeinfo->tm_year * 10000 + timeinfo->tm_mon *100 + timeinfo->tm_mday;
     };
-     
+    //return true; // tmp code nddel 
      
     static int week_day = 0;  
     static int ori_day = 0;
