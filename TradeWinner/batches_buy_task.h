@@ -29,7 +29,7 @@ private:
 
     std::string TagOfCurTask(); 
 
-    bool  is_wait_trade_result_; 
+    TimedMutexWrapper  timed_mutex_wrapper_;
 
     unsigned int continue_trade_fail_count_;
     unsigned int trade_fail_ctr_count_;
