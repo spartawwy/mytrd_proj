@@ -27,9 +27,8 @@ public:
     std::vector<T_StepItem> step_items_;
 
 private:
-
-    bool is_waitting_removed_;
-    bool is_wait_trade_result_;
+     
+    TimedMutexWrapper  timed_mutex_wrapper_;
 };
 
 #endif

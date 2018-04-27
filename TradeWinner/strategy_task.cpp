@@ -96,7 +96,7 @@ int StrategyTask::HandleSellByStockPosition(double price, bool remove_task)
     if( qty > para_.quantity ) qty = para_.quantity;
     if( qty == 0 )
     {
-        auto ret_str = new std::string(TSystem::utility::FormatStr("警告:触发任务:%d 破位卖出 %s 价格:%f 实际可用数量:0 ", para_.id, this->code_data(), price));
+        auto ret_str = new std::string(TSystem::utility::FormatStr("警告:触发任务:%d 卖出 %s 价格:%f 实际可用数量:0 ", para_.id, this->code_data(), price));
         this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str); 
         this->app_->AppendLog2Ui(ret_str->c_str()); 
         this->app_->EmitSigShowUi(ret_str);
