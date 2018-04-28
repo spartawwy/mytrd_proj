@@ -11,7 +11,7 @@
 #include <memory>
 #include <string>
 #include <assert.h>
-
+#include <cstdio>
 #include "string_function.h"
 
 extern "C" int STKQUOTER_IMEXPORT  StkQuoteGetQuote(char stocks[][16], const unsigned int size, T_StockPriceInfo price_info[]/*, unsigned int *ret_size*/)
@@ -99,14 +99,12 @@ EXIT_PROC:
     return index;
 }
 
-//ps: use delete[] to release datas; out : count--can't be null
+//ps: use delete[] to release datas;  
 extern "C" int STKQUOTER_IMEXPORT  StkHisData(char stocks[16], int start_date, int end_date, T_StockHisDataItem **datas)
 {
-	const unsigned int buf_size = 1024*10;
+	const unsigned int buf_size = 1024*20;
 	static auto do_move = [buf_size](char *target, char *src, unsigned int &position)
-	{
-		/*if( buf_size < 1024*10 )
-			position = position;*/
+	{ 
 		position = strlen(src);
 		auto old_len = strlen(target); 
 		memmove(target, src, position);
@@ -115,7 +113,7 @@ extern "C" int STKQUOTER_IMEXPORT  StkHisData(char stocks[16], int start_date, i
 	};
 
     int count = 0;
-    CInternetSession session((LPCTSTR)"by_dreamcatcher"); //"建立会话"  
+    CInternetSession session((LPCTSTR)"by_dreamcatcher");  
     CStdioFile* sessionfile = NULL;   
  
     std::string strurl("http://quotes.money.163.com/service/chddata.html?code=");
@@ -145,83 +143,81 @@ extern "C" int STKQUOTER_IMEXPORT  StkHisData(char stocks[16], int start_date, i
             <<"dwcontext:" << ex.m_dwContext << "\tdwErrorCode:" << ex.m_dwError << std::endl;  
         ex.Delete();  
     }
-	
-
+	 
     *datas = new T_StockHisDataItem[1024];
     T_StockHisDataItem * p_data_array = *datas;
-      
-    
+       
     char *p_buffer = new char[buf_size];
     memset(p_buffer, 0, buf_size);
 
     unsigned int getlen = 0;
     unsigned int pos = 0;
-    bool is_head_line = true;
-#if 1
-    do
-    {
-        getlen = sessionfile->Read(p_buffer + pos, 40);  
-        pos += getlen; 
-
-        char *p_rem = strstr(p_buffer, "\r\n");
-        if( !p_rem )
-            continue;
-		OutputDebugString(p_buffer);
-        *p_rem = '\0';
- 
-        p_rem += 2;
-         
-        if( is_head_line )
-        {
-            is_head_line = false;
-            
-           /* pos = strlen(p_rem);
-            memmove(p_buffer, p_rem, pos);
-            p_buffer[pos] = '\0';*/
-            do_move(p_buffer, p_rem, pos);
-            continue;
-        }
-        auto quotes = split(p_buffer, ",");
-        if( quotes.size() < 10 )
-        {
-            do_move(p_buffer, p_rem, pos);
-            continue;
-        }
-        auto data_str = quotes.at(0);
-        auto year_str = data_str.substr(0, 4);
-        auto mon_str = data_str.substr(5, 2);
-        auto day_str = data_str.substr(8, 2);
-
-        p_data_array[count].date = atoi( year_str.c_str() ) * 10000 + atoi( mon_str.c_str() ) * 100 + atoi( day_str.c_str() );
-        p_data_array[count].close_price = atof(quotes.at(3).c_str());
-        p_data_array[count].high_price = atof(quotes.at(4).c_str());
-        p_data_array[count].low_price = atof(quotes.at(5).c_str());
-        p_data_array[count].open_price = atof(quotes.at(6).c_str());
-        p_data_array[count].pre_close_price = atof(quotes.at(7).c_str());
-        p_data_array[count].vol = atof(quotes.at(8).c_str());
-        p_data_array[count].capital = atof(quotes.at(9).c_str());
-        
-        ++ count;
-
-        do_move(p_buffer, p_rem, pos);
-
-    }while (getlen > 0);
-#else
+    //bool is_head_line = true;
 	do
 	{
 		getlen = sessionfile->Read(p_buffer + pos, 40);  
 		pos += getlen; 
-	 }while (getlen > 0);
-	OutputDebugString(p_buffer);
-#endif
-    //std::cout << p_buffer << std::endl;
-    std::cout << p_buffer << std::endl;
-      
+	}while (getlen > 0);
+    OutputDebugString(p_buffer);
 
+    std::vector<std::string> quotes;
+    char *pp_buf = p_buffer;
+    char *p_rem = strstr(pp_buf, "\r\n");
+    if( !p_rem )
+        goto EXIT_PROC;
+    p_rem += 2; //pass header line
+    while( *p_rem != '\0' )
+    { 
+        bool has_enough_data = false;
+        bool is_last_line = false;
+        char *p_cur_end = strstr(p_rem, "\r\n");
+        if( p_cur_end )
+        {
+            *p_cur_end = '\0';
+            quotes = split(p_rem, ",");
+            if( quotes.size() >= 10 )
+                has_enough_data = true; 
+            p_rem = p_cur_end + 2;
+
+        }else // last line
+        {
+            auto quotes = split(p_rem, ",");
+            if( quotes.size() >= 10 )
+                has_enough_data = true;
+            is_last_line = true;
+        }
+
+        if( has_enough_data )
+        {
+            auto data_str = quotes.at(0);
+            auto year_str = data_str.substr(0, 4);
+            auto mon_str = data_str.substr(5, 2);
+            auto day_str = data_str.substr(8, 2);
+
+            p_data_array[count].date = atoi( year_str.c_str() ) * 10000 + atoi( mon_str.c_str() ) * 100 + atoi( day_str.c_str() );
+            p_data_array[count].close_price = atof(quotes.at(3).c_str());
+            p_data_array[count].high_price = atof(quotes.at(4).c_str());
+            p_data_array[count].low_price = atof(quotes.at(5).c_str());
+            p_data_array[count].open_price = atof(quotes.at(6).c_str());
+            p_data_array[count].pre_close_price = atof(quotes.at(7).c_str());
+            p_data_array[count].vol = atof(quotes.at(8).c_str());
+            p_data_array[count].capital = atof(quotes.at(9).c_str());
+#if 0
+            char tmpbuf[256] ={0};
+            sprintf(tmpbuf, "%d\n", count);
+            OutputDebugString(tmpbuf);
+#endif
+            ++ count;
+        }
+        if( is_last_line )
+            break;
+    }
+  
+    std::cout << p_buffer << std::endl;
+       
 EXIT_PROC:
 
     delete [] p_buffer;
-
     return count;
 }
 
