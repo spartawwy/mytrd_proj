@@ -153,9 +153,10 @@ BEFORE_TRADE:
             if( is_waitting_removed_ )
                 this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_SELL);
 
+            timed_mutex_wrapper_.unlock();
         });
 
-        timed_mutex_wrapper_.unlock();
+        
     } 
 
 }

@@ -262,9 +262,9 @@ BEFORE_TRADE:
 
             this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_BUY);
         }
-
-        });
         timed_mutex_wrapper_.unlock();
+        });
+        
     } 
 
 }
