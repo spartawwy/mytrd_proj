@@ -142,8 +142,11 @@ extern "C" int STKQUOTER_IMEXPORT  StkHisData(char stocks[16], int start_date, i
         std::cout << "error" << " open request faile:"  
             <<"dwcontext:" << ex.m_dwContext << "\tdwErrorCode:" << ex.m_dwError << std::endl;  
         ex.Delete();  
+    }catch(...)
+    {
+        return 0;
     }
-	 
+	
     *datas = new T_StockHisDataItem[1024];
     T_StockHisDataItem * p_data_array = *datas;
        
