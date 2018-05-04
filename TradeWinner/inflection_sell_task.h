@@ -18,6 +18,9 @@ public:
     double top_price_;
     //double cur_price_;
    
+private:
+
+    std::string TagOfCurTask();
 };
 
 #endif

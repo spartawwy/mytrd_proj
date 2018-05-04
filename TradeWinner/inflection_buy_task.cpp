@@ -1,5 +1,6 @@
 #include "inflection_buy_task.h" 
 
+#include <TLib/core/tsystem_time.h>
 #include <TLib/core/tsystem_utility_functions.h>
 #include "common.h"
 #include "winner_app.h"
@@ -35,7 +36,7 @@ void InflectionBuyTask::HandleQuoteData()
 
     if( IsPriceJumpDown(pre_price, iter->cur_price) )
     {
-        app_->local_logger().LogLocal(TSystem::utility::FormatStr("%d InflectionBuyTask price jump %.2f to %.2f", para_.id, pre_price, iter->cur_price));
+        app_->local_logger().LogLocal(TagOfCurTask(), TSystem::utility::FormatStr("%d InflectionBuyTask price jump %.2f to %.2f", para_.id, pre_price, iter->cur_price));
         return;
     };
      
@@ -47,7 +48,7 @@ void InflectionBuyTask::HandleQuoteData()
         {
             bottom_price_ = iter->cur_price;
             time_point_bottom_price_ = iter->time_stamp;
-            app_->local_logger().LogLocal(TagOfOrderLog(), 
+            app_->local_logger().LogLocal(TagOfCurTask(), 
 				utility::FormatStr("%d InflectionBuyTask::HandleQuoteData bottom %.2f", para_.id, bottom_price_));
         }
         //para_.continue_second = iter->time_stamp - time_point_open_warning_;
@@ -57,7 +58,7 @@ void InflectionBuyTask::HandleQuoteData()
         is_first_open = true;
         time_point_open_warning_ = time_point_bottom_price_ = iter->time_stamp; // open warning
         bottom_price_ = iter->cur_price; 
-        app_->local_logger().LogLocal(TagOfOrderLog(), 
+        app_->local_logger().LogLocal(TagOfCurTask(), 
 			utility::FormatStr("%d InflectionBuyTask::HandleQuoteData first open. cur:%.2f alert:%.2f bottom %.2f", para_.id, iter->cur_price, para_.alert_price, bottom_price_));
         
     }
@@ -76,7 +77,7 @@ void InflectionBuyTask::HandleQuoteData()
                 ) 
             {
                 is_in_trigger_area = true; 
-                app_->local_logger().LogLocal(TagOfOrderLog(), 
+                app_->local_logger().LogLocal(TagOfCurTask(), 
                     TSystem::utility::FormatStr("%d InflectionBuyTask bk_alert_trg %s %.2f %d | %.2f %ds ", para_.id, this->code_data(), iter->cur_price, para_.quantity, bottom_price_, para_.continue_second)); 
             }
             // if retreat_percent > rebounce_percent 
@@ -85,7 +86,7 @@ void InflectionBuyTask::HandleQuoteData()
 				) 
             {
                is_in_trigger_area = true; 
-               app_->local_logger().LogLocal(TagOfOrderLog(), 
+               app_->local_logger().LogLocal(TagOfCurTask(), 
                     TSystem::utility::FormatStr("%d InflectionBuyTask %s %.2f %d | %.2f %ds| infle %.2f ", para_.id, this->code_data(), iter->cur_price, para_.quantity, bottom_price_, para_.continue_second
                     , get_inflect_percent(para_.alert_price, bottom_price_, iter->cur_price))); 
             }
@@ -159,4 +160,9 @@ void InflectionBuyTask::HandleQuoteData()
         });
             
     }
+}
+
+std::string InflectionBuyTask::TagOfCurTask()
+{ 
+    return TSystem::utility::FormatStr("InflectBuy_%s_%d", para_.stock.c_str(), TSystem::Today());
 }

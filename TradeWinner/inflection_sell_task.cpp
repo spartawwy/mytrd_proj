@@ -1,6 +1,7 @@
 
 #include "inflection_sell_task.h"
 
+#include <TLib/core/tsystem_time.h>
 #include <TLib/core/tsystem_utility_functions.h>
 #include "common.h"
 #include "winner_app.h"
@@ -49,7 +50,7 @@ void InflectionSellTask::HandleQuoteData()
         {
             top_price_ = iter->cur_price;
             time_point_top_price_ = iter->time_stamp;
-            app_->local_logger().LogLocal(TagOfOrderLog(), 
+            app_->local_logger().LogLocal(TagOfCurTask(), 
                     TSystem::utility::FormatStr("%d InflectionSellTask set top:%.2f ",  para_.id, top_price_));
         }
          
@@ -58,7 +59,7 @@ void InflectionSellTask::HandleQuoteData()
         is_first_open = true;
         time_point_open_warning_ = time_point_top_price_ = iter->time_stamp; // open warning
         top_price_ = iter->cur_price; 
-        app_->local_logger().LogLocal(TagOfOrderLog(), 
+        app_->local_logger().LogLocal(TagOfCurTask(), 
                     TSystem::utility::FormatStr("%d InflectionSellTask first open set top:%.2f ",  para_.id, top_price_));
     }
 
@@ -76,7 +77,7 @@ void InflectionSellTask::HandleQuoteData()
                 )
             {
                 is_in_trigger_area = true; 
-                app_->local_logger().LogLocal(TagOfOrderLog(), 
+                app_->local_logger().LogLocal(TagOfCurTask(), 
                     TSystem::utility::FormatStr("%d InflectionSellTask back trig %s %.2f %d | top:%.2f %d s ", para_.id, this->code_data(), iter->cur_price, para_.quantity, top_price_, para_.continue_second)); 
             
             }
@@ -86,7 +87,7 @@ void InflectionSellTask::HandleQuoteData()
                 ) 
             {
                 is_in_trigger_area = true; 
-                app_->local_logger().LogLocal(TagOfOrderLog(), 
+                app_->local_logger().LogLocal(TagOfCurTask(), 
                     TSystem::utility::FormatStr("%d InflectionSellTask %s %.2f %d | top:%.2f %d s| infle %.2f", para_.id, this->code_data(), iter->cur_price, para_.quantity, top_price_, para_.continue_second, (top_price_ - iter->cur_price) * 100 / para_.alert_price)); 
             
             }
@@ -165,4 +166,9 @@ void InflectionSellTask::HandleQuoteData()
         });
             
     }  
+}
+
+std::string InflectionSellTask::TagOfCurTask()
+{ 
+    return TSystem::utility::FormatStr("InflectSell_%s_%d", para_.stock.c_str(), TSystem::Today());
 }
