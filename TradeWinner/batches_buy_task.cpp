@@ -123,8 +123,9 @@ void BatchesBuyTask::HandleQuoteData()
     std::shared_ptr<QuotesData> & iter = *data_iter;
     assert(iter);
     //return timed_mutex_wrapper_.unlock(); // tmp code nddel
-     app_->QueryCapital().available; // tmp code nddel
-     return;// tmp code nddel
+    Delay(50);
+    app_->QueryCapital().available; // tmp code nddel
+    return;// tmp code nddel
 
     if( continue_trade_fail_count_ >= 3 )
     {

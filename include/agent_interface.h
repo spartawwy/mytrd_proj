@@ -2,6 +2,7 @@
 #define AGENT_INTERFACE_SDF23FDSFS_H_
 
 #include <cstring>
+#include <mutex>
 
 #include "common_base.h"
 
@@ -53,6 +54,8 @@ protected:
 	char password_[64]; 
 
     T_AccountData  account_data_[2];
+
+    std::mutex  mutex_query_data_;
 };
  
 extern "C" AGENT_INTERFACE_API AgentInterface * __cdecl CreateObject();

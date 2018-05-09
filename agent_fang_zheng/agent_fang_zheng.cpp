@@ -67,12 +67,16 @@ bool Agent_FANG_ZHENG::InstallAccountData(char *error)
      if( !trade_delegater_ || trade_client_id_ == -1 )
          return false;
      Buffer result(1024); 
-     trade_delegater_->QueryData(trade_client_id_, (int)TypeQueryCategory::SHARED_HOLDER_CODE, result.data(), error);
-	 if( strlen(error) != 0 )
-	 { 
-		 //QMessageBox::information(nullptr, "alert", QString::fromLocal8Bit("查询股权代码失败!"));
-		 return false;
-	 } 
+     {
+         std::lock_guard<std::mutex> locker(mutex_query_data_);
+         trade_delegater_->QueryData(trade_client_id_, (int)TypeQueryCategory::SHARED_HOLDER_CODE, result.data(), error);
+         if( strlen(error) != 0 )
+         { 
+             //QMessageBox::information(nullptr, "alert", QString::fromLocal8Bit("查询股权代码失败!"));
+             return false;
+         } 
+     }
+     
     unsigned short shared_holder_code_index = 0;
     unsigned short name_index = 1;
     unsigned short type_index = 2;
@@ -129,12 +133,15 @@ int Agent_FANG_ZHENG::QueryPosition(T_PositionData *out_pos_data, int max_pos_si
         return -1;
 
     auto result = std::make_shared<Buffer>(5*1024);
-      
-    trade_delegater_->QueryData(trade_client_id_, (int)TypeQueryCategory::STOCK, result->data(), error);
-	if( strlen(error) != 0 )
-	{  
-		return -1;
-	} 
+    {
+        std::lock_guard<std::mutex> locker(mutex_query_data_);
+        trade_delegater_->QueryData(trade_client_id_, (int)TypeQueryCategory::STOCK, result->data(), error);
+        if( strlen(error) != 0 )
+        {  
+            return -1;
+        } 
+    }  
+    
 	std::string str_result = result->c_data();
 	UtilityUse::replace_all_distinct(str_result, "\n", "\t");
 	/*qDebug() << " line 382" << "\n";
@@ -200,11 +207,14 @@ bool Agent_FANG_ZHENG::QueryCapital(T_Capital *capital)
 
     auto result = std::make_shared<Buffer>(5*1024);
     char error[1024] = {0};
+    {
+    std::lock_guard<std::mutex> locker(mutex_query_data_);
     trade_delegater_->QueryData(trade_client_id_, (int)TypeQueryCategory::CAPITAL, result->data(), error);
 	if( strlen(error) != 0 )
 	{  
 		return false;
 	} 
+    }
     std::string str_result = result->c_data();
     UtilityUse::replace_all_distinct(str_result, "\n", "\t");
 
@@ -212,18 +222,10 @@ bool Agent_FANG_ZHENG::QueryCapital(T_Capital *capital)
 	if( result_array.size() < 13 )
 		return false;
 	try
-	{
-		/*if( p_user_broker_info_->type == TypeBroker::PING_AN )
-		{
-			capital.remain = boost::lexical_cast<double>(result_array.at(19));
-			capital.available = boost::lexical_cast<double>(result_array.at(20));
-			capital.total = boost::lexical_cast<double>(result_array.at(25));
-		}else*/
-		{
-            capital->remain = std::stod(result_array.at(11));
-			capital->available = std::stod(result_array.at(12));
-			capital->total = std::stod(result_array.at(15));
-		}
+	{  
+        capital->remain = std::stod(result_array.at(11));
+        capital->available = std::stod(result_array.at(12));
+        capital->total = std::stod(result_array.at(15));
 	}catch(std::exception &)
 	{ 
         return false;
