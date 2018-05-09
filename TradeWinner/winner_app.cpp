@@ -188,10 +188,10 @@ bool WinnerApp::Init()
 		while(!this->exit_flag_)
 		{
 			Delay(cst_ticker_update_interval);
-
+#if 0 // tmpnouse it
 			if( !this->ticker_enable_flag_ )
 				continue;
-
+#endif
 			tick_strand_.PostTask([this]()
 			{
 				this->stock_ticker_->Procedure();

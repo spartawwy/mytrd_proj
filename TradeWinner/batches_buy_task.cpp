@@ -101,7 +101,7 @@ void BatchesBuyTask::HandleQuoteData()
         }
         return -1;
     };
-    
+    //return; // tmp code nddel
     if( is_waitting_removed_ )
         return;
     if( !is_ok_ )
@@ -110,11 +110,11 @@ void BatchesBuyTask::HandleQuoteData()
         this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_BUY);
         return;
     }
-     
+    app_->local_logger().LogLocal("mutex", TSystem::utility::FormatStr(" task %d BatchesBuyTask timed_mutex_wrapper_ try lock", para_.id));  
     if( !timed_mutex_wrapper_.try_lock_for(1000) )  
     {
         //DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
-        app_->local_logger().LogLocal("mutex", "error: BatchesBuyTask::HandleQuoteData timed_mutex_wrapper_ lock fail"); 
+        app_->local_logger().LogLocal("mutex", TSystem::utility::FormatStr("error: task %d BatchesBuyTask timed_mutex_wrapper_ lock fail", para_.id)); 
         return;
     }
      
@@ -122,12 +122,15 @@ void BatchesBuyTask::HandleQuoteData()
     auto data_iter = quote_data_queue_.rbegin();
     std::shared_ptr<QuotesData> & iter = *data_iter;
     assert(iter);
+    //return timed_mutex_wrapper_.unlock(); // tmp code nddel
+     app_->QueryCapital().available; // tmp code nddel
+     return;// tmp code nddel
 
     if( continue_trade_fail_count_ >= 3 )
     {
         if( ++trade_fail_ctr_count_ % 60 != 0 )
         {
-            app_->local_logger().LogLocal(TagOfCurTask(), "BatchesBuyTask::HandleQuoteData continue trade fail, do return!");
+            app_->local_logger().LogLocal(TagOfCurTask(), "BatchesBuyTask continue trade fail, do return!");
             goto NO_TRADE;
         }
     }
@@ -142,7 +145,9 @@ void BatchesBuyTask::HandleQuoteData()
         if( step_items_[index].has_buy )
             goto NO_TRADE;
         // prepare buy ----------
+        app_->local_logger().LogLocal(TSystem::utility::FormatStr(" task %d BatchesBuyTask QueryCapital", para_.id));
         double capital = app_->QueryCapital().available;
+        app_->local_logger().LogLocal(TSystem::utility::FormatStr(" task %d BatchesBuyTask ret QueryCapital", para_.id));
         // check upper indexs which has't buy, if hasn't buy, buy it together
         int qty = 0;
         for( int i = index, count = 1; i >= 0; --i )
@@ -156,6 +161,7 @@ void BatchesBuyTask::HandleQuoteData()
                     break;
             }
         }
+        app_->local_logger().LogLocal(TSystem::utility::FormatStr(" task %d BatchesBuyTask after check upper indexs", para_.id));
         if( qty < 100 )
         {
             app_->local_logger().LogLocal(TagOfCurTask(), utility::FormatStr(" trigger step index %d: but capital:%.2f not enough", index, capital));

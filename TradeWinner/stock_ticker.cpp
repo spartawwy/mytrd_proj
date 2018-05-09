@@ -201,9 +201,10 @@ void StockTicker::DecodeStkQuoteResult(Buffer &Result, std::list<T_codeQuoteDate
         {
             continue;
         }
-        
+        logger_.LogLocal(utility::FormatStr("to tell_all_rel_task"));
         if( tell_all_rel_task )
             tell_all_rel_task(task_ids_iter->second, quote_data);
+        logger_.LogLocal( "ret_quotes_data->push_back");
         if( ret_quotes_data )
             ret_quotes_data->push_back(std::make_tuple(stock_code, std::move(quote_data)));
     }
@@ -223,17 +224,22 @@ void StockTicker::Procedure()
      
     auto  cur_time = QTime::currentTime();
     //--------------------------- 
+    logger_.LogLocal("StockTicker::Procedure() to GetRegisteredCodes");
     stock_count = GetRegisteredCodes(registered_tasks_, stock_codes, markets);
     if( stock_count < 1 )
+    {   logger_.LogLocal("end GetRegisteredCodes");
         return;
-
+    }
+    logger_.LogLocal("to GetQuotes");
     if( !GetQuotes(stock_codes, stock_count, Result) )
+    {   logger_.LogLocal("end GetQuotes");
         return;
-  
+    }
+    logger_.LogLocal("to DecodeStkQuoteResult");
     //--------------------------Docode result -------------
 
     DecodeStkQuoteResult(Result, nullptr, std::bind(&StockTicker::TellAllRelTasks, this, std::placeholders::_1, std::placeholders::_2));
-      
+    logger_.LogLocal("end DecodeStkQuoteResult");  
     ///qDebug() << QString::fromLocal8Bit(Result.data()) << "\n";  
 }
  
