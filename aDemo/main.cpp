@@ -1,4 +1,6 @@
 
+#if 0
+
 #include <stdio.h>
 #include <cmath>
 
@@ -125,3 +127,5 @@ int main()
 	getchar();
    return 0;
 }
+
+#endif

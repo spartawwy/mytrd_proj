@@ -6,8 +6,7 @@
 #include <Tlib/core/tsystem_utility_functions.h>
 
 #include <qmessagebox.h>
-
-#include <TLib/core/tsystem_utility_functions.h>
+ 
  
 TradeAgent::TradeAgent() 
 	: hmd_(nullptr)

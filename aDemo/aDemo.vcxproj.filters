@@ -18,5 +18,22 @@
     <ClCompile Include="main.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="app_testor.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="main_testor.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="agenter.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="app_testor.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="agenter.h">
+      <Filter>source</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
