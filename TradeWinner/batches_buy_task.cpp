@@ -84,8 +84,7 @@ BatchesBuyTask::BatchesBuyTask(T_TaskInformation &task_info, WinnerApp *app)
 
 
 void BatchesBuyTask::HandleQuoteData()
-{
-    // 
+{ 
     static auto in_which_part = [](BatchesBuyTask* tsk, double price) ->int
     { 
         if( price < tsk->step_items_[tsk->step_items_.size()-1].bottom_price )
@@ -101,7 +100,7 @@ void BatchesBuyTask::HandleQuoteData()
         }
         return -1;
     };
-    //return; // tmp code nddel
+    
     if( is_waitting_removed_ )
         return;
     if( !is_ok_ )
@@ -122,11 +121,7 @@ void BatchesBuyTask::HandleQuoteData()
     auto data_iter = quote_data_queue_.rbegin();
     std::shared_ptr<QuotesData> & iter = *data_iter;
     assert(iter);
-    //return timed_mutex_wrapper_.unlock(); // tmp code nddel
-    Delay(50);
-    app_->QueryCapital().available; // tmp code nddel
-    return;// tmp code nddel
-
+       
     if( continue_trade_fail_count_ >= 3 )
     {
         if( ++trade_fail_ctr_count_ % 60 != 0 )

@@ -27,12 +27,18 @@
     <ClCompile Include="agenter.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="demo_mutex_wrapper.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app_testor.h">
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="agenter.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="demo_mutex_wrapper.h">
       <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>

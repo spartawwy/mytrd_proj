@@ -112,7 +112,7 @@ std::string ToString(TypeEqSection val)
     return "";
 }
 
-void Delay(unsigned short mseconds)
+void Delay(__int64 mseconds)
 {
     //TSystem::WaitFor([]()->bool { return false;}, mseconds); // only make effect to timer
     std::this_thread::sleep_for(std::chrono::system_clock::duration(std::chrono::milliseconds(mseconds)));
@@ -208,7 +208,7 @@ bool IsNowTradeTime()
 	    timeinfo = localtime( &rawtime ); // from 1900 year
         return timeinfo->tm_year * 10000 + timeinfo->tm_mon *100 + timeinfo->tm_mday;
     };
-    return true; // tmp code nddel 
+    //return true; // tmp code  
      
     static int week_day = 0;  
     static int ori_day = 0;

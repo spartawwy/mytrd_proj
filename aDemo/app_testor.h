@@ -2,6 +2,7 @@
 #define  APP_TEST_DFKLSDFS32SDF_H_
 
 #include <TLib/tool/tsystem_server_client_appbase.h>
+#include "demo_mutex_wrapper.h"
 
 class TradeAgent;
 class AppTestor : public TSystem::ServerClientAppBase
@@ -26,5 +27,8 @@ private:
 
     std::shared_ptr<TradeAgent> trade_agent_;
 
+    TimedMutexWrapper  query_lock_;
+
+    volatile bool exit_;
 };
 #endif

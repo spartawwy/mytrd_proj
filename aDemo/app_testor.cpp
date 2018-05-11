@@ -1,24 +1,20 @@
 #include "app_testor.h"
 
 #include "agenter.h"
-
-void Delay(unsigned short mseconds)
-{
-    //TSystem::WaitFor([]()->bool { return false;}, mseconds); // only make effect to timer
-    std::this_thread::sleep_for(std::chrono::system_clock::duration(std::chrono::milliseconds(mseconds)));
-}
+#include "demo_mutex_wrapper.h"
 
 AppTestor::AppTestor() : ServerClientAppBase("client", "trade_winner", "0.1")
     , strand_(this->task_pool())
     , strand_other_(this->task_pool())
     , trade_agent_()
+    , exit_(false)
 {
 
 }
 
 AppTestor::~AppTestor()
 {
-
+    exit_ = true;
 }
 
 void AppTestor::Initiate()
@@ -43,13 +39,30 @@ void AppTestor::Initiate()
     }
     this->task_pool().PostTask([this]()
     {
-        Delay(50);
-
-        strand_.PostTask([this]()
+        while(!exit_)
         {
-            T_Capital capital;
-            trade_agent_->QueryCapital(&capital);
-            printf("capital:%.2f\n", capital.total);
-        });
+            Delay(50);
+
+            strand_.PostTask([this]()
+            {
+                if( !query_lock_.try_lock_for(1000) )
+                {
+                    printf("locker faile\n");
+                    return;
+                }
+                T_Capital capital;
+                trade_agent_->QueryCapital(&capital);
+                printf("capital:%.2f\n", capital.total);
+                //query_lock_.unlock();
+            });
+#if 0
+            strand_other_.PostTask([this]()
+            {
+                T_Capital capital;
+                trade_agent_->QueryCapital(&capital);
+                printf("capital_other:%.2f\n", capital.total);
+            });
+#endif
+        }
     });
 }

@@ -379,7 +379,7 @@ QString ToQString(TaskCurrentState val);
 QString ToQString(TindexTaskType val);
 std::string ToString(TypeEqSection val);
 
-void Delay(unsigned short mseconds);
+void Delay(__int64 mseconds);
 
 bool Equal(double lh, double rh);
 
