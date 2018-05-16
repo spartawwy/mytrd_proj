@@ -109,14 +109,12 @@ void BatchesBuyTask::HandleQuoteData()
         this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_BUY);
         return;
     }
-    app_->local_logger().LogLocal("mutex", TSystem::utility::FormatStr(" task %d BatchesBuyTask timed_mutex_wrapper_ try lock", para_.id));  
     if( !timed_mutex_wrapper_.try_lock_for(1000) )  
     {
         //DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
         app_->local_logger().LogLocal("mutex", TSystem::utility::FormatStr("error: task %d BatchesBuyTask timed_mutex_wrapper_ lock fail", para_.id)); 
         return;
     }
-     
     assert( !quote_data_queue_.empty() );
     auto data_iter = quote_data_queue_.rbegin();
     std::shared_ptr<QuotesData> & iter = *data_iter;
@@ -133,142 +131,144 @@ void BatchesBuyTask::HandleQuoteData()
 
     double pre_price = quote_data_queue_.size() > 1 ? (*(++data_iter))->cur_price : iter->cur_price;
      
-    if( iter->cur_price < para_.alert_price )
+    if( iter->cur_price > para_.alert_price - 0.0001 )
+        goto NO_TRADE;
+ 
+    const int index = in_which_part(this, iter->cur_price);
+    if( index < 0 )
+        goto NO_TRADE;
+    if( step_items_[index].has_buy )
+        goto NO_TRADE;
+    // prepare buy ----------
+    app_->local_logger().LogLocal(TSystem::utility::FormatStr(" task %d BatchesBuyTask QueryCapital", para_.id));
+    double capital = app_->QueryCapital().available;
+    app_->local_logger().LogLocal(TSystem::utility::FormatStr(" task %d BatchesBuyTask ret QueryCapital", para_.id));
+    // check upper indexs which has't buy, if hasn't buy, buy it together
+    int qty = 0;
+    for( int i = index, count = 1; i >= 0; --i )
     {
-        const int index = in_which_part(this, iter->cur_price);
-        if( index < 0 )
-            goto NO_TRADE;
-        if( step_items_[index].has_buy )
-            goto NO_TRADE;
-        // prepare buy ----------
-        app_->local_logger().LogLocal(TSystem::utility::FormatStr(" task %d BatchesBuyTask QueryCapital", para_.id));
-        double capital = app_->QueryCapital().available;
-        app_->local_logger().LogLocal(TSystem::utility::FormatStr(" task %d BatchesBuyTask ret QueryCapital", para_.id));
-        // check upper indexs which has't buy, if hasn't buy, buy it together
-        int qty = 0;
-        for( int i = index, count = 1; i >= 0; --i )
+        if( iter->cur_price * (qty + para_.quantity) > capital - 10.0 ) // an charge at least 5.00 yuan
+            break;
+        if( !step_items_[i].has_buy )
         {
-            if( iter->cur_price * (qty + para_.quantity) > capital - 10.0 ) // an charge at least 5.00 yuan
+            qty += para_.quantity;
+            if( (times_has_buy_ + count++) >= para_.bs_times ) // check max buy times
                 break;
-            if( !step_items_[i].has_buy )
-            {
-                qty += para_.quantity;
-                if( (times_has_buy_ + count++) >= para_.bs_times ) // check max buy times
-                    break;
-            }
         }
-        app_->local_logger().LogLocal(TSystem::utility::FormatStr(" task %d BatchesBuyTask after check upper indexs", para_.id));
-        if( qty < 100 )
-        {
-            app_->local_logger().LogLocal(TagOfCurTask(), utility::FormatStr(" trigger step index %d: but capital:%.2f not enough", index, capital));
-            goto NO_TRADE;
-        }
+    }
+    app_->local_logger().LogLocal(TSystem::utility::FormatStr(" task %d BatchesBuyTask after check upper indexs", para_.id));
+    if( qty < 100 )
+    {
+        app_->local_logger().LogLocal(TagOfCurTask(), utility::FormatStr(" trigger step index %d: but capital:%.2f not enough", index, capital));
+        goto NO_TRADE;
+    }
 
-        app_->local_logger().LogLocal(TagOfCurTask()
-            , utility::FormatStr(" trigger step index %d: bottom: %.2f up:%.2f %s", index, step_items_[index].bottom_price, step_items_[index].up_price, ( qty > para_.quantity ? "supplement buy other index" : "")));
-        goto BEFORE_TRADE;
+    app_->local_logger().LogLocal(TagOfCurTask()
+        , utility::FormatStr(" trigger step index %d: bottom: %.2f up:%.2f %s", index, step_items_[index].bottom_price, step_items_[index].up_price, ( qty > para_.quantity ? "supplement buy other index" : "")));
+    goto BEFORE_TRADE;
 
 NO_TRADE:
-        timed_mutex_wrapper_.unlock();
-        return;
+
+    app_->local_logger().LogLocal("mutex", TSystem::utility::FormatStr(" task %d BatchesBuyTask timed_mutex_wrapper_.unlock", para_.id));  
+    timed_mutex_wrapper_.unlock();
+    return;
 
 BEFORE_TRADE:         
 
-        app_->trade_strand().PostTask([iter, index, qty, capital, this]()
-        {
-        // send order 
-        char result[1024] = {0};
-        char error_info[1024] = {0};
+    app_->trade_strand().PostTask([iter, index, qty, capital, this]()
+    {
+    // send order 
+    char result[1024] = {0};
+    char error_info[1024] = {0};
 	            
-        // to choice price to buy
-        double price = GetQuoteTargetPrice(*iter, false);
-        if( IsPriceJumpUp(iter->cur_price, price) )
-            price = iter->cur_price;
+    // to choice price to buy
+    double price = GetQuoteTargetPrice(*iter, false);
+    if( IsPriceJumpUp(iter->cur_price, price) )
+        price = iter->cur_price;
 #ifdef USE_TRADE_FLAG
-        assert(this->app_->trade_agent().account_data(market_type_));
+    assert(this->app_->trade_agent().account_data(market_type_));
 
-        //auto sh_hld_code  = const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code;
+    //auto sh_hld_code  = const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code;
         
-		this->app_->local_logger().LogLocal(TagOfOrderLog(), 
-            TSystem::utility::FormatStr("触发任务:%d 分批买入 %s 价格:%.2f 数量:%d ", para_.id, this->code_data(), price, qty)); 
-        this->app_->AppendLog2Ui("触发任务:%d 分批买入 %s 价格:%.2f 数量:%d ", para_.id, this->code_data(), price, qty);
+	this->app_->local_logger().LogLocal(TagOfOrderLog(), 
+        TSystem::utility::FormatStr("触发任务:%d 分批买入 %s 价格:%.2f 数量:%d ", para_.id, this->code_data(), price, qty)); 
+    this->app_->AppendLog2Ui("触发任务:%d 分批买入 %s 价格:%.2f 数量:%d ", para_.id, this->code_data(), price, qty);
 #if 1
-		// buy the stock
-        this->app_->trade_agent().SendOrder((int)TypeOrderCategory::BUY, 0
-            , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
-            , price, qty
-            , result, error_info); 
+	// buy the stock
+    this->app_->trade_agent().SendOrder((int)TypeOrderCategory::BUY, 0
+        , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
+        , price, qty
+        , result, error_info); 
 #endif
 #endif
-        // judge result 
-        if( strlen(error_info) > 0 )
-        {
-           ++continue_trade_fail_count_;
-           auto ret_str = new std::string(utility::FormatStr("error %d 分批买入 %s %.2f %d error:%s"
-                        , para_.id, para_.stock.c_str(), price, qty, error_info));
-           this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
-           this->app_->AppendLog2Ui(ret_str->c_str());
-           this->app_->EmitSigShowUi(ret_str, true);
+    // judge result 
+    if( strlen(error_info) > 0 )
+    {
+        ++continue_trade_fail_count_;
+        auto ret_str = new std::string(utility::FormatStr("error %d 分批买入 %s %.2f %d error:%s"
+                    , para_.id, para_.stock.c_str(), price, qty, error_info));
+        this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
+        this->app_->AppendLog2Ui(ret_str->c_str());
+        this->app_->EmitSigShowUi(ret_str, true);
 
-        }else
-        {   
-            continue_trade_fail_count_ = 0;
-            trade_fail_ctr_count_ = 0;
-            // update state ----------------
-            int quantity = 0;
-            for( int i = index; i >= 0; --i )
-            {
-                if( iter->cur_price * (quantity + para_.quantity) > capital - 10.0 ) // an charge at least 5.00 yuan
-                    break;
-                if( !step_items_[i].has_buy )
-                {
-                    step_items_[i].has_buy = true;
-                    quantity += para_.quantity;
-                    if( ++times_has_buy_ >= para_.bs_times )
-                    {
-                        is_waitting_removed_ = true;
-                        break;
-                    }
-                }
-            }
-
-            auto ret_str = new std::string(utility::FormatStr("执行任务:%d 分批买入 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, qty));
-            this->app_->EmitSigShowUi(ret_str, true);
-        }
-        // update assistant filed in db ------------
-        para_.assistant_field.clear();
-        for( int i = 0; i < step_items_.size(); ++i )
+    }else
+    {   
+        continue_trade_fail_count_ = 0;
+        trade_fail_ctr_count_ = 0;
+        // update state ----------------
+        int quantity = 0;
+        for( int i = index; i >= 0; --i )
         {
-            if( 100.0 - (i + 1) * para_.step < 0.0 )
+            if( iter->cur_price * (quantity + para_.quantity) > capital - 10.0 ) // an charge at least 5.00 yuan
                 break;
-            if( step_items_[i].has_buy ) 
+            if( !step_items_[i].has_buy )
             {
-                if( para_.assistant_field.empty() )
+                step_items_[i].has_buy = true;
+                quantity += para_.quantity;
+                if( ++times_has_buy_ >= para_.bs_times )
                 {
-                    para_.assistant_field.append(std::to_string(times_has_buy_));
-                    para_.assistant_field.append("#");
-                    para_.assistant_field.append(std::to_string(i));
-                }else
-                { 
-                    para_.assistant_field += ";" + std::to_string(i);
+                    is_waitting_removed_ = true;
+                    break;
                 }
             }
-        } 
-        app_->db_moudle().UpdateTaskInfo(para_);
-
-        if( times_has_buy_ >= para_.bs_times )
-        {
-            auto info_str = utility::FormatStr("分批买入任务:%d %s 已买 %d 次,任务结束!", para_.id, para_.stock.c_str(), times_has_buy_);
-            this->app_->local_logger().LogLocal(info_str);
-            this->app_->AppendLog2Ui(info_str.c_str());
-
-            this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_BUY);
         }
-        timed_mutex_wrapper_.unlock();
-        });
-        
-    } 
 
+        auto ret_str = new std::string(utility::FormatStr("执行任务:%d 分批买入 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, qty));
+        this->app_->EmitSigShowUi(ret_str, true);
+    }
+    // update assistant filed in db ------------
+    para_.assistant_field.clear();
+    for( int i = 0; i < step_items_.size(); ++i )
+    {
+        if( 100.0 - (i + 1) * para_.step < 0.0 )
+            break;
+        if( step_items_[i].has_buy ) 
+        {
+            if( para_.assistant_field.empty() )
+            {
+                para_.assistant_field.append(std::to_string(times_has_buy_));
+                para_.assistant_field.append("#");
+                para_.assistant_field.append(std::to_string(i));
+            }else
+            { 
+                para_.assistant_field += ";" + std::to_string(i);
+            }
+        }
+    } 
+    app_->db_moudle().UpdateTaskInfo(para_);
+
+    if( times_has_buy_ >= para_.bs_times )
+    {
+        auto info_str = utility::FormatStr("分批买入任务:%d %s 已买 %d 次,任务结束!", para_.id, para_.stock.c_str(), times_has_buy_);
+        this->app_->local_logger().LogLocal(info_str);
+        this->app_->AppendLog2Ui(info_str.c_str());
+
+        this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_BUY);
+    }
+    timed_mutex_wrapper_.unlock();
+
+    });
+         
 }
 
 std::string BatchesBuyTask::TagOfCurTask()

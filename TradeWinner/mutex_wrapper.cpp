@@ -1,9 +1,14 @@
 #include "mutex_wrapper.h"
 
 #include <chrono>
+#include <TLib/core/tsystem_utility_functions.h>
+#include <TLib/core/tsystem_local_logger.h>
 #include "common.h"
+//using namespace TSystem;
 
-TimedMutexWrapper::TimedMutexWrapper() 
+#define WRAPPER_LOG(a) do{ if(local_logger_) local_logger_->LogLocal(a); }while(0)
+
+TimedMutexWrapper::TimedMutexWrapper(int id, TSystem::LocalLogger *local_logger) : id_(id), local_logger_(local_logger)
 {
     is_locked_ = false;
 }
@@ -20,6 +25,7 @@ bool TimedMutexWrapper::try_lock_for(__int64 milli_sec)
     if( !is_locked_ )
     {
         is_locked_ = true;
+        WRAPPER_LOG(TSystem::utility::FormatStr("%d lock ok", id_));
         return true;
     }
   
@@ -57,14 +63,19 @@ bool TimedMutexWrapper::try_lock_for(__int64 milli_sec)
  
     if( !is_locked_ )
     {
+        WRAPPER_LOG(TSystem::utility::FormatStr("%d lock ok", id_));
         is_locked_ = true;
         return true;
     }else
+    {
+       WRAPPER_LOG(TSystem::utility::FormatStr("%d lock fail", id_));
        return false;
+    }
 }
 
 void TimedMutexWrapper::unlock()
 {
     is_locked_ = false;
+    WRAPPER_LOG(TSystem::utility::FormatStr("%d unlock", id_));
 }
 

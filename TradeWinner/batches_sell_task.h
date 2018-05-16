@@ -28,7 +28,7 @@ public:
 
 private:
      
-    TimedMutexWrapper  timed_mutex_wrapper_;
+    //TimedMutexWrapper  timed_mutex_wrapper_;
 };
 
 #endif

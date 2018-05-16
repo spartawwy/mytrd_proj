@@ -20,7 +20,7 @@ StrategyTask::StrategyTask(T_TaskInformation &task_info, WinnerApp *app)
     , is_waitting_removed_(false)
     , life_count_(0)
     , strand_(app->task_pool())
-    , timed_mutex_wrapper_()
+    , timed_mutex_wrapper_(/* para_.type == TypeTask::BATCHES_BUY ? para_.id : 0, para_.type == TypeTask::BATCHES_BUY ? std::addressof(app->local_logger()) : nullptr*/ )
 {
     
 }
