@@ -91,6 +91,7 @@ public slots:
     //--------------advance equal task related---
     void DoAddAdveqTask();
     void ResetAdveqTaskTime();
+    void DoAdveqGetNeedCapital();
 
     //---------------index trade task related----
 	void DoAddIndexTradeTask();

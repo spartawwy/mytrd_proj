@@ -26,7 +26,7 @@ void WinnerWin::InitAdveqTaskWin()
 
     ResetAdveqTaskTime();
     ret = connect(ui.pbtn_add_adveq_task, SIGNAL(clicked()), this, SLOT(DoAddAdveqTask()));
-
+    ret = connect(ui.pbtn_adveq_need_capital, SIGNAL(clicked()), this, SLOT(DoAdveqGetNeedCapital()));
 }
 
 void WinnerWin::DoAddAdveqTask()
@@ -175,4 +175,9 @@ void WinnerWin::ResetAdveqTaskTime()
 {
 	ui.timeEdit_adveq_begin->setTime(QTime(9, 30, 0));
     ui.timeEdit_adveq_end->setTime(QTime(15, 00, 0));
+}
+
+void WinnerWin::DoAdveqGetNeedCapital()
+{
+
 }

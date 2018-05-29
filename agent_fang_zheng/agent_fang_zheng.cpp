@@ -144,8 +144,7 @@ int Agent_FANG_ZHENG::QueryPosition(T_PositionData *out_pos_data, int max_pos_si
     
 	std::string str_result = result->c_data();
 	UtilityUse::replace_all_distinct(str_result, "\n", "\t");
-	/*qDebug() << " line 382" << "\n";
-	qDebug() << str_result.c_str() << " ----\n";*/
+ 
 	auto result_array = UtilityUse::split(str_result, "\t");
 
 	//std::lock_guard<std::mutex>  locker(stocks_position_mutex_);

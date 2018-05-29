@@ -584,7 +584,7 @@ int DBMoudle::FindBorkerIdByAccountID(int account_id)
 }
 
 // info->id will set if saved ok
-bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
+bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info, char *error)
 {
     auto str_stock_py = info->stock_pinyin;
     gbkToUtf8(str_stock_py);
@@ -611,17 +611,21 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
         Open(db_conn_);
     if( !utility::ExistTable("TaskInfo", *db_conn_) )
     {  // throw exception
+        if( error ) sprintf(error, "not exist table TaskInfo\0");
         return false; 
     }
     if( info->type == TypeTask::EQUAL_SECTION && !utility::ExistTable("EqualSectionTask", *db_conn_) )
     {  // throw exception
+        if( error ) sprintf(error, "not exist table EqualSectionTask\0");
         return false; 
     }else if( info->type == TypeTask::ADVANCE_SECTION && !utility::ExistTable("AdvanceSectionTask", *db_conn_))
     {
+        if( error ) sprintf(error, "not exist table AdvanceSectionTask\0");
         return false;
 
     }else if( info->type == TypeTask::INDEX_RISKMAN && !utility::ExistTable("IndexRelateTask", *db_conn_) )
     {   // throw exception
+        if( error ) sprintf(error, "not exist table IndexRelateTask\0");
         return false; 
     }
     bool ret = true;
@@ -629,6 +633,7 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
     {
         WriteLock locker(taskinfo_table_mutex_);
         ret = db_conn_->ExecuteSQL(sql.c_str());
+        if( !ret && error ) strcpy(error, sql.c_str());
     }
     if( ret )
     {
@@ -648,7 +653,7 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
                 , info->secton_task.min_position);
             WriteLock locker(equalsection_table_mutex_);
             ret = db_conn_->ExecuteSQL(sql.c_str()); 
-
+             
         }else if( info->type == TypeTask::ADVANCE_SECTION )
         {
              sql = utility::FormatStr("INSERT INTO AdvanceSectionTask VALUES(%d, '%s', '%s', %.2f, %d) "
@@ -675,12 +680,14 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info)
 
         if( !ret )
         {  
+            if( error ) strcpy(error, sql.c_str());
             sql = utility::FormatStr("DELETE FROM TaskInfo WHERE id=%d", app_->Cookie_MaxTaskId() + 1);
             WriteLock locker(taskinfo_table_mutex_);
             db_conn_->ExecuteSQL(sql.c_str());
         }else
             info->id = app_->Cookie_NextTaskId();
     }
+    
     return ret;
 }
 

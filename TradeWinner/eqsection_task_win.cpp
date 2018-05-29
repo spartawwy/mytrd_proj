@@ -179,12 +179,13 @@ void WinnerWin::DoAddEqSectionTask()
     task_info->start_time = ui.timeEdit_eqsec_begin->time().toString("Hmmss").toInt();
     task_info->end_time = ui.timeEdit_eqsec_end->time().toString("Hmmss").toInt();
     
-    task_info->state = 1;		
-    if( !app_->db_moudle().AddTaskInfo(task_info) )
+    task_info->state = 1;
+    char error[2048] = {0};
+    if( !app_->db_moudle().AddTaskInfo(task_info, error) )
     {
         // log error
 		app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("区间任务添加失败!"));
-		app_->AppendLog2Ui("添加区间任务 : %d 失败! fail db_moudle().AddTaskInfo \n", task_info->id);
+		app_->AppendLog2Ui("添加区间任务 : %d 失败! fail db_moudle().AddTaskInfo %s\n", task_info->id, error);
         return;
     }
     app_->AppendTaskInfo(task_info->id, task_info);

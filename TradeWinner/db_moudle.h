@@ -50,7 +50,7 @@ public:
     bool UpdateAccountInfo(T_AccountInformation &info);
     int FindBorkerIdByAccountID(int account_id);
 
-    bool AddTaskInfo(std::shared_ptr<T_TaskInformation> &info);
+    bool AddTaskInfo(std::shared_ptr<T_TaskInformation> &info, char *error=nullptr);
     bool DelTaskInfo(int task_id, TypeTask type);
     bool UpdateTaskInfo(T_TaskInformation &info);
 

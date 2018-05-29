@@ -99,7 +99,7 @@ bool Ticker::Init()
     return true;
 }
 
-bool Ticker::GetQuotes(char* stock_code, QuotesData& quote_data)
+bool Ticker::GetQuotes(char* stock_code, QuotesData& quote_data, char *ret_message)
 {
     byte markets[cst_max_stock_code_count];
     //for( int i = 0; i < count; ++i )
@@ -115,6 +115,7 @@ bool Ticker::GetQuotes(char* stock_code, QuotesData& quote_data)
     if ( !ret )
     {
         qDebug() << ErrInfo.data() << endl;
+        if( ret_message ) sprintf(ret_message, "TdxHq_GetSecurityQuotes fail: %s ", ErrInfo.data());
         //logger_.LogLocal(std::string("Ticker::GetQuotes TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
         if( !strstr(ErrInfo.data(), "请重新连接") )
             TdxHq_Disconnect();
@@ -128,6 +129,7 @@ bool Ticker::GetQuotes(char* stock_code, QuotesData& quote_data)
         if ( !ret )
         {
             //logger_.LogLocal(std::string("Ticker::GetQuotes retry TdxHq_Connect fail:") + ErrInfo.data());
+            if( ret_message ) strcat(ret_message, "reconnect fail!");
             return false;
         }
         //logger_.LogLocal(utility::FormatStr("Ticker::GetQuotes TdxHq_Connect ok!"));
@@ -141,6 +143,7 @@ bool Ticker::GetQuotes(char* stock_code, QuotesData& quote_data)
         if ( !ret )
         {
             //logger_.LogLocal(std::string("Ticker::GetQuotes retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
+            if( ret_message ) strcat(ret_message, "reconnect retry TdxHq_GetSecurityQuotes fail!");
             return false;
         }
         }catch(std::exception &e)

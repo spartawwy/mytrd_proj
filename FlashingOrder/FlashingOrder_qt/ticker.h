@@ -43,7 +43,7 @@ public:
 
     bool GetSecurityBars(int Category, int Market, char* Zqdm, short Start, short& Count, char* Result, char* ErrInfo);
 
-    bool GetQuotes(char* stock_code, QuotesData& quote_data);
+    bool GetQuotes(char* stock_code, QuotesData& quote_data, char *ret_message=nullptr);
 
     /*bool DecodeStkQuoteResult(Buffer &Result, std::list<T_codeQuoteDateTuple> *ret_quotes_data=nullptr
             , std::function<void(const std::list<unsigned int>& id_list, std::shared_ptr<QuotesData> &data)> tell_all_rel_task=nullptr);

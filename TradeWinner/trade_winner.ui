@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>917</width>
+    <width>910</width>
     <height>620</height>
    </rect>
   </property>
@@ -2541,6 +2541,24 @@
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
+     <widget class="QPushButton" name="pbtn_adveq_need_capital">
+      <property name="geometry">
+       <rect>
+        <x>290</x>
+        <y>280</y>
+        <width>71</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>所需资金</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_capital">
      <attribute name="title">
@@ -3039,7 +3057,7 @@ background-color: rgb(255, 255,255);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>917</width>
+     <width>910</width>
      <height>18</height>
     </rect>
    </property>

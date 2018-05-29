@@ -202,6 +202,7 @@ public:
     QLabel *label_buytask_monitor_time_3;
     QComboBox *combox_adveq_price_level;
     QLabel *label_price_level_5;
+    QPushButton *pbtn_adveq_need_capital;
     QWidget *tab_capital;
     QPlainTextEdit *pte_capital;
     QPushButton *pbtn_query_capital;
@@ -249,7 +250,7 @@ public:
     {
         if (TradeWinnerClass->objectName().isEmpty())
             TradeWinnerClass->setObjectName(QStringLiteral("TradeWinnerClass"));
-        TradeWinnerClass->resize(917, 620);
+        TradeWinnerClass->resize(910, 620);
         actionClose = new QAction(TradeWinnerClass);
         actionClose->setObjectName(QStringLiteral("actionClose"));
         actionRestart = new QAction(TradeWinnerClass);
@@ -914,6 +915,12 @@ public:
         label_price_level_5->setGeometry(QRect(70, 320, 91, 21));
         label_price_level_5->setFont(font1);
         label_price_level_5->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        pbtn_adveq_need_capital = new QPushButton(tab_advsec_task);
+        pbtn_adveq_need_capital->setObjectName(QStringLiteral("pbtn_adveq_need_capital"));
+        pbtn_adveq_need_capital->setGeometry(QRect(290, 280, 71, 23));
+        QFont font2;
+        font2.setPointSize(11);
+        pbtn_adveq_need_capital->setFont(font2);
         tabwid_holder->addTab(tab_advsec_task, QString());
         tab_capital = new QWidget();
         tab_capital->setObjectName(QStringLiteral("tab_capital"));
@@ -1048,7 +1055,7 @@ public:
         TradeWinnerClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(TradeWinnerClass);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 917, 18));
+        menuBar->setGeometry(QRect(0, 0, 910, 18));
         menu_system = new QMenu(menuBar);
         menu_system->setObjectName(QStringLiteral("menu_system"));
         menu_help = new QMenu(menuBar);
@@ -1232,6 +1239,7 @@ public:
         label_24->setText(QApplication::translate("TradeWinnerClass", "---", 0));
         label_buytask_monitor_time_3->setText(QApplication::translate("TradeWinnerClass", "\347\233\221\346\216\247\346\227\266\351\227\264:", 0));
         label_price_level_5->setText(QApplication::translate("TradeWinnerClass", "\344\272\244\346\230\223\344\273\267\346\240\274:", 0));
+        pbtn_adveq_need_capital->setText(QApplication::translate("TradeWinnerClass", "\346\211\200\351\234\200\350\265\204\351\207\221", 0));
         tabwid_holder->setTabText(tabwid_holder->indexOf(tab_advsec_task), QApplication::translate("TradeWinnerClass", "\350\264\235\345\241\224\345\214\272\351\227\264", 0));
         pbtn_query_capital->setText(QApplication::translate("TradeWinnerClass", "\346\237\245\350\257\242", 0));
         tabwid_holder->setTabText(tabwid_holder->indexOf(tab_capital), QApplication::translate("TradeWinnerClass", "\350\265\204\344\272\247\344\277\241\346\201\257", 0));

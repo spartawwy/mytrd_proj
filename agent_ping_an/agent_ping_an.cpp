@@ -137,14 +137,14 @@ int Agent_PING_AN::QueryPosition(T_PositionData *out_pos_data, int max_pos_size,
 	} 
 
 	std::string str_result = result->c_data();
-    UtilityUse::WriteLog("QueryPosition ret:\n%s", result->c_data());
+    //UtilityUse::WriteLog("QueryPosition ret:\n%s", result->c_data());
 
 	UtilityUse::replace_all_distinct(str_result, "\n", "\t");
 	UtilityUse::replace_all_distinct(str_result, "\t\t\t", "\t");
 	UtilityUse::replace_all_distinct(str_result, "\t\t", "\t");
 	/*qDebug() << " line 382" << "\n";
 	qDebug() << str_result.c_str() << " ----\n";*/
-    UtilityUse::WriteLog("QueryPosition afterreplace_all_distinct:\n%s", str_result.c_str());
+    //UtilityUse::WriteLog("QueryPosition afterreplace_all_distinct:\n%s", str_result.c_str());
 	auto result_array = UtilityUse::split(str_result, "\t");
 
     int start = 22;

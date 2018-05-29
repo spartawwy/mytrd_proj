@@ -23,7 +23,7 @@
 
 
 #define WINDOW_TEXT_LENGTH 256    
-#define MAIN_PROCESS_WIN_TAG "方正证券泉友通"  //"通达信"
+#define MAIN_PROCESS_WIN_TAG "方正证券"  // "方正证券泉友通"  //"通达信"
 #define  CONFIG_FILE_NAME "flashingorder.ini"
 
 char g_win_process_win_tag[256] = MAIN_PROCESS_WIN_TAG; // "方正证券泉友通";  
@@ -245,13 +245,16 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
         WriteLog("FlashingOrder::HandleOrder cant find %s", stock_name.c_str());
 		return;
 	}
+    WriteLog("FlashingOrder::HandleOrder to GetQuotes %s", stock_name.c_str());
 	QuotesData quote_data;
-	if( !ticker_->GetQuotes(const_cast<char*>(iter->second.c_str()), quote_data) )
+    char ret_message[1024] = {0};
+	if( !ticker_->GetQuotes(const_cast<char*>(iter->second.c_str()), quote_data, ret_message) )
 	{
 		qDebug() << "FlashingOrder::HandleOrder GetQuotes fail " << stock_name.c_str() << "\n";
         WriteLog("FlashingOrder::HandleOrder GetQuotes fail %s", stock_name.c_str());
 		return;
 	} 
+    WriteLog("FlashingOrder::HandleOrder when GetQuotes : %s", ret_message);
     double target_price = 0.0;
     switch(quote_level_)
     {
@@ -262,6 +265,7 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
         case TypeQuoteLevel::PRICE_BUYSELL_5: target_price = (is_buy ? quote_data.price_s_5 : quote_data.price_b_5); break;
         default: target_price = quote_data.cur_price; break;
     }
+    WriteLog("FlashingOrder::HandleOrder  SendOrder for %s", stock_name.c_str());
 	trade_proxy_.SendOrder(trade_client_id_
 		, (is_buy ? (int)TypeOrderCategory::BUY : (int)TypeOrderCategory::SELL)
 		, 0
