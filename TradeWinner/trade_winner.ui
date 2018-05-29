@@ -2398,7 +2398,7 @@
        </font>
       </property>
       <property name="text">
-       <string>所需资金:</string>
+       <string>满仓资金:</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2546,7 +2546,7 @@
        <rect>
         <x>290</x>
         <y>280</y>
-        <width>71</width>
+        <width>111</width>
         <height>23</height>
        </rect>
       </property>
@@ -2556,7 +2556,7 @@
        </font>
       </property>
       <property name="text">
-       <string>所需资金</string>
+       <string>计算满仓资金</string>
       </property>
      </widget>
     </widget>
@@ -3058,7 +3058,7 @@ background-color: rgb(255, 255,255);</string>
      <x>0</x>
      <y>0</y>
      <width>910</width>
-     <height>18</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_system">

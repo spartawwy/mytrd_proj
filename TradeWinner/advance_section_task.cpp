@@ -423,7 +423,7 @@ void AdvanceSectionTask::SetSectionState(double price, int position)
     auto cur_portion_iter = portions_.end();
     cur_portion_iter = std::find_if( std::begin(portions_), std::end(portions_),[price, this](Portion &entry)
 	{
-		if( price >= entry.bottom_price() && price < entry.top_price() ) return true;
+		if( !(price < entry.bottom_price()) && price < entry.top_price() ) return true;
 		else return false;
 	});
     if( cur_portion_iter == std::end(portions_) )

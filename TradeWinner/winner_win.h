@@ -92,7 +92,7 @@ public slots:
     void DoAddAdveqTask();
     void ResetAdveqTaskTime();
     void DoAdveqGetNeedCapital();
-
+      
     //---------------index trade task related----
 	void DoAddIndexTradeTask();
 	void DoTrdIndexRadioCrossDownChecked(bool);
@@ -146,7 +146,7 @@ private:
 
     // advance equal section task related
     void InitAdveqTaskWin();
-
+    bool CheckAdveqTaskWinInput(const QString &stock_str, bool is_calc_capital = false);
 	// index trade task related 
 	void InitIndexTradeWin();
 	 

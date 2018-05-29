@@ -31,7 +31,7 @@ void WinnerWin::InitAdveqTaskWin()
 
 void WinnerWin::DoAddAdveqTask()
 {
-    // todo:
+#if 0
     static auto check_le_stock = [this](TypeTask type) ->bool
     {
        // check stock codes
@@ -94,18 +94,18 @@ void WinnerWin::DoAddAdveqTask()
         }
         return true;
     };
-
-    if( !check_le_stock(TypeTask::ADVANCE_SECTION) )
+#endif
+    QString::SectionFlag flag = QString::SectionSkipEmpty;
+    QString text_str = ui.le_adveq_stock->text().trimmed();
+    QString stock_str = text_str.section('/', 0, 0, flag);
+    QString stock_pinyin = text_str.section('/', 1, 1, flag);
+    if( !CheckAdveqTaskWinInput(stock_str, false) )
         return;
 
     auto task_info = std::make_shared<T_TaskInformation>();
     task_info->type = TypeTask::ADVANCE_SECTION;
-
-    QString::SectionFlag flag = QString::SectionSkipEmpty;
-	QString stock_str = ui.le_adveq_stock->text().trimmed();
-	QString stock_pinyin = stock_str.section('/', 1, 1, flag);
-	task_info->stock = stock_str.section('/', 0, 0, flag).toLocal8Bit();
-	task_info->stock_pinyin = stock_str.section('/', 1, 1, flag).toLocal8Bit();
+	task_info->stock = stock_str.toLocal8Bit();
+	task_info->stock_pinyin = stock_pinyin.toLocal8Bit();
      
     //task_info->continue_second = 5;
     task_info->advance_section_task.is_original = true;
@@ -179,5 +179,97 @@ void WinnerWin::ResetAdveqTaskTime()
 
 void WinnerWin::DoAdveqGetNeedCapital()
 {
+    if( ui.dbspb_adveq_max_price->value() < ui.dbspb_adveq_min_price->value() + 0.05 )
+    {
+        app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("顶部价格必须大于底部价格一定值!"));
+        return;
+    }
+   
+    QString::SectionFlag flag = QString::SectionSkipEmpty;
+    QString text_str = ui.le_adveq_stock->text().trimmed();
+    QString stock_str = text_str.section('/', 0, 0, flag);
 
+    if( !CheckAdveqTaskWinInput(stock_str, true) )
+        return;
+    /* T_StockPriceInfo *p_info = app_->GetStockPriceInfo(task_info->stock, false);
+    if( !p_info )
+    {
+    app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("无法获取价格,请检查网络连接是否正常并避免360误杀!"));
+    return;
+    } */
+    double top_price = ui.dbspb_adveq_max_price->value();
+    double bottom_price = ui.dbspb_adveq_min_price->value();
+    const int section_count = ui.spb_adveq_section_count->value(); 
+    double atom_h = (top_price - bottom_price ) / section_count;
+    double need_capital = 0.0;
+    for( int i = 0; i < section_count; ++i )
+    {
+        double cur_sec_bottom = bottom_price + atom_h * i;
+        need_capital += cur_sec_bottom + atom_h / 2; 
+    } 
+    ui.dbspb_adveq_start_capital->setValue(need_capital);
+}
+
+bool WinnerWin::CheckAdveqTaskWinInput(const QString &stock_str, bool is_calc_capital)
+{ 
+    if( stock_str.length() != 6 )
+    {
+        // todo: show erro info
+        ui.le_adveq_stock->setFocus();
+        return false;
+    } 
+    if( !is_calc_capital )
+    {
+        if( app_->db_moudle().IsTaskExists(app_->user_info().id, TypeTask::ADVANCE_SECTION, stock_str.toStdString()) )
+        {
+            //QMessageBox::information(nullptr, "notice", QString::fromLocal8Bit("任务已经存在!"));
+            app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("任务已经存在!"));
+            return false;
+        }
+    }
+    if( ui.dbspb_adveq_max_price->value() < ui.dbspb_adveq_min_price->value() + 0.05 )
+    {
+        app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("顶部价格必须大于底部价格一定值!"));
+        return false;
+    }
+    int section_count = ui.spb_adveq_section_count->value();
+    if( section_count < 2 )
+    {
+        app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("区间数必须大于1!"));
+        return false;
+    }
+    
+    if( ui.spinBox_adveq_qty->value() < 100 )
+    {
+        ui.spinBox_adveq_qty->setFocus();
+        return false;
+    }
+
+    if( ui.dbspb_adveq_max_price->value() > 999.0 )
+    {
+        ui.dbspb_adveq_max_price->setFocus();
+        return false;
+    }
+    if( ui.dbspb_adveq_min_price->value() < 0.01 )
+    {
+        ui.dbspb_adveq_min_price->setFocus();
+        return false;
+    }
+    
+    if( !is_calc_capital )
+    {
+        if( ui.spb_adveq_rebounce->value() < 0.01 )
+        {
+            ui.spb_adveq_rebounce->setFocus();
+            return false;
+        }
+        auto start_time = ui.timeEdit_adveq_begin->time().toString("Hmmss").toInt();
+        auto end_time = ui.timeEdit_adveq_end->time().toString("Hmmss").toInt();
+        if( start_time >= end_time )
+        {
+            ui.timeEdit_adveq_begin->setFocus();
+            return false;
+        }
+    }
+    return true;
 }
