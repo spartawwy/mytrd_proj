@@ -191,12 +191,8 @@ void WinnerWin::DoAdveqGetNeedCapital()
 
     if( !CheckAdveqTaskWinInput(stock_str, true) )
         return;
-    /* T_StockPriceInfo *p_info = app_->GetStockPriceInfo(task_info->stock, false);
-    if( !p_info )
-    {
-    app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("无法获取价格,请检查网络连接是否正常并避免360误杀!"));
-    return;
-    } */
+     
+    double qty = ui.spinBox_adveq_qty->value();
     double top_price = ui.dbspb_adveq_max_price->value();
     double bottom_price = ui.dbspb_adveq_min_price->value();
     const int section_count = ui.spb_adveq_section_count->value(); 
@@ -205,7 +201,7 @@ void WinnerWin::DoAdveqGetNeedCapital()
     for( int i = 0; i < section_count; ++i )
     {
         double cur_sec_bottom = bottom_price + atom_h * i;
-        need_capital += cur_sec_bottom + atom_h / 2; 
+        need_capital += (cur_sec_bottom + atom_h / 2) * qty;
     } 
     ui.dbspb_adveq_start_capital->setValue(need_capital);
 }
