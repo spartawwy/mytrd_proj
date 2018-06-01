@@ -141,7 +141,7 @@ void BatchesBuyTask::HandleQuoteData()
         goto NO_TRADE;
     // prepare buy ----------
     app_->local_logger().LogLocal(TSystem::utility::FormatStr(" task %d BatchesBuyTask QueryCapital", para_.id));
-    double capital = app_->QueryCapital().available;
+    double capital = this->app_->Capital().available;
     app_->local_logger().LogLocal(TSystem::utility::FormatStr(" task %d BatchesBuyTask ret QueryCapital", para_.id));
     // check upper indexs which has't buy, if hasn't buy, buy it together
     int qty = 0;
@@ -235,6 +235,10 @@ BEFORE_TRADE:
 
         auto ret_str = new std::string(utility::FormatStr("执行任务:%d 分批买入 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, qty));
         this->app_->EmitSigShowUi(ret_str, true);
+        this->app()->capital_strand().PostTask([this]()
+        {
+            this->app_->DownloadCapital(); 
+        });
     }
     // update assistant filed in db ------------
     para_.assistant_field.clear();

@@ -124,34 +124,48 @@ void InflectionBuyTask::HandleQuoteData()
             // send order 
         char result[1024] = {0};
         char error_info[1024] = {0};
-               
         // to choice price to sell
         const auto price = GetQuoteTargetPrice(*iter, false);
+        double capital = this->app_->Capital().available;
+        auto qty = para_.quantity;
+        if( capital < price * para_.quantity )
+        {
+            qty = int(capital / price) / 100 * 100;
+            if( qty > 0 )
+              this->app_->AppendLog2Ui("触发任务:%d 拐点买入 %s 价格:%.2f 资金不够 自动调整到数量:%d", para_.id, this->code_data(), price, qty);
+        }
+        if( qty < 100 )
+            qty = para_.quantity;
+        
 #ifdef USE_TRADE_FLAG
         assert(this->app_->trade_agent().account_data(market_type_));
 
         auto sh_hld_code  = const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code;
         this->app_->local_logger().LogLocal(TagOfOrderLog(), 
-            TSystem::utility::FormatStr("触发任务:%d 拐点买入 %s 价格:%.2f 数量:%d 阀值:%d秒", para_.id, this->code_data(), price, para_.quantity, this->para_.continue_second)); 
-        this->app_->AppendLog2Ui("触发任务:%d 拐点买入 %s 价格:%.2f 数量:%d 阀值:%d秒", para_.id, this->code_data(), price, para_.quantity, this->para_.continue_second);
+            TSystem::utility::FormatStr("触发任务:%d 拐点买入 %s 价格:%.2f 数量:%d 阀值:%d秒", para_.id, this->code_data(), price, qty, this->para_.continue_second)); 
+        this->app_->AppendLog2Ui("触发任务:%d 拐点买入 %s 价格:%.2f 数量:%d 阀值:%d秒", para_.id, this->code_data(), price, qty, this->para_.continue_second);
         // sell the stock
         this->app_->trade_agent().SendOrder((int)TypeOrderCategory::BUY, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
-            , price, para_.quantity
+            , price, qty
             , result, error_info); 
 #endif
         // judge result 
         if( strlen(error_info) > 0 )
         {
             auto ret_str = new std::string(utility::FormatStr("error %d 拐点买入 %s %f %d fail:%s"
-                        , para_.id, para_.stock.c_str(), price, para_.quantity, error_info));
+                        , para_.id, para_.stock.c_str(), price, qty, error_info));
             this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
             this->app_->AppendLog2Ui(ret_str->c_str());
             this->app_->EmitSigShowUi(ret_str, true);
              
         }else
         {
-            auto ret_str = new std::string(utility::FormatStr("任务:%d 拐点买入 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, para_.quantity));
+            this->app()->capital_strand().PostTask([this]()
+            {
+                this->app_->DownloadCapital(); 
+            });
+            auto ret_str = new std::string(utility::FormatStr("任务:%d 拐点买入 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, qty));
             this->app_->EmitSigShowUi(ret_str, true);
         }
 

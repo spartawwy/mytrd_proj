@@ -60,6 +60,8 @@ public:
 
     TradeAgent& trade_agent() { return trade_agent_; }
 
+    TaskStrand& capital_strand() { return capital_strand_; }
+
     int trade_client_id() { return trade_client_id_; }
     void RemoveTask(unsigned int task_id, TypeTask task_type);
 
@@ -96,8 +98,16 @@ public:
     void EmitSigShowUi(std::string *str, bool flash_task_bar=false) { emit SigShowUi(str, flash_task_bar); }
     void EmitSigShowLongUi(std::string *str, bool flash_task_bar=false) { emit SigShowLongUi(str, flash_task_bar); }
 
-    T_PositionData* QueryPosition(const std::string& code);
+    T_Capital Capital()
+    { 
+        ReadLock  locker(capital_mutex_);
+        return  capital_; 
+    }
+    void DownloadCapital();
     T_Capital QueryCapital();
+    
+
+    T_PositionData* QueryPosition(const std::string& code);
     //std::unordered_map<std::string, int>& stocks_position() { return stocks_position_; }
     T_CodeMapPosition QueryPosition();
     int QueryPosAvaliable_LazyMode(const std::string& code);
@@ -144,7 +154,8 @@ private:
     TaskStrand  index_tick_strand_;
    
     TaskStrand  trade_strand_;
-   
+    TaskStrand  capital_strand_;
+
     std::shared_ptr<StockTicker>  stock_ticker_;
     std::shared_ptr<IndexTicker>  index_ticker_;
 
@@ -182,6 +193,9 @@ private:
 
     std::shared_ptr<QTimer>  strategy_tasks_timer_;
     std::shared_ptr<QTimer>  normal_timer_;
+
+    T_Capital capital_;
+    WRMutex   capital_mutex_;  
 
     T_CodeMapPosition stocks_position_;
     std::mutex  stocks_position_mutex_;

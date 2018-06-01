@@ -38,12 +38,13 @@ WinnerApp::WinnerApp(int argc, char* argv[])
 	, ServerClientAppBase("client", "trade_winner", "0.1")
 	, tick_strand_(task_pool())
     , index_tick_strand_(task_pool())
+    , trade_strand_(task_pool())
+    , capital_strand_(task_pool())
 	, stock_ticker_(nullptr)
 	, index_ticker_(std::make_shared<IndexTicker>(this->local_logger())) 
 	, stock_ticker_life_count_(0)
     , index_ticker_life_count_(0)
 	, ticker_enable_flag_(false)
-	, trade_strand_(task_pool())
 	, task_infos_(256)
 	, msg_win_(new MessageWin(5000))
     , msgwin_longshow_(new MessageWin(60*1000))
@@ -361,6 +362,13 @@ std::shared_ptr<StrategyTask> WinnerApp::FindStrategyTask(int task_id)
 	return nullptr;
 }
 
+void WinnerApp::DownloadCapital()
+{
+    T_Capital  capital = QueryCapital();
+    WriteLock  locker(capital_mutex_);
+    capital_ = capital;
+}
+
 // ps: except app's init, make sure it's called in trade_strand
 T_CodeMapPosition WinnerApp::QueryPosition()
 { 
@@ -670,6 +678,10 @@ void WinnerApp::DoNormalTimer()
 		trade_strand().PostTask([this]()
 		{
 			this->QueryPosition();
+            this->capital_strand().PostTask([this]()
+            {
+                this->DownloadCapital(); 
+            });
 		});
 	}
 }

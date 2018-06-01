@@ -189,7 +189,7 @@ void AdvanceSectionTask::HandleQuoteData()
         if( up_rebounce < para_.rebounce )
             goto NOT_TRADE;
         // create position --------------
-        double capital = this->app_->QueryCapital().available;
+        double capital = this->app_->Capital().available;
           
         qty_can_buy = int(capital / iter->cur_price) / 100 * 100;
         if( qty_can_buy > 100 && capital < iter->cur_price * qty_can_buy + CaculateFee(iter->cur_price * qty_can_buy, order_type == TypeOrderCategory::BUY) )
@@ -221,8 +221,8 @@ void AdvanceSectionTask::HandleQuoteData()
         if( up_rebounce < para_.rebounce )
             goto NOT_TRADE;
          
-        double capital = this->app_->QueryCapital().available;
-         
+        double capital = this->app_->Capital().available;
+        
         qty_can_buy = int(capital / iter->cur_price) / 100 * 100;
         if( qty_can_buy > 100 && capital < iter->cur_price * qty_can_buy + CaculateFee(iter->cur_price * qty_can_buy, order_type == TypeOrderCategory::BUY) )
             qty_can_buy -= 100;
@@ -388,13 +388,17 @@ BEFORE_TRADE:
 
                 // todo: save to db: save cur_price as start_price in assistant_field 
                 app_->db_moudle().UpdateAdvanceSection(para_);
-
+                 
             }else
             {
                 is_waitting_removed_ = true;
                 ShowError(utility::FormatStr("贝塔任务:%d %s 已破底清仓! 将移除任务!", para_.id, para_.stock.c_str()));
                 this->app_->RemoveTask(this->task_id(), TypeTask::ADVANCE_SECTION); // invoker delete self
             }
+            this->app()->capital_strand().PostTask([this]()
+            {
+                this->app_->DownloadCapital(); 
+            });
         }else // trade fail
         {  
             if( order_type == TypeOrderCategory::BUY )

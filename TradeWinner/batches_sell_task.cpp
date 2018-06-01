@@ -135,8 +135,12 @@ BEFORE_TRADE:
             if( index == step_items_.size() - 1 )
                 is_waitting_removed_ = true;
             this->app_->SubAvaliablePosition(para_.stock, qty); // sub availiable position
+            this->app()->capital_strand().PostTask([this]()
+            {
+                this->app_->DownloadCapital(); 
+            });
             auto ret_str = new std::string(utility::FormatStr("执行任务:%d 分批出货 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, qty));
-            this->app_->EmitSigShowUi(ret_str, true);
+            this->app_->EmitSigShowUi(ret_str, true); 
         }
         // update assistant filed in db ------------
         para_.assistant_field.clear();

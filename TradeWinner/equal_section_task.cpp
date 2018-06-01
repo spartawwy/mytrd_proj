@@ -533,6 +533,10 @@ BEFORE_TRADE:
                 this->app_->EmitSigShowUi(ret_str);
                 this->app_->RemoveTask(this->task_id(), TypeTask::EQUAL_SECTION); // invoker delete self
             }
+            this->app()->capital_strand().PostTask([this]()
+            {
+                this->app_->DownloadCapital(); 
+            });
         }else  // trade fail
         {
             auto ret_str = new std::string(utility::FormatStr(" error %d %s %s %.2f %d error:%s"

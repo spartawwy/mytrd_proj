@@ -62,6 +62,10 @@ void BreakUpBuyTask::HandleQuoteData()
                      
                 }else
                 {
+                    this->app()->capital_strand().PostTask([this]()
+                    {
+                        this->app_->DownloadCapital(); 
+                    });
                     auto ret_str = new std::string(utility::FormatStr("执行任务:%d 突破买入 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, para_.quantity));
                     this->app_->EmitSigShowUi(ret_str, true);
                 }
