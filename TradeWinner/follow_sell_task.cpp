@@ -18,6 +18,8 @@ FollowSellTask::FollowSellTask(T_TaskInformation &task_info, WinnerApp *app)
 
 void FollowSellTask::HandleQuoteData()
 {
+    if( is_waitting_removed_ )
+        return;
     assert( !quote_data_queue_.empty() );
     auto data_iter = quote_data_queue_.rbegin();
     std::shared_ptr<QuotesData> & iter = *data_iter;
@@ -31,7 +33,13 @@ void FollowSellTask::HandleQuoteData()
         return;
     }
     bool is_to_send = false;
-     
+    if( !timed_mutex_wrapper_.try_lock_for(1000) )  
+    {
+        //DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
+        return;
+    } 
+    if( is_waitting_removed_ )
+        return;
     // 1.conddition attach profile line
     if( is_out_warn_ ) 
     {
@@ -88,8 +96,10 @@ void FollowSellTask::HandleQuoteData()
         const auto price = GetQuoteTargetPrice(*iter, false);
         int qty = HandleSellByStockPosition(price);
         if( qty == 0 )
+        {
+            timed_mutex_wrapper_.unlock();    
             return;
-        
+        }
 #ifdef USE_TRADE_FLAG
         assert(this->app_->trade_agent().account_data(market_type_));
 
@@ -122,11 +132,14 @@ void FollowSellTask::HandleQuoteData()
             auto ret_str = new std::string(utility::FormatStr("任务:%d 跟踪止盈 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, qty));
             this->app_->EmitSigShowUi(ret_str, true);
         }
-
+        is_waitting_removed_ = true;
+        timed_mutex_wrapper_.unlock();    
         this->app_->RemoveTask(this->task_id(), TypeTask::FOLLOW_SELL);
 
         });
             
-    } 
-         
+    }else
+    {
+        timed_mutex_wrapper_.unlock();     
+    }
 }

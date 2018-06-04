@@ -127,13 +127,13 @@ void AdvanceSectionTask::HandleQuoteData()
     
     int ms_for_wait_lock = 1000; 
     if( !timed_mutex_wrapper_.try_lock_for(ms_for_wait_lock) )  
-    {
-        //DO_LOG_BKTST(TagOfCurTask(), *ret_str);
-        DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
-        app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock fail"); 
+    { 
+        //DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
+        //app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock fail"); 
         return;
-    };
-
+    }
+    if( is_waitting_removed_ )
+        return;
     TypeAction action = TypeAction::NOOP;
     TypeOrderCategory order_type = TypeOrderCategory::SELL;
     int qty = 0;

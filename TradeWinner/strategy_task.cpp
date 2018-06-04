@@ -102,7 +102,10 @@ int StrategyTask::HandleSellByStockPosition(double price, bool remove_task)
         this->app_->EmitSigShowUi(ret_str);
 
         if( remove_task )
+        {
+            is_waitting_removed_ = true;
             this->app_->RemoveTask(this->task_id(), para_.type);
+        }
     }
     return qty;
 }

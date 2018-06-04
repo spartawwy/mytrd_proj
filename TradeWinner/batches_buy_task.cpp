@@ -115,6 +115,8 @@ void BatchesBuyTask::HandleQuoteData()
         app_->local_logger().LogLocal("mutex", TSystem::utility::FormatStr("error: task %d BatchesBuyTask timed_mutex_wrapper_ lock fail", para_.id)); 
         return;
     }
+    if( is_waitting_removed_ )
+        return;
     assert( !quote_data_queue_.empty() );
     auto data_iter = quote_data_queue_.rbegin();
     std::shared_ptr<QuotesData> & iter = *data_iter;

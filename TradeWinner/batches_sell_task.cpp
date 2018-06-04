@@ -60,11 +60,11 @@ void BatchesSellTask::HandleQuoteData()
     if( !timed_mutex_wrapper_.try_lock_for(1000) )  
     {
         //DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
-        app_->local_logger().LogLocal("mutex", "error: BatchesSellTask::HandleQuoteData timed_mutex_wrapper_ lock fail"); 
         app_->local_logger().LogLocal("error: BatchesSellTask::HandleQuoteData timed_mutex_wrapper_ lock fail"); 
         return;
     }
-     
+    if( is_waitting_removed_ )
+        return; 
     if( iter->cur_price < para_.alert_price - 0.0001 )
         goto NO_TRADE;
 
@@ -113,13 +113,13 @@ BEFORE_TRADE:
         this->app_->local_logger().LogLocal(TagOfOrderLog(), 
             TSystem::utility::FormatStr("触发任务:%d 分批出货 %s 价格:%f 数量:%d", para_.id, this->code_data(), price, qty)); 
         this->app_->AppendLog2Ui("触发任务:%d 分批出货 %s 价格:%f 数量:%d", para_.id, this->code_data(), price, qty);
-#if 1
+
         // sell the stock
         this->app_->trade_agent().SendOrder((int)TypeOrderCategory::SELL, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
             , price, qty
             , result, error_info); 
-#endif
+
 #endif
         // judge result 
         if( strlen(error_info) > 0 )
@@ -157,8 +157,9 @@ BEFORE_TRADE:
 
         app_->db_moudle().UpdateTaskInfo(para_);
         if( is_waitting_removed_ )
+        {
             this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_SELL);
-
+        }
         timed_mutex_wrapper_.unlock();
     });
 

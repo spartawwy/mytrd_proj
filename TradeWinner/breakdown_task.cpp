@@ -92,7 +92,6 @@ void BreakDownTask::HandleQuoteData()
         {
             time_point_open_warning_ = iter->time_stamp;
             this->app_->local_logger().LogLocal(TSystem::utility::FormatStr("任务:%d %s 触及价格:%f 预警", para_.id, this->code_data(), iter->cur_price)); 
-                
         }
 
     }else
