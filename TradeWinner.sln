@@ -25,6 +25,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "agent_ping_an", "agent_ping
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "agent_zhongy_gj", "agent_zhongygj\agent_zhongygj.vcxproj", "{BA2FBD3E-2E4F-4D45-A118-148BB1ED5AAC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "agent_hua_tai", "agent_hua_tai\agent_hua_tai.vcxproj", "{50CD2D0A-D115-4671-ABB6-AEC6406A6E51}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -95,6 +97,12 @@ Global
 		{BA2FBD3E-2E4F-4D45-A118-148BB1ED5AAC}.Release|Win32.ActiveCfg = Release|Win32
 		{BA2FBD3E-2E4F-4D45-A118-148BB1ED5AAC}.Release|Win32.Build.0 = Release|Win32
 		{BA2FBD3E-2E4F-4D45-A118-148BB1ED5AAC}.Release|x64.ActiveCfg = Release|Win32
+		{50CD2D0A-D115-4671-ABB6-AEC6406A6E51}.Debug|Win32.ActiveCfg = Debug|Win32
+		{50CD2D0A-D115-4671-ABB6-AEC6406A6E51}.Debug|Win32.Build.0 = Debug|Win32
+		{50CD2D0A-D115-4671-ABB6-AEC6406A6E51}.Debug|x64.ActiveCfg = Debug|Win32
+		{50CD2D0A-D115-4671-ABB6-AEC6406A6E51}.Release|Win32.ActiveCfg = Release|Win32
+		{50CD2D0A-D115-4671-ABB6-AEC6406A6E51}.Release|Win32.Build.0 = Release|Win32
+		{50CD2D0A-D115-4671-ABB6-AEC6406A6E51}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -108,5 +116,6 @@ Global
 		{6D011A06-0B16-4C54-84F7-4AAF7D304392} = {FE7D0AF4-9CD8-4EDB-9CE5-08E01339849B}
 		{34F124F4-79AF-4029-936D-9C0FD26992E3} = {FE7D0AF4-9CD8-4EDB-9CE5-08E01339849B}
 		{BA2FBD3E-2E4F-4D45-A118-148BB1ED5AAC} = {FE7D0AF4-9CD8-4EDB-9CE5-08E01339849B}
+		{50CD2D0A-D115-4671-ABB6-AEC6406A6E51} = {FE7D0AF4-9CD8-4EDB-9CE5-08E01339849B}
 	EndGlobalSection
 EndGlobal

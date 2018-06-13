@@ -27,11 +27,17 @@ void AppTestor::Initiate()
 	std::string cur_dir(".//");
 	work_dir(cur_dir);
 	local_logger_.SetDir(cur_dir);
-
+#if 0 
     trade_agent_ = std::make_shared<TradeAgent>();
     trade_agent_->Init("fang_zheng", "32506627");
     char error_info[256] = {0};
     bool ret = trade_agent_->Login("122.224.113.121", 7708, "2.20", 1, "32506627", "32506627", "626261", "", error_info);
+#else
+    trade_agent_ = std::make_shared<TradeAgent>();
+    bool ret = trade_agent_->Init("hua_tai", "666625480788");
+    char error_info[256] = {0}; 
+    ret = trade_agent_->Login("119.145.1.203", 7708, "6.42", 0, "666625480788", "666625480788", "507109", "110803", error_info);
+#endif
     if( !ret )
     {
         printf("trade_agent_->Login fail!\n");
