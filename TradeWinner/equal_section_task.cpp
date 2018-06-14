@@ -34,9 +34,18 @@ static const int cst_max_sec = 5;
 static const double cst_max_stock_price = MAX_STOCK_PRICE;
 const std::string cst_rebounce_debug = "EqualSec";
 
-void EqualSectionTask::CalculateSections(double price, IN T_TaskInformation &task_info, OUT std::vector<T_SectionAutom> &sections)
+void EqualSectionTask::CalculateSections(double price, IN T_TaskInformation &task_info, OUT std::vector<T_SectionAutom> &sections, char *tag_str)
 {
-    assert( price > 0.0);
+    //assert( price > 0.0);
+	if( !(price > 0.0) )
+	{
+		std::string content_log = TSystem::utility::FormatStr("error: 区间任务:%d %s CalculateSections 价格:%.2f %s", task_info.id, task_info.stock.c_str(), price, (tag_str ? tag_str : ""));
+		this->app_->local_logger().LogLocal(content_log); 
+		this->app_->local_logger().LogLocal(TagOfOrderLog(), content_log); 
+        this->app_->AppendLog2Ui(content_log.c_str());
+		// todo:stop current task
+		return;
+	}
     assert( task_info.secton_task.raise_percent > 0.0 && task_info.secton_task.fall_percent > 0.0 );
     assert( task_info.secton_task.fall_percent < 100.0 );
     assert( task_info.secton_task.min_trig_price < task_info.secton_task.max_trig_price );
@@ -107,7 +116,7 @@ EqualSectionTask::EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app)
 	, cond4_buy_backtrigger_price_(cst_max_stock_price)
 { 
     if( task_info.secton_task.is_original )
-        CalculateSections(task_info.alert_price, task_info, sections_);
+        CalculateSections(task_info.alert_price, task_info, sections_, "EqualSectionTask::EqualSectionTask line 119");
     else
     {
         if( task_info.assistant_field.empty() )
@@ -120,7 +129,7 @@ EqualSectionTask::EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app)
             if( p_stk_price )
             {
                 task_info.assistant_field = utility::FormatStr("%.2f", p_stk_price->open_price);
-                CalculateSections(std::stod(task_info.assistant_field), task_info, sections_);
+                CalculateSections(std::stod(task_info.assistant_field), task_info, sections_, "EqualSectionTask::EqualSectionTask line 132");
             }else
             {
                 task_info.state = static_cast<int>(TaskCurrentState::EXCEPT);
@@ -131,7 +140,7 @@ EqualSectionTask::EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app)
             , "EqualSectionTask::EqualSectionTask"
             , "is not original but assistant_field is empty!");*/
         }else
-            CalculateSections(std::stod(task_info.assistant_field), task_info, sections_);
+            CalculateSections(std::stod(task_info.assistant_field), task_info, sections_, "EqualSectionTask::EqualSectionTask line 143");
     }
 
 }
@@ -508,7 +517,7 @@ BEFORE_TRADE:
          
             if( !is_to_clear )
             {  // re calculate
-                CalculateSections(iter->cur_price, para_, sections_);
+                CalculateSections(iter->cur_price, para_, sections_, "EqualSectionTask::HandleQuoteData trade ok line 520");
                 PrintSections();
 			    // for rebouce -------
 			    bottom_price_ = cst_max_stock_price;

@@ -7,8 +7,9 @@ class EqualSectionTask: public StrategyTask
 {
 public:
 	 
-	static void CalculateSections(double price, IN T_TaskInformation &task_info, OUT std::vector<T_SectionAutom> &sections);
 	static void TranslateSections(IN std::vector<T_SectionAutom> &sections, OUT std::string &sections_str);
+
+	void CalculateSections(double price, IN T_TaskInformation &task_info, OUT std::vector<T_SectionAutom> &sections, char *tag_str=nullptr);
 
     EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app);
 
