@@ -252,9 +252,10 @@ void StockTicker::TellAllRelTasks(const std::list<unsigned int>& id_list, std::s
             task_iter->second->ObtainData(data);
 
             task_iter->second->life_count_ = 0;
-			if( task_iter->second->cur_state() != TaskCurrentState::RUNNING )
-			{
-				task_iter->second->cur_state(TaskCurrentState::RUNNING);
+			 
+			if( !IsStateSet(task_iter->second->cur_state(), TaskStateElem::RUNNING) )
+			{ 
+				task_iter->second->set_a_state(TaskStateElem::RUNNING);
 				task_iter->second->app()->Emit(task_iter->second.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
 			}
 
@@ -322,7 +323,7 @@ void StockTicker::ClearAllTask()
     std::lock_guard<std::mutex>  locker(tasks_list_mutex_);
     std::for_each( std::begin(registered_tasks_), std::end(registered_tasks_), [this](TTaskIdMapStrategyTask::reference entry)
     {
-        entry.second->cur_state(TaskCurrentState::STOP);
+        entry.second->cur_state(static_cast<TaskCurrentState>(TaskStateElem::STOP));
         entry.second->app()->Emit(entry.second.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
     });
     registered_tasks_.clear();
@@ -457,9 +458,11 @@ void IndexTicker::Procedure()
                 task_iter->second->ObtainData(quote_data);
 
                 task_iter->second->life_count_ = 0;
-				if( task_iter->second->cur_state() != TaskCurrentState::RUNNING )
+				//if( task_iter->second->cur_state() != TaskCurrentState::RUNNING )
+				if( !IsStateSet(task_iter->second->cur_state(), TaskStateElem::RUNNING) )
 				{
-					task_iter->second->cur_state(TaskCurrentState::RUNNING);
+					//task_iter->second->cur_state(TaskCurrentState::RUNNING);
+					task_iter->second->set_a_state(TaskStateElem::RUNNING);
 					task_iter->second->app()->Emit(task_iter->second.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
 				}
 

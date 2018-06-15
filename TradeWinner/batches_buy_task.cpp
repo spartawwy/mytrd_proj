@@ -112,7 +112,6 @@ void BatchesBuyTask::HandleQuoteData()
     if( !timed_mutex_wrapper_.try_lock_for(1000) )  
     {
         //DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
-        app_->local_logger().LogLocal("mutex", TSystem::utility::FormatStr("error: task %d BatchesBuyTask timed_mutex_wrapper_ lock fail", para_.id)); 
         return;
     }
     if( is_waitting_removed_ )
@@ -268,11 +267,10 @@ BEFORE_TRADE:
         auto info_str = utility::FormatStr("分批买入任务:%d %s 已买 %d 次,任务结束!", para_.id, para_.stock.c_str(), times_has_buy_);
         this->app_->local_logger().LogLocal(info_str);
         this->app_->AppendLog2Ui(info_str.c_str());
-
+		timed_mutex_wrapper_.unlock();
         this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_BUY);
     }
-    timed_mutex_wrapper_.unlock();
-
+    
     });
          
 }

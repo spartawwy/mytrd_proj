@@ -111,19 +111,21 @@ enum class TaskStatChangeType : char
     CUR_STATE_CHANGE,
 };
 
+typedef int TaskCurrentState;
 // in database, STOP and WAITING is enough
-enum class TaskCurrentState : char
+enum class TaskStateElem : TaskCurrentState
 {
     STOP = 0,  // not to run
-    WAITTING, // means: not in tasktime, hasn't been register 
+    WAITTING = 0x00000001, // means: not in tasktime, hasn't been register 
 
     // follow state is used for task which is registered
-    STARTING,
-    RUNNING,
-    REST,     // exchange is in rest time
-    EXCEPT,   // exception : in running time but not in running state
+    STARTING = 0x00000002,
+    RUNNING  = 0x00000004,
+    REST     = 0x00000008,     // exchange is in rest time
+    EXCEPT   = 0x00000010,   // exception : in running time but not in running state
 };
 
+bool IsStateSet(TaskCurrentState val, TaskStateElem state);
   
 enum class TypeEqSection : char
 {

@@ -189,7 +189,7 @@ bool WinnerApp::Init()
 		while(!this->exit_flag_)
 		{
 			Delay(cst_ticker_update_interval);
-#if 0 // tmpnouse it
+#if 1
 			if( !this->ticker_enable_flag_ )
 				continue;
 #endif
@@ -561,7 +561,7 @@ void WinnerApp::DoStrategyTasksTimeout()
 	{
         if( !entry->is_to_run()  )
             return;
-        if( entry->cur_state() == TaskCurrentState::WAITTING ) // state: unregistered
+        if( entry->cur_state() == static_cast<TaskCurrentState>(TaskStateElem::WAITTING) ) // state: unregistered
         {
             if( is_in_task_time(cur_time, entry->tp_start(), entry->tp_end()) )
             {
@@ -581,13 +581,13 @@ void WinnerApp::DoStrategyTasksTimeout()
                 }
 
                 if( IsNowTradeTime() )
-                    entry->cur_state(TaskCurrentState::STARTING);
+					entry->cur_state(static_cast<TaskCurrentState>(TaskStateElem::STARTING));
                 else
-                    entry->cur_state(TaskCurrentState::REST);
+                    entry->cur_state(static_cast<TaskCurrentState>(TaskStateElem::REST));
 
 				this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
             }
-        }else if( entry->cur_state() > TaskCurrentState::WAITTING ) // state:  registered
+        }else /*if( entry->cur_state() > static_cast<TaskCurrentState>(TaskStateElem::WAITTING) ) */// state:  registered
         {
             if( !is_in_task_time(cur_time, entry->tp_start(), entry->tp_end()) )
             {
@@ -599,24 +599,30 @@ void WinnerApp::DoStrategyTasksTimeout()
                 {
                     this->stock_ticker_->UnRegister(entry->task_id());
                 }
-                entry->cur_state(TaskCurrentState::WAITTING); 
+				 
+				if( entry->is_a_state_set(TaskStateElem::EXCEPT) )
+					entry->set_a_state(TaskStateElem::WAITTING);
+				else
+					entry->cur_state(static_cast<TaskCurrentState>(TaskStateElem::WAITTING));
+					 
 				this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
 
-            }else if( entry->cur_state() != TaskCurrentState::REST )
-            {
+            }else if( !IsStateSet(entry->cur_state(), TaskStateElem::REST) ) //if( entry->cur_state() != TaskCurrentState::REST )
+            { 
                 if( !IsNowTradeTime() )
                 {
-                    entry->cur_state(TaskCurrentState::REST); 
+					entry->set_a_state(TaskStateElem::REST); 
 				    this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
                 }
             }
 
-            if( entry->cur_state() == TaskCurrentState::RUNNING )
+            //if( entry->cur_state() == TaskCurrentState::RUNNING )
+			if( IsStateSet(entry->cur_state(), TaskStateElem::RUNNING) )
             {
                 if( entry->life_count_++ > 60 )
                 {
                     this->local_logger().LogLocal(utility::FormatStr("error: task %d not in running", entry->task_id()));
-                    entry->cur_state(TaskCurrentState::EXCEPT);
+					entry->set_a_state(TaskStateElem::EXCEPT); 
                     this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
                 }
             }
@@ -822,7 +828,7 @@ void WinnerApp::StopAllStockTasks()
 		{
             if( entry->task_info().type != TypeTask::INDEX_RISKMAN )
             {
-			    entry->SetOriginalState(TaskCurrentState::STOP);
+			    entry->SetOriginalState(static_cast<TaskCurrentState>(TaskStateElem::STOP));
 			    db_moudle().UpdateTaskInfo(entry->task_info());
 			    this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
             } 
@@ -842,7 +848,7 @@ void WinnerApp::StopAllIndexRelTypeTasks(TindexTaskType type_task)
             {
                 //entry->task_info().index_rel_task.rel_type == TindexTaskType::RELSTOCK;
 
-			    entry->SetOriginalState(TaskCurrentState::STOP);
+			    entry->SetOriginalState(static_cast<TaskCurrentState>(TaskStateElem::STOP));
 			    db_moudle().UpdateTaskInfo(entry->task_info());
 			    this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
             } 

@@ -46,7 +46,7 @@ public:
     void SetOriginalState(TaskCurrentState val) { para_.state = static_cast<int>(val); }
     bool is_to_run() const 
     { 
-        return para_.state != static_cast<int>(TaskCurrentState::STOP);
+		return para_.state != static_cast<int>(TaskStateElem::STOP);
     }
 
     double GetQuoteTargetPrice(const QuotesData& data, bool is_buy);
@@ -54,6 +54,15 @@ public:
     void ObtainData(std::shared_ptr<QuotesData> &data);
     
     void cur_state(TaskCurrentState val) { cur_state_ = val; }
+	bool is_a_state_set(TaskStateElem val) { return (cur_state_ & (int)val) == (int)val; }
+	
+	void clear_a_state(TaskStateElem val) { cur_state_ &= ~(int)val; }
+	void set_a_state(TaskStateElem val)
+	{ 
+		auto is_except_set = is_a_state_set(TaskStateElem::EXCEPT); 
+		cur_state_ = (int)val; 
+		if( is_except_set ) cur_state_ |= (int)TaskStateElem::EXCEPT;
+	}
     TaskCurrentState cur_state() { return cur_state_; }
 
     QTime tp_start() { return tp_start_; }

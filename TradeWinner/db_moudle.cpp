@@ -795,23 +795,26 @@ void DBMoudle::UpdateEqualSection(int taskid, bool is_original, double start_pri
     {
         Open(db_conn_);
     }
-
+	bool ret = false;
     std::string sql = utility::FormatStr("UPDATE TaskInfo SET assistant_field='%.2f' WHERE id=%d ", start_price, taskid); 
     {
         WriteLock locker(taskinfo_table_mutex_);
-        db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+        ret = db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
         { 
             return 0;
         });
     }
-    sql = utility::FormatStr("UPDATE EqualSectionTask SET is_original=%d WHERE id=%d ", (int)is_original, taskid); 
-    {
-        WriteLock locker(equalsection_table_mutex_);
-        db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
-        { 
-            return 0;
-        });
-    }
+	if( ret )
+	{
+		sql = utility::FormatStr("UPDATE EqualSectionTask SET is_original=%d WHERE id=%d ", (int)is_original, taskid); 
+		{
+			WriteLock locker(equalsection_table_mutex_);
+			db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
+			{ 
+				return 0;
+			});
+		}
+	}
 }
 
 void DBMoudle::UpdateAdvanceSection(T_TaskInformation &info)

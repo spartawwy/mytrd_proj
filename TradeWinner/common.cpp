@@ -67,6 +67,9 @@ QString ToQString(TypeQuoteLevel val)
 
 QString ToQString(TaskCurrentState val)
 {
+#define  IS_BIT_SET(a, b)  ((int(a)&int(b)) == int(b))
+	QString ret_str;
+#if 0
     switch(val)
     {
     case TaskCurrentState::STOP:
@@ -83,7 +86,29 @@ QString ToQString(TaskCurrentState val)
         return QString::fromLocal8Bit("异常");
     default: assert(0);
     }
-    return "";
+#else
+	
+	if( val == static_cast<TaskCurrentState>(TaskStateElem::STOP) ) 
+		return QString::fromLocal8Bit("停止"); 
+	if( IS_BIT_SET(val, TaskStateElem::EXCEPT) )
+		return QString::fromLocal8Bit("异常");
+
+	if( IS_BIT_SET(val, TaskStateElem::WAITTING) )
+		ret_str.append(QString::fromLocal8Bit("等待"));
+	if( IS_BIT_SET(val, TaskStateElem::STARTING) )
+		ret_str.append(QString::fromLocal8Bit("启动中"));
+	if( IS_BIT_SET(val, TaskStateElem::RUNNING) )
+		ret_str.append(QString::fromLocal8Bit("运行"));
+	if( IS_BIT_SET(val, TaskStateElem::REST) )
+		ret_str.append(QString::fromLocal8Bit("休市"));
+
+#endif
+    return ret_str;
+}
+
+bool IsStateSet(TaskCurrentState val, TaskStateElem state)
+{ 
+	return ((int)val & (int)state) == (int)state; 
 }
 
 QString ToQString(TindexTaskType val)

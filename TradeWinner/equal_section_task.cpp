@@ -43,8 +43,17 @@ void EqualSectionTask::CalculateSections(double price, IN T_TaskInformation &tas
 		this->app_->local_logger().LogLocal(content_log); 
 		this->app_->local_logger().LogLocal(TagOfOrderLog(), content_log); 
         this->app_->AppendLog2Ui(content_log.c_str());
+		this->cur_state(static_cast<TaskCurrentState>(TaskStateElem::EXCEPT));
+		this->app_->Emit((StrategyTask*)this, static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
 		// todo:stop current task
 		return;
+	}else // normal 
+	{ 
+		if( this->cur_state() != static_cast<TaskCurrentState>(TaskStateElem::RUNNING) )
+		{
+			this->cur_state(static_cast<TaskCurrentState>(TaskStateElem::RUNNING) );
+			this->app_->Emit((StrategyTask*)this, static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+		}
 	}
     assert( task_info.secton_task.raise_percent > 0.0 && task_info.secton_task.fall_percent > 0.0 );
     assert( task_info.secton_task.fall_percent < 100.0 );
@@ -123,19 +132,30 @@ EqualSectionTask::EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app)
         {
             auto str = new std::string(utility::FormatStr("error EqualSectionTask::EqualSectionTask task %d is not is_original but assistant_field is empty ", task_info.id));
             app_->local_logger().LogLocal(*str);
-            this->app_->EmitSigShowUi(str);
-
+			DO_LOG(TagOfCurTask(), *str);
+            this->app_->EmitSigShowUi(str); 
+			this->cur_state(static_cast<TaskCurrentState>(TaskStateElem::EXCEPT));
+			this->app_->Emit((StrategyTask*)this, static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+			is_waitting_removed_ = true;
+#if 0
             auto p_stk_price = app->GetStockPriceInfo(task_info.stock);
             if( p_stk_price )
             {
+				if( p_stk_price->open_price > 0.01 &&  p_stk_price->open_price < 999.99 )
+				{
                 task_info.assistant_field = utility::FormatStr("%.2f", p_stk_price->open_price);
                 CalculateSections(std::stod(task_info.assistant_field), task_info, sections_, "EqualSectionTask::EqualSectionTask line 132");
+				}else
+				{
+					task_info.state = static_cast<int>(TaskCurrentState::EXCEPT);
+					is_waitting_removed_ = true;
+				}
             }else
             {
                 task_info.state = static_cast<int>(TaskCurrentState::EXCEPT);
                 is_waitting_removed_ = true;
             }
-
+#endif
             /*ThrowTException( TSystem::CoreErrorCategory::ErrorCode::BAD_CONTENT
             , "EqualSectionTask::EqualSectionTask"
             , "is not original but assistant_field is empty!");*/
@@ -237,6 +257,12 @@ void EqualSectionTask::HandleQuoteData()
     std::shared_ptr<QuotesData> & iter = *data_iter;
     assert(iter);
 
+	//tmp for debug
+	if( iter->cur_price < 0.01 )
+	{
+		DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("error: task %d EqualSectionTask price:%.2f", para_.id, iter->cur_price));
+	}
+	// end ----
     double pre_price = quote_data_queue_.size() > 1 ? (*(++data_iter))->cur_price : iter->cur_price;
     if( IsPriceJumpDown(pre_price, iter->cur_price) || IsPriceJumpUp(pre_price, iter->cur_price) )
     {
@@ -246,14 +272,14 @@ void EqualSectionTask::HandleQuoteData()
 
     int ms_for_wait_lock = 1000;
     
-    app_->local_logger().LogLocal("mutex", "try lock");
+    //app_->local_logger().LogLocal("mutex", "try lock");
     if( !timed_mutex_wrapper_.try_lock_for(ms_for_wait_lock) )  
     {
-        DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
-        app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock fail"); 
+        //DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
+        //app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock fail"); 
         return;
     };
-    app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock ok");
+    //app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock ok");
 
     int total_position = GetTototalPosition();
     int avaliable_pos = GetAvaliablePosition();
@@ -462,7 +488,7 @@ void EqualSectionTask::HandleQuoteData()
 	
 
 NOT_TRADE:
-    app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
+    //app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
     timed_mutex_wrapper_.unlock();
     return;
 
@@ -470,6 +496,18 @@ BEFORE_TRADE:
 
     app_->trade_strand().PostTask([iter, index, order_type, qty, this]()
     {
+		//tmp for debug
+		if( iter->cur_price < 0.01 )
+		{
+			auto ret_str = new std::string(utility::FormatStr("error: task %d EqualSectionTask PostTask price:%.2f", para_.id, iter->cur_price));
+            this->app_->AppendLog2Ui(ret_str->c_str());
+			DO_LOG(TagOfCurTask(), *ret_str);
+            this->app_->EmitSigShowUi(ret_str);
+			//app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
+			timed_mutex_wrapper_.unlock();
+			return;
+		}
+		// end ----
         char result[1024] = {0};
         char error_info[1024] = {0};
 
@@ -489,12 +527,13 @@ BEFORE_TRADE:
         this->app_->local_logger().LogLocal(TagOfOrderLog(), 
             TSystem::utility::FormatStr("区间任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty)); 
         this->app_->AppendLog2Ui("区间任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty);
- 
+#if 0
         // order the stock
         this->app_->trade_agent().SendOrder((int)order_type, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
             , price, qty
             , result, error_info); 
+#endif
 #endif
 
 		cur_type_action_ = TypeAction::NOOP; // for rebounce
@@ -528,7 +567,7 @@ BEFORE_TRADE:
                 DO_LOG(TagOfCurTask(), utility::FormatStr("DB UpdateEqualSection %d price:%.2f", para_.id, iter->cur_price));
                 app_->db_moudle().UpdateEqualSection(para_.id, para_.secton_task.is_original, iter->cur_price);
 
-                app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
+                //app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
                 this->timed_mutex_wrapper_.unlock();
             }else
             {
@@ -536,7 +575,7 @@ BEFORE_TRADE:
                 this->app_->AppendLog2Ui(ret_str->c_str());
                 
                 is_waitting_removed_ = true;
-                app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
+                //app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
                 this->timed_mutex_wrapper_.unlock();
                  
                 this->app_->EmitSigShowUi(ret_str);
@@ -554,7 +593,7 @@ BEFORE_TRADE:
             this->app_->AppendLog2Ui(ret_str->c_str());
             this->app_->EmitSigShowUi(ret_str, true);
 
-            app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
+            //app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
             this->timed_mutex_wrapper_.unlock();
         }
     });

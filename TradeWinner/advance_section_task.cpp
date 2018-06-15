@@ -392,8 +392,10 @@ BEFORE_TRADE:
             }else
             {
                 is_waitting_removed_ = true;
+				timed_mutex_wrapper_.unlock();
                 ShowError(utility::FormatStr("贝塔任务:%d %s 已破底清仓! 将移除任务!", para_.id, para_.stock.c_str()));
                 this->app_->RemoveTask(this->task_id(), TypeTask::ADVANCE_SECTION); // invoker delete self
+				return;
             }
             this->app()->capital_strand().PostTask([this]()
             {
