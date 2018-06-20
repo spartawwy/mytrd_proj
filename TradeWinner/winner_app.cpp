@@ -619,7 +619,7 @@ void WinnerApp::DoStrategyTasksTimeout()
             //if( entry->cur_state() == TaskCurrentState::RUNNING )
 			if( IsStateSet(entry->cur_state(), TaskStateElem::RUNNING) )
             {
-                if( entry->life_count_++ > 60 )
+                if( IsNowTradeTime() && entry->life_count_++ > 60 )
                 {
                     this->local_logger().LogLocal(utility::FormatStr("error: task %d not in running", entry->task_id()));
 					entry->set_a_state(TaskStateElem::EXCEPT); 

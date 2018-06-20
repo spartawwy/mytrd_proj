@@ -256,7 +256,8 @@ void StockTicker::TellAllRelTasks(const std::list<unsigned int>& id_list, std::s
 			if( !IsStateSet(task_iter->second->cur_state(), TaskStateElem::RUNNING) )
 			{ 
 				task_iter->second->set_a_state(TaskStateElem::RUNNING);
-				task_iter->second->app()->Emit(task_iter->second.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+				if( task_iter->second->cur_state() == (TaskCurrentState)TaskStateElem::RUNNING )
+				   task_iter->second->app()->Emit(task_iter->second.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
 			}
 
         }else

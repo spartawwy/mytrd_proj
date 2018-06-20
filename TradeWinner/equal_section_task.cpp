@@ -527,7 +527,7 @@ BEFORE_TRADE:
         this->app_->local_logger().LogLocal(TagOfOrderLog(), 
             TSystem::utility::FormatStr("区间任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty)); 
         this->app_->AppendLog2Ui("区间任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty);
-#if 0
+#if 1
         // order the stock
         this->app_->trade_agent().SendOrder((int)order_type, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
