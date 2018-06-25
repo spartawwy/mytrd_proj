@@ -28,7 +28,7 @@ static bool SetCurrentEnvPath();
 
 //static void AjustTickFlag(bool & enable_flag);
 
-static const int cst_ticker_update_interval = 2000;  //ms :notice value have to be bigger than 1000
+static const int cst_ticker_update_interval = 1100;  //ms :notice value have to be bigger than 1000
 static const int cst_normal_timer_interval = 2000;
 
 //static const unsigned int cst_result_len = 1024 * 1024;

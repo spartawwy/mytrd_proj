@@ -6,6 +6,7 @@
 #include <string>
 #include <cassert>
 #include <tuple>
+#include <unordered_map>
 
 #include <QObject>
 #include <QtCore/qstring.h> 
@@ -412,5 +413,6 @@ double Get2DownRebouncePercent(double base, double top, double cur);
 
 double CaculateFee(double total, bool is_sell);
  
+typedef std::unordered_map<std::string, std::shared_ptr<QuotesData> > TCodeMapQuotesData;
 
 #endif

@@ -14,5 +14,6 @@ public:
 private:
 
 	__int64 time_point_bt_open_warning_;
+    TCodeMapQuotesData quotes_data_;
 };
 #endif

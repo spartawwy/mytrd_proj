@@ -47,6 +47,8 @@ public:
     void DecodeStkQuoteResult(Buffer &Result, std::list<T_codeQuoteDateTuple> *ret_quotes_data=nullptr
             , std::function<void(const std::list<unsigned int>& id_list, std::shared_ptr<QuotesData> &data)> tell_all_rel_task=nullptr);
 
+    bool GetQuoteDatas(char* stock_codes[], short count, TCodeMapQuotesData &ret_quotes_data);
+
     void TellAllRelTasks(const std::list<unsigned int>& id_list, std::shared_ptr<QuotesData> &data);
 
 protected:
