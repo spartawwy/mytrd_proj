@@ -346,6 +346,7 @@ void FlashingOrder::DoKeySig(QString str)
 {
 	qDebug() << "Enter DoKeySig\n";
     WriteLog("Enter DoKeySig");
+	ui.pte_flash_log->appendPlainText("Enter DoKeySig\n");
 	key_sig_mutex_.lock();
 	thread_.stock_name(str);
 	key_sig_wait_cond_.wakeAll();

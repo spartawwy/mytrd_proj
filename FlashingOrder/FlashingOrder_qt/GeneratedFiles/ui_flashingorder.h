@@ -16,6 +16,7 @@
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QWidget>
@@ -35,12 +36,14 @@ public:
     QPushButton *pbtn_save;
     QComboBox *combox_price_level;
     QLabel *label_price_level_2;
+    QPlainTextEdit *pte_flash_log;
+    QLabel *label_status;
 
     void setupUi(QWidget *FlashingOrderClass)
     {
         if (FlashingOrderClass->objectName().isEmpty())
             FlashingOrderClass->setObjectName(QStringLiteral("FlashingOrderClass"));
-        FlashingOrderClass->resize(600, 400);
+        FlashingOrderClass->resize(600, 503);
         label = new QLabel(FlashingOrderClass);
         label->setObjectName(QStringLiteral("label"));
         label->setGeometry(QRect(85, 30, 201, 31));
@@ -49,36 +52,42 @@ public:
         label->setFont(font);
         label_2 = new QLabel(FlashingOrderClass);
         label_2->setObjectName(QStringLiteral("label_2"));
-        label_2->setGeometry(QRect(85, 80, 191, 31));
+        label_2->setGeometry(QRect(85, 60, 191, 31));
         label_2->setFont(font);
         spinBox_buy_quantity = new QSpinBox(FlashingOrderClass);
         spinBox_buy_quantity->setObjectName(QStringLiteral("spinBox_buy_quantity"));
-        spinBox_buy_quantity->setGeometry(QRect(185, 130, 101, 31));
+        spinBox_buy_quantity->setGeometry(QRect(185, 110, 101, 31));
         spinBox_sell_quantity = new QSpinBox(FlashingOrderClass);
         spinBox_sell_quantity->setObjectName(QStringLiteral("spinBox_sell_quantity"));
-        spinBox_sell_quantity->setGeometry(QRect(185, 190, 101, 31));
+        spinBox_sell_quantity->setGeometry(QRect(185, 160, 101, 31));
         label_3 = new QLabel(FlashingOrderClass);
         label_3->setObjectName(QStringLiteral("label_3"));
-        label_3->setGeometry(QRect(70, 130, 111, 31));
+        label_3->setGeometry(QRect(70, 110, 111, 31));
         label_3->setFont(font);
         label_4 = new QLabel(FlashingOrderClass);
         label_4->setObjectName(QStringLiteral("label_4"));
-        label_4->setGeometry(QRect(70, 190, 101, 31));
+        label_4->setGeometry(QRect(70, 160, 101, 31));
         label_4->setFont(font);
         pbtn_fresh = new QPushButton(FlashingOrderClass);
         pbtn_fresh->setObjectName(QStringLiteral("pbtn_fresh"));
-        pbtn_fresh->setGeometry(QRect(130, 310, 141, 23));
+        pbtn_fresh->setGeometry(QRect(130, 260, 141, 23));
         pbtn_save = new QPushButton(FlashingOrderClass);
         pbtn_save->setObjectName(QStringLiteral("pbtn_save"));
-        pbtn_save->setGeometry(QRect(300, 310, 141, 23));
+        pbtn_save->setGeometry(QRect(300, 260, 141, 23));
         combox_price_level = new QComboBox(FlashingOrderClass);
         combox_price_level->setObjectName(QStringLiteral("combox_price_level"));
-        combox_price_level->setGeometry(QRect(185, 240, 291, 31));
+        combox_price_level->setGeometry(QRect(185, 210, 291, 31));
         label_price_level_2 = new QLabel(FlashingOrderClass);
         label_price_level_2->setObjectName(QStringLiteral("label_price_level_2"));
-        label_price_level_2->setGeometry(QRect(80, 240, 91, 21));
+        label_price_level_2->setGeometry(QRect(80, 210, 91, 21));
         label_price_level_2->setFont(font);
         label_price_level_2->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+        pte_flash_log = new QPlainTextEdit(FlashingOrderClass);
+        pte_flash_log->setObjectName(QStringLiteral("pte_flash_log"));
+        pte_flash_log->setGeometry(QRect(10, 300, 581, 171));
+        label_status = new QLabel(FlashingOrderClass);
+        label_status->setObjectName(QStringLiteral("label_status"));
+        label_status->setGeometry(QRect(10, 480, 581, 21));
 
         retranslateUi(FlashingOrderClass);
 
@@ -95,6 +104,7 @@ public:
         pbtn_fresh->setText(QApplication::translate("FlashingOrderClass", "\345\210\267\346\226\260", 0));
         pbtn_save->setText(QApplication::translate("FlashingOrderClass", "\344\277\235\345\255\230", 0));
         label_price_level_2->setText(QApplication::translate("FlashingOrderClass", "\344\272\244\346\230\223\344\273\267\346\240\274:", 0));
+        label_status->setText(QApplication::translate("FlashingOrderClass", "TextLabel", 0));
     } // retranslateUi
 
 };
