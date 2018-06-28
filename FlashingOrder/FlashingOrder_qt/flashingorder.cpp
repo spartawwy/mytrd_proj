@@ -127,13 +127,15 @@ FlashingOrder::FlashingOrder(QWidget *parent)
     
     ui.combox_price_level->setCurrentText(ToQString(static_cast<TypeQuoteLevel>(quote_level_)));
     //------------------------------
-
-	connect(&normal_timer_, SIGNAL(timeout()), this, SLOT(DoNormalTimer()));
+     
 	bool ret = connect(this, SIGNAL(key_sig(QString)), this, SLOT(DoKeySig(QString)));
+    ret = connect(&normal_timer_, SIGNAL(timeout()), this, SLOT(DoTimer()));
     ret = connect( this, SIGNAL(show_msg_sig(QString, QString)), this, SLOT(DoShowMsgSig(QString, QString)) );
+    ret = connect( this, SIGNAL(log2ui_sig(QString)), this, SLOT(DoLog2Ui(QString)) );
+
     ret = connect(ui.pbtn_fresh, SIGNAL(clicked()), this, SLOT(DoReadCfg()));
     ret = connect(ui.pbtn_save, SIGNAL(clicked()), this, SLOT(DoSaveCfg()));
-
+    
 	thread_.start();
 }
 
@@ -216,7 +218,7 @@ bool FlashingOrder::Init(int argc, char *argv[])
 
 	 
 #if 1
-	//normal_timer_.start(2000);
+   normal_timer_.start(2000);
 
    BOOL ret = InstallLaunchEv(CallBackFunc, const_cast<char*>(target_win_title_tag_.c_str()));
 #else
@@ -231,6 +233,7 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
 	assert(ticker_);
 	assert(msg_win_);
     WriteLog("FlashingOrder::HandleOrder %s", stock_name.c_str());
+    EmitLog2Ui(QString("FlashingOrder::HandleOrder %1").arg(stock_name.c_str()));
 #if 1
 	Buffer result(1024);
 	char error[1024] = {0};
@@ -243,6 +246,7 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
 	{
 		qDebug() << "FlashingOrder::HandleOrder cant find " << stock_name.c_str() << "\n";
         WriteLog("FlashingOrder::HandleOrder cant find %s", stock_name.c_str());
+        EmitLog2Ui(QString("FlashingOrder::HandleOrder cant find %1").arg(stock_name.c_str()));
 		return;
 	}
     WriteLog("FlashingOrder::HandleOrder to GetQuotes %s", stock_name.c_str());
@@ -252,6 +256,7 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
 	{
 		qDebug() << "FlashingOrder::HandleOrder GetQuotes fail " << stock_name.c_str() << "\n";
         WriteLog("FlashingOrder::HandleOrder GetQuotes fail %s", stock_name.c_str());
+        EmitLog2Ui(QString("FlashingOrder::HandleOrder GetQuotes fail %1").arg(stock_name.c_str()));
 		return;
 	} 
     WriteLog("FlashingOrder::HandleOrder when GetQuotes : %s", ret_message);
@@ -265,7 +270,8 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
         case TypeQuoteLevel::PRICE_BUYSELL_5: target_price = (is_buy ? quote_data.price_s_5 : quote_data.price_b_5); break;
         default: target_price = quote_data.cur_price; break;
     }
-    WriteLog("FlashingOrder::HandleOrder  SendOrder for %s", stock_name.c_str());
+    WriteLog("FlashingOrder::HandleOrder SendOrder for %s", stock_name.c_str());
+    EmitLog2Ui(QString("FlashingOrder::HandleOrder SendOrder for %1").arg(stock_name.c_str()));
 	trade_proxy_.SendOrder(trade_client_id_
 		, (is_buy ? (int)TypeOrderCategory::BUY : (int)TypeOrderCategory::SELL)
 		, 0
@@ -281,6 +287,7 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
     sprintf(buf, "%s 股票:%s 数目:%d %s %s!", (is_buy ? "买入" : "卖出")
         , stock_name.c_str(), (is_buy ? qty_buy_ : qty_sell_), (strlen(error) == 0 ? "成功" : "失败"), error);
     WriteLog(buf);
+    EmitLog2Ui(QString(buf));
     EmitShowMsgSig(QString::fromLocal8Bit("闪电交易助手提示"), QString::fromLocal8Bit(buf));
 #endif
 }
@@ -344,9 +351,10 @@ void FlashingOrder::DoSaveCfg()
   
 void FlashingOrder::DoKeySig(QString str)
 {
-	qDebug() << "Enter DoKeySig\n";
-    WriteLog("Enter DoKeySig");
-	ui.pte_flash_log->appendPlainText("Enter DoKeySig\n");
+	qDebug() << "Enter DoKeySig \n";
+    QString tmp_str = QString("Enter DoKeySig %1\n").arg(str);
+    WriteLog(tmp_str.toLocal8Bit().data());
+	ui.pte_flash_log->appendPlainText(tmp_str);
 	key_sig_mutex_.lock();
 	thread_.stock_name(str);
 	key_sig_wait_cond_.wakeAll();
@@ -365,6 +373,25 @@ void FlashingOrder::DoShowMsgSig(QString title, QString content)
     msg_win_->ShowUI(title, content); 
 }
 
+void FlashingOrder::DoLog2Ui(QString str)
+{
+    ui.pte_flash_log->appendPlainText(str);
+}
+
+void FlashingOrder::DoTimer()
+{
+    QuotesData quote_data;
+    char ret_message[1024] = {0};
+    char stock_name[32] = "600519";
+    if( !ticker_->GetQuotes("600519", quote_data, ret_message) )
+    {  
+        ui.pte_flash_log->appendPlainText(QString("FlashingOrder::HandleOrder DoTimer fail\n"));
+        ui.label_status->setText("Hq Disconnect!");
+        return;
+    } 
+    ui.label_status->setText("Hq Connected!");
+
+}
 #if 0
 void FlashingOrder::DoNormalTimer()
 {

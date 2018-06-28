@@ -101,11 +101,8 @@ bool Ticker::Init()
 
 bool Ticker::GetQuotes(char* stock_code, QuotesData& quote_data, char *ret_message)
 {
-    byte markets[cst_max_stock_code_count];
-    //for( int i = 0; i < count; ++i )
-    {
-        markets[0] = (byte)GetStockMarketType(stock_code);
-    }
+    byte markets[cst_max_stock_code_count]; 
+    markets[0] = (byte)GetStockMarketType(stock_code);
 	char *stock_codes[1] = {stock_code};
 
 	Buffer Result(cst_error_len*2);
@@ -162,11 +159,9 @@ bool Ticker::GetQuotes(char* stock_code, QuotesData& quote_data, char *ret_messa
 	replace_all_distinct(res_str, "\n", "\t");
 
 	auto result_array = split(res_str, "\t");
-
 	for( int n = 1; n < result_array.size() / 44; ++n )
 	{
 		auto stock_code = result_array.at(1 + n * 44);
-		  
 		try
 		{ 
 			quote_data.cur_price = atof(result_array.at(3 + n * 44).c_str() );

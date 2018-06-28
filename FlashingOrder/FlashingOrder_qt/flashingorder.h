@@ -39,6 +39,7 @@ public:
 
 	void EmitKeySig(QString str) { emit key_sig(str); }
     void EmitShowMsgSig(QString title, QString content) { emit show_msg_sig(title, content); }
+    void EmitLog2Ui(QString str) { emit log2ui_sig(str); }
 
 	void set_key_sig(bool val);
 
@@ -51,14 +52,17 @@ private slots:
     void DoSaveCfg();
 
 	//void DoNormalTimer();
+    void DoTimer();
 	void DoKeySig(QString);
     void DoShowMsgSig(QString, QString);
+    void DoLog2Ui(QString);
 
 signals:
 
 	void key_sig(QString);
     void show_msg_sig(QString, QString);
-
+    void log2ui_sig(QString);
+    
 private:
 	Ui::FlashingOrderClass  ui;
 
