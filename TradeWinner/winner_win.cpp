@@ -46,6 +46,10 @@ static const int cst_tab_capital = 5;
 static const int cst_tab_index_log = 6;
 static const int cst_tab_index_stkindex_task = 7;
 
+static const int cst_small_width = 60;
+static const int cst_normal_width = 80;
+static const int cst_big_width = 100;
+
 WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     : QMainWindow(parent)
     , app_(app)
@@ -145,10 +149,13 @@ void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_
     auto item = new QStandardItem( utility::FormatStr("%d", task_info.id).c_str() );
     model->setItem(row_index, cst_tbview_tasks_rowindex_task_id, item);
     model->item(row_index, cst_tbview_tasks_rowindex_task_id)->setTextAlignment(align_way);
+	tbv->setColumnWidth(cst_tbview_tasks_rowindex_task_id, cst_small_width);
+
     // run state
 	item = new QStandardItem(ToQString(static_cast<TaskCurrentState>(task_info.state)));
     model->setItem(row_index, cst_tbview_tasks_rowindex_state, item);
     model->item(row_index, cst_tbview_tasks_rowindex_state)->setTextAlignment(align_way);
+	tbv->setColumnWidth(cst_tbview_tasks_rowindex_state, cst_small_width);
 
 	QString stock_str; 
     // task name
@@ -175,24 +182,29 @@ void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_
 	}
     model->setItem(row_index, cst_tbview_tasks_rowindex_task_name, item);
     model->item(row_index, cst_tbview_tasks_rowindex_task_name)->setTextAlignment(align_way);
+	tbv->setColumnWidth(cst_tbview_tasks_rowindex_task_name, cst_normal_width);
+
     //  stock name 
 	item = new QStandardItem(stock_str);
     model->setItem(row_index, cst_tbview_tasks_rowindex_stock_name, item);
     model->item(row_index, cst_tbview_tasks_rowindex_stock_name)->setTextAlignment(align_way);
+	tbv->setColumnWidth(cst_tbview_tasks_rowindex_stock_name, cst_normal_width);
     // current price
     item = new QStandardItem("");
     model->setItem(row_index, cst_tbview_tasks_rowindex_cur_price, item);
     model->item(row_index, cst_tbview_tasks_rowindex_cur_price)->setTextAlignment(align_way);
+	tbv->setColumnWidth(cst_tbview_tasks_rowindex_cur_price, cst_small_width);
     // trigger price 
     item = new QStandardItem( utility::FormatStr("%.2f", task_info.alert_price).c_str() );
     model->setItem(row_index, cst_tbview_tasks_rowindex_trigger_price, item);
     model->item(row_index, cst_tbview_tasks_rowindex_trigger_price)->setTextAlignment(align_way);
+	tbv->setColumnWidth(cst_tbview_tasks_rowindex_trigger_price, cst_small_width);
 
     // quntity
     item = new QStandardItem( utility::FormatStr("%d", task_info.quantity).c_str() );
     model->setItem(row_index, cst_tbview_tasks_rowindex_quantity, item);
     model->item(row_index, cst_tbview_tasks_rowindex_quantity)->setTextAlignment(align_way);
-
+	tbv->setColumnWidth(cst_tbview_tasks_rowindex_quantity, cst_small_width);
     // price level
     item = new QStandardItem( ToQString(static_cast<TypeQuoteLevel>(task_info.target_price_level)) );
     model->setItem(row_index, cst_tbview_tasks_rowindex_price_level, item);
@@ -201,11 +213,13 @@ void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_
     item = new QStandardItem( utility::FormatStr("%d", task_info.start_time).c_str() );
     model->setItem(row_index, cst_tbview_tasks_rowindex_start_time, item);
     model->item(row_index, cst_tbview_tasks_rowindex_start_time)->setTextAlignment(align_way);
+	tbv->setColumnWidth(cst_tbview_tasks_rowindex_start_time, cst_small_width);
     // end time
     item = new QStandardItem( utility::FormatStr("%d", task_info.end_time).c_str() );
     model->setItem(row_index, cst_tbview_tasks_rowindex_end_time, item);
     model->item(row_index, cst_tbview_tasks_rowindex_end_time)->setTextAlignment(align_way);        
-    
+    tbv->setColumnWidth(cst_tbview_tasks_rowindex_end_time, cst_small_width);
+
     item = new QStandardItem( utility::FormatStr("%d", task_info.type).c_str() );
     model->setItem(row_index, cst_tbview_tasks_rowindex_task_type, item);
     model->item(row_index, cst_tbview_tasks_rowindex_task_type)->setTextAlignment(align_way);  
@@ -221,14 +235,13 @@ void WinnerWin::Init()
     bool ret = connect(this->app_, SIGNAL(SigAppendLog(char*)), this, SLOT(SlotAppendLog(char*)));
 	connect(ui.tabwid_holder, SIGNAL(currentChanged(int)), this, SLOT(SlotTabChanged(int)));
 
-    //
     ret = connect(ui.actionStopAllTask, SIGNAL(triggered(bool)), this->app_, SLOT(SlotStopAllTasks(bool)));
     // ndedt
     ret = connect(ui.actionOpenCalcWin, SIGNAL(triggered(bool)), this, SLOT(SlotOpenCalcWin(bool)));
     ui.tbview_tasks->setContextMenuPolicy(Qt::CustomContextMenu);
     ui.tbview_tasks->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui.tbview_tasks->setSelectionMode(QAbstractItemView::SingleSelection);
-    ;
+    
     //set menu context of tableview tasklist -------------------
     auto action_start = new QAction (this);
     action_start ->setText ( QStringLiteral( "Æô¶¯" ));

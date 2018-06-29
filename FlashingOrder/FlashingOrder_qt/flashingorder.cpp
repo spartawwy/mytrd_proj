@@ -233,7 +233,7 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
 	assert(ticker_);
 	assert(msg_win_);
     WriteLog("FlashingOrder::HandleOrder %s", stock_name.c_str());
-    EmitLog2Ui(QString("FlashingOrder::HandleOrder %1").arg(stock_name.c_str()));
+	EmitLog2Ui(QString("FlashingOrder::HandleOrder %1").arg(QString::fromLocal8Bit(stock_name.c_str())));
 #if 1
 	Buffer result(1024);
 	char error[1024] = {0};
@@ -246,7 +246,7 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
 	{
 		qDebug() << "FlashingOrder::HandleOrder cant find " << stock_name.c_str() << "\n";
         WriteLog("FlashingOrder::HandleOrder cant find %s", stock_name.c_str());
-        EmitLog2Ui(QString("FlashingOrder::HandleOrder cant find %1").arg(stock_name.c_str()));
+        EmitLog2Ui(QString("FlashingOrder::HandleOrder cant find %1").arg(QString::fromLocal8Bit(stock_name.c_str())));
 		return;
 	}
     WriteLog("FlashingOrder::HandleOrder to GetQuotes %s", stock_name.c_str());
@@ -256,7 +256,7 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
 	{
 		qDebug() << "FlashingOrder::HandleOrder GetQuotes fail " << stock_name.c_str() << "\n";
         WriteLog("FlashingOrder::HandleOrder GetQuotes fail %s", stock_name.c_str());
-        EmitLog2Ui(QString("FlashingOrder::HandleOrder GetQuotes fail %1").arg(stock_name.c_str()));
+        EmitLog2Ui(QString("FlashingOrder::HandleOrder GetQuotes fail %1").arg(QString::fromLocal8Bit(stock_name.c_str())));
 		return;
 	} 
     WriteLog("FlashingOrder::HandleOrder when GetQuotes : %s", ret_message);
@@ -271,7 +271,7 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
         default: target_price = quote_data.cur_price; break;
     }
     WriteLog("FlashingOrder::HandleOrder SendOrder for %s", stock_name.c_str());
-    EmitLog2Ui(QString("FlashingOrder::HandleOrder SendOrder for %1").arg(stock_name.c_str()));
+    EmitLog2Ui(QString("FlashingOrder::HandleOrder SendOrder for %1").arg(QString::fromLocal8Bit(stock_name.c_str())));
 	trade_proxy_.SendOrder(trade_client_id_
 		, (is_buy ? (int)TypeOrderCategory::BUY : (int)TypeOrderCategory::SELL)
 		, 0
@@ -287,7 +287,7 @@ void FlashingOrder::HandleOrder(bool is_buy, const std::string &stock_name)
     sprintf(buf, "%s 股票:%s 数目:%d %s %s!", (is_buy ? "买入" : "卖出")
         , stock_name.c_str(), (is_buy ? qty_buy_ : qty_sell_), (strlen(error) == 0 ? "成功" : "失败"), error);
     WriteLog(buf);
-    EmitLog2Ui(QString(buf));
+    EmitLog2Ui(QString(QString::fromLocal8Bit(buf)));
     EmitShowMsgSig(QString::fromLocal8Bit("闪电交易助手提示"), QString::fromLocal8Bit(buf));
 #endif
 }

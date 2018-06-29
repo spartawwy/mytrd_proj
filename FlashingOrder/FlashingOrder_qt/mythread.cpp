@@ -33,7 +33,7 @@ void MyThread::run()
 		auto rctr_val = KEYUP(VK_RCONTROL);
 		qDebug() << "my thread line 67 | lctr_val: " << lctr_val << " rctr_val: " << rctr_val << "\n";
         WriteLog("Enter MyThread");
-        app_->EmitLog2Ui(QString("Enter MyThread %1").arg(stock_name_.toLocal8Bit().data()) );
+        app_->EmitLog2Ui(QString("Enter MyThread %1").arg(stock_name_) );
 		//----end ---------
 		if( (KEYDOWN(VK_LCONTROL) || KEYDOWN(VK_RCONTROL)) && !(KEYDOWN(VK_LCONTROL) && KEYDOWN(VK_RCONTROL)) )
 		{ 
