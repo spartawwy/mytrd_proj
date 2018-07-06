@@ -36,6 +36,7 @@ static const int cst_tbview_tasks_rowindex_price_level = 7;
 static const int cst_tbview_tasks_rowindex_start_time = 8;
 static const int cst_tbview_tasks_rowindex_end_time = 9;
 static const int cst_tbview_tasks_rowindex_task_type = 10;
+static const int cst_tbview_tasks_rowindex_pretrigged = 11;
 
 static const int cst_tab_index_task_list = 0;
 static const int cst_tab_index_buy_task = 1;
@@ -103,10 +104,14 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     model->setHorizontalHeaderItem(cst_tbview_tasks_rowindex_end_time, new QStandardItem(QString::fromLocal8Bit("结束时间")));
     model->horizontalHeaderItem(cst_tbview_tasks_rowindex_end_time)->setTextAlignment(Qt::AlignCenter);
 
-    model->setHorizontalHeaderItem(cst_tbview_tasks_rowindex_task_type, new QStandardItem("类型"));
-     
+    model->setHorizontalHeaderItem(cst_tbview_tasks_rowindex_task_type, new QStandardItem(QString::fromLocal8Bit("类型")));
+    
+	model->setHorizontalHeaderItem(cst_tbview_tasks_rowindex_pretrigged, new QStandardItem(QString::fromLocal8Bit("上次触发价")));
+	model->horizontalHeaderItem(cst_tbview_tasks_rowindex_pretrigged)->setTextAlignment(Qt::AlignCenter);
+
     ui.tbview_tasks->setModel(model);
-    ui.tbview_tasks->setColumnWidth(cst_tbview_tasks_rowindex_task_type, 5);
+    ui.tbview_tasks->setColumnWidth(cst_tbview_tasks_rowindex_task_type, 1);
+    ui.tbview_tasks->setColumnWidth(cst_tbview_tasks_rowindex_pretrigged, 70);
 
     ui.tbview_tasks->setEditTriggers(QAbstractItemView::NoEditTriggers);
     bool ret = connect(ui.tbview_tasks, SIGNAL(doubleClicked(const QModelIndex)), this, SLOT(DoTabTasksDbClick(const QModelIndex)));
@@ -682,12 +687,24 @@ void WinnerWin::changeEvent(QEvent * event)
 void WinnerWin::DoTaskStatChangeSignal(StrategyTask* p_task, int val)
 {
     assert(p_task);
+	static auto find_target_index = [this](int task_id)->int
+	{
+		for( int i = 0; i < ui.tbview_tasks->model()->rowCount(); ++i )
+        {
+            if( task_id == static_cast<QStandardItemModel *>(ui.tbview_tasks->model())->item(i, cst_tbview_tasks_rowindex_task_id)->text().toUInt() ) 
+            {
+                return i;
+            }
+        }
+		return -1;
+	};
 
+	QStandardItemModel *model = static_cast<QStandardItemModel *>(ui.tbview_tasks->model());
     switch(static_cast<TaskStatChangeType>(val))
     {
     case TaskStatChangeType::CUR_PRICE_CHANGE:
         {
-            for( int i = 0; i < ui.tbview_tasks->model()->rowCount(); ++i )
+            /*for( int i = 0; i < ui.tbview_tasks->model()->rowCount(); ++i )
             {
                 if( p_task->task_id() == static_cast<QStandardItemModel *>(ui.tbview_tasks->model())->item(i, cst_tbview_tasks_rowindex_task_id)->text().toUInt() ) 
                 {
@@ -695,12 +712,18 @@ void WinnerWin::DoTaskStatChangeSignal(StrategyTask* p_task, int val)
                     model->item(i, cst_tbview_tasks_rowindex_cur_price)->setText(utility::FormatStr("%.2f", p_task->cur_price()).c_str());
                     return;
                 }
-            }
+            }*/
+			auto i = find_target_index(p_task->task_id());
+			if( i >= 0 )
+			{
+				model->item(i, cst_tbview_tasks_rowindex_cur_price)->setText(utility::FormatStr("%.2f", p_task->cur_price()).c_str());
+                return;
+			}
             break;
         }
     case TaskStatChangeType::CUR_STATE_CHANGE:
         {
-            for( int i = 0; i < ui.tbview_tasks->model()->rowCount(); ++i )
+            /*for( int i = 0; i < ui.tbview_tasks->model()->rowCount(); ++i )
             {
                 if( p_task->task_id() == static_cast<QStandardItemModel *>(ui.tbview_tasks->model())->item(i, cst_tbview_tasks_rowindex_task_id)->text().toUInt() ) 
                 {
@@ -708,9 +731,25 @@ void WinnerWin::DoTaskStatChangeSignal(StrategyTask* p_task, int val)
                     model->item(i, cst_tbview_tasks_rowindex_state)->setText(ToQString(p_task->cur_state()));
                     return;
                 }
-            }
-            break;
+            }*/
+			auto i = find_target_index(p_task->task_id());
+			if( i >= 0 )
+			{ 
+				model->item(i, cst_tbview_tasks_rowindex_state)->setText(ToQString(p_task->cur_state()));
+                return;
+			}
+            break; 
         }
+	case TaskStatChangeType::PRE_TRIGG_PRICE_CHANGE:
+		{
+			auto i = find_target_index(p_task->task_id());
+			if( i >= 0 )
+			{ 
+				model->item(i, cst_tbview_tasks_rowindex_pretrigged)->setText(ToQString(p_task->pre_trigged_price()));
+                return;
+			}
+            break; 
+		}
     }
 
 }

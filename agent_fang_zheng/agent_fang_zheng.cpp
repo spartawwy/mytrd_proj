@@ -203,7 +203,8 @@ int Agent_FANG_ZHENG::QueryPosition(T_PositionData *out_pos_data, int max_pos_si
 bool Agent_FANG_ZHENG::QueryCapital(T_Capital *capital)
 {
     assert(capital);
-
+	if( trade_client_id_ <= -1 )
+		return false;
     auto result = std::make_shared<Buffer>(5*1024);
     char error[1024] = {0};
     {

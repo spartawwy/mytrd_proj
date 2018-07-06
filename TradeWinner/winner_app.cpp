@@ -115,8 +115,10 @@ bool WinnerApp::Init()
 	p_user_broker_info_ = db_moudle_.FindUserBrokerByUser(user_info_.id);
 	assert(p_user_account_info_ && p_user_broker_info_);
 
+	trade_agent_.Init(p_user_broker_info_->remark, p_user_account_info_->account_no_in_broker_);
 #endif
-#ifdef USE_TRADE_FLAG
+
+#if 1 //#ifdef USE_TRADE_FLAG
 
 	BrokerCfgWin  bcf_win(this);
 	bcf_win.Init();
@@ -521,10 +523,22 @@ T_StockPriceInfo * WinnerApp::GetStockPriceInfo(const std::string& code, bool is
 	strcpy_s(stocks[0], code.c_str());
  
 	T_StockPriceInfo price_info[1];
+#if 0
 	auto num = index_ticker_->StkQuoteGetQuote_(stocks, 1, price_info);
 	if( num < 1 )
 		return nullptr;
- 
+#else
+	char* tgt_stock[8] = {0};
+	tgt_stock[0] = const_cast<char*>(code.c_str());
+	TCodeMapQuotesData  code_quote_data;
+	if( !stock_ticker().GetQuoteDatas(tgt_stock, 1, code_quote_data) )
+		return nullptr;
+	auto quote_iter = code_quote_data.find(code);
+	if( quote_iter == code_quote_data.end() )
+		return nullptr;
+	price_info[0].cur_price = quote_iter->second->cur_price;
+
+#endif
     if( iter != stocks_price_info_.end() )
     {
         iter->second = price_info[0];

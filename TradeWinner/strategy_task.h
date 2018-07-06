@@ -67,7 +67,7 @@ public:
 
     QTime tp_start() { return tp_start_; }
     QTime tp_end() { return tp_end_; }
-
+	double pre_trigged_price() { return pre_trigged_price_; }
     unsigned int life_count_;
     
 protected:
@@ -88,7 +88,7 @@ protected:
    QTime  tp_end_;
 
    double  cur_price_;
-   
+   double  pre_trigged_price_;
    volatile TaskCurrentState cur_state_;
    bool is_waitting_removed_; 
 

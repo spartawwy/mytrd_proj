@@ -273,13 +273,8 @@ void EqualSectionTask::HandleQuoteData()
     int ms_for_wait_lock = 1000;
     
     //app_->local_logger().LogLocal("mutex", "try lock");
-    if( !timed_mutex_wrapper_.try_lock_for(ms_for_wait_lock) )  
-    {
-        //DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
-        //app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock fail"); 
-        return;
-    };
-    //app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock ok");
+    if( !timed_mutex_wrapper_.try_lock_for(ms_for_wait_lock) )   
+        return; 
 
     int total_position = GetTototalPosition();
     int avaliable_pos = GetAvaliablePosition();
@@ -557,6 +552,7 @@ BEFORE_TRADE:
             if( !is_to_clear )
             {  // re calculate
                 CalculateSections(iter->cur_price, para_, sections_, "EqualSectionTask::HandleQuoteData trade ok line 520");
+				app()->Emit(this, static_cast<int>(TaskStatChangeType::PRE_TRIGG_PRICE_CHANGE));
                 PrintSections();
 			    // for rebouce -------
 			    bottom_price_ = cst_max_stock_price;
