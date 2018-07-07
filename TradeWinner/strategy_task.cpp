@@ -48,19 +48,40 @@ bool StrategyTask::IsPriceJumpDown(double pre_price, double cur_price)
     return IsPriceJumpUp(cur_price, pre_price);
 }
 
-double StrategyTask::GetQuoteTargetPrice(const QuotesData& data, bool is_buy)
+double StrategyTask::GetQuoteTargetPrice(const QuotesData& data, bool is_buy, bool is_chase_uplimit)
 {
-    switch(para_.target_price_level)
+    if( !is_chase_uplimit )
     {
-    case TypeQuoteLevel::PRICE_CUR: return data.cur_price;
-         
-    case TypeQuoteLevel::PRICE_BUYSELL_1: return is_buy ? data.price_s_1 : data.price_b_1;
-    case TypeQuoteLevel::PRICE_BUYSELL_2: return is_buy ? data.price_s_2 : data.price_b_2;
-    case TypeQuoteLevel::PRICE_BUYSELL_3: return is_buy ? data.price_s_3 : data.price_b_3;
-    case TypeQuoteLevel::PRICE_BUYSELL_4: return is_buy ? data.price_s_4 : data.price_b_4;
-    case TypeQuoteLevel::PRICE_BUYSELL_5: return is_buy ? data.price_s_5 : data.price_b_5;
-    default: return data.cur_price; 
+        switch(para_.target_price_level)
+        {
+        case TypeQuoteLevel::PRICE_CUR: return data.cur_price; 
+        case TypeQuoteLevel::PRICE_BUYSELL_1: return is_buy ? data.price_s_1 : data.price_b_1;
+        case TypeQuoteLevel::PRICE_BUYSELL_2: return is_buy ? data.price_s_2 : data.price_b_2;
+        case TypeQuoteLevel::PRICE_BUYSELL_3: return is_buy ? data.price_s_3 : data.price_b_3;
+        case TypeQuoteLevel::PRICE_BUYSELL_4: return is_buy ? data.price_s_4 : data.price_b_4;
+        case TypeQuoteLevel::PRICE_BUYSELL_5: return is_buy ? data.price_s_5 : data.price_b_5;
+        default: return data.cur_price; 
+        }
+    }else
+    {
+        // --- get top price
+        double top_price = data.price_s_5;
+        if( data.price_s_5 > 0.001 ) 
+            top_price = data.price_s_5; 
+        else if( data.price_s_4 > 0.001 )
+            top_price = data.price_s_4; 
+        else if( data.price_s_3 > 0.001 )
+            top_price = data.price_s_3; 
+        else if( data.price_s_2 > 0.001 )
+            top_price = data.price_s_2; 
+        else if( data.price_s_1 > 0.001 )
+            top_price = data.price_s_1; 
+        else
+            top_price = data.price_b_1; 
+
+        return top_price;
     }
+    
 }
 
 void StrategyTask::ObtainData(std::shared_ptr<QuotesData> &data)

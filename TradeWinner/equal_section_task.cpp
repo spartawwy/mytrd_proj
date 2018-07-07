@@ -49,7 +49,7 @@ void EqualSectionTask::CalculateSections(double price, IN T_TaskInformation &tas
 		return;
 	}else // normal 
 	{ 
-		if( this->cur_state() != static_cast<TaskCurrentState>(TaskStateElem::RUNNING) )
+		if( this->cur_state() == static_cast<TaskCurrentState>(TaskStateElem::EXCEPT) )
 		{
 			this->cur_state(static_cast<TaskCurrentState>(TaskStateElem::RUNNING) );
 			this->app_->Emit((StrategyTask*)this, static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
@@ -137,7 +137,7 @@ EqualSectionTask::EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app)
 			this->cur_state(static_cast<TaskCurrentState>(TaskStateElem::EXCEPT));
 			this->app_->Emit((StrategyTask*)this, static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
 			is_waitting_removed_ = true;
-#if 0
+#if 0  // another way to procedue the erro
             auto p_stk_price = app->GetStockPriceInfo(task_info.stock);
             if( p_stk_price )
             {
@@ -491,7 +491,6 @@ BEFORE_TRADE:
 
     app_->trade_strand().PostTask([iter, index, order_type, qty, this]()
     {
-		//tmp for debug
 		if( iter->cur_price < 0.01 )
 		{
 			auto ret_str = new std::string(utility::FormatStr("error: task %d EqualSectionTask PostTask price:%.2f", para_.id, iter->cur_price));
@@ -502,7 +501,6 @@ BEFORE_TRADE:
 			timed_mutex_wrapper_.unlock();
 			return;
 		}
-		// end ----
         char result[1024] = {0};
         char error_info[1024] = {0};
 
@@ -552,7 +550,8 @@ BEFORE_TRADE:
             if( !is_to_clear )
             {  // re calculate
                 CalculateSections(iter->cur_price, para_, sections_, "EqualSectionTask::HandleQuoteData trade ok line 520");
-				app()->Emit(this, static_cast<int>(TaskStatChangeType::PRE_TRIGG_PRICE_CHANGE));
+				pre_trigged_price_ = price;
+                app()->Emit(this, static_cast<int>(TaskStatChangeType::PRE_TRIGG_PRICE_CHANGE));
                 PrintSections();
 			    // for rebouce -------
 			    bottom_price_ = cst_max_stock_price;

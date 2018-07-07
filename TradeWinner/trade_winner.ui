@@ -29,7 +29,7 @@
      </font>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>0</number>
     </property>
     <property name="iconSize">
      <size>
@@ -46,7 +46,7 @@
        <rect>
         <x>10</x>
         <y>30</y>
-        <width>801</width>
+        <width>821</width>
         <height>461</height>
        </rect>
       </property>
@@ -573,6 +573,19 @@
        </property>
        <property name="text">
         <string>全部</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="cb_buytask_chase_limitup">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>60</y>
+         <width>111</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>追涨停</string>
        </property>
       </widget>
      </widget>

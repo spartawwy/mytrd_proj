@@ -158,13 +158,14 @@ void WinnerWin::DoAddAdveqTask()
     app_->AppendTaskInfo(task_info->id, task_info);
              
     app_->AppendStrategyTask(std::shared_ptr<StrategyTask>(advance_section_task));
+    // add to task list ui
+    InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
 
     app_->ticker_strand().PostTask([advance_section_task, this]()
     {
         this->app_->stock_ticker().Register(std::shared_ptr<StrategyTask>(advance_section_task));
     });
-    // add to task list ui
-    InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+    
     app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("贝塔区间任务添加成功!"));
     app_->AppendLog2Ui("添加贝塔区间任务 : %d %s 成功\n", task_info->id, task_info->stock.c_str());
 

@@ -49,7 +49,7 @@ static const int cst_tab_index_stkindex_task = 7;
 
 static const int cst_small_width = 60;
 static const int cst_normal_width = 80;
-static const int cst_big_width = 100;
+static const int cst_big_width = 120;
 
 WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     : QMainWindow(parent)
@@ -112,7 +112,7 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     ui.tbview_tasks->setModel(model);
     ui.tbview_tasks->setColumnWidth(cst_tbview_tasks_rowindex_task_type, 1);
     ui.tbview_tasks->setColumnWidth(cst_tbview_tasks_rowindex_pretrigged, 70);
-
+    ui.tbview_tasks->setColumnWidth(cst_tbview_tasks_rowindex_stock_name, cst_big_width);
     ui.tbview_tasks->setEditTriggers(QAbstractItemView::NoEditTriggers);
     bool ret = connect(ui.tbview_tasks, SIGNAL(doubleClicked(const QModelIndex)), this, SLOT(DoTabTasksDbClick(const QModelIndex)));
     //------------------tab add sell task
@@ -193,7 +193,7 @@ void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_
 	item = new QStandardItem(stock_str);
     model->setItem(row_index, cst_tbview_tasks_rowindex_stock_name, item);
     model->item(row_index, cst_tbview_tasks_rowindex_stock_name)->setTextAlignment(align_way);
-	tbv->setColumnWidth(cst_tbview_tasks_rowindex_stock_name, cst_normal_width);
+	tbv->setColumnWidth(cst_tbview_tasks_rowindex_stock_name, cst_big_width);
     // current price
     item = new QStandardItem("");
     model->setItem(row_index, cst_tbview_tasks_rowindex_cur_price, item);
@@ -228,6 +228,13 @@ void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_
     item = new QStandardItem( utility::FormatStr("%d", task_info.type).c_str() );
     model->setItem(row_index, cst_tbview_tasks_rowindex_task_type, item);
     model->item(row_index, cst_tbview_tasks_rowindex_task_type)->setTextAlignment(align_way);  
+
+    QString str;
+    if( task_info.type == TypeTask::EQUAL_SECTION )
+        str = task_info.assistant_field.c_str();
+    item = new QStandardItem(str);
+    model->setItem(row_index, cst_tbview_tasks_rowindex_pretrigged, item);
+    model->item(row_index, cst_tbview_tasks_rowindex_pretrigged)->setTextAlignment(align_way);  
 }
  
 void WinnerWin::Init()
@@ -745,7 +752,8 @@ void WinnerWin::DoTaskStatChangeSignal(StrategyTask* p_task, int val)
 			auto i = find_target_index(p_task->task_id());
 			if( i >= 0 )
 			{ 
-				model->item(i, cst_tbview_tasks_rowindex_pretrigged)->setText(ToQString(p_task->pre_trigged_price()));
+                QString str = QString("%1").arg(p_task->pre_trigged_price());
+				model->item(i, cst_tbview_tasks_rowindex_pretrigged)->setText(str);
                 return;
 			}
             break; 

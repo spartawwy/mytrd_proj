@@ -195,6 +195,7 @@ bool WinnerApp::Init()
 			if( !this->ticker_enable_flag_ )
 				continue;
 #endif
+ 
 			tick_strand_.PostTask([this]()
 			{
 				this->stock_ticker_->Procedure();
@@ -567,10 +568,10 @@ void WinnerApp::DoStrategyTasksTimeout()
         return current >= start && current <= end;
     };
 	
-    auto cur_time = QTime::currentTime();
+    auto cur_time = QTime::currentTime(); 
     //qDebug() << "DoStrategyTasksTimeout: " << cur_time.toString() << "\n";
 	// register 
-	ReadLock locker(strategy_tasks_mutex_);
+	WriteLock locker(strategy_tasks_mutex_);
 	std::for_each( std::begin(strategy_tasks_), std::end(strategy_tasks_), [&cur_time, this](std::shared_ptr<StrategyTask>& entry)
 	{
         if( !entry->is_to_run()  )
@@ -582,13 +583,13 @@ void WinnerApp::DoStrategyTasksTimeout()
                 if( entry->task_info().type == TypeTask::INDEX_RISKMAN )
                 {
                     // ticker register 
-					this->index_tick_strand_.PostTask([entry, this]()
+					this->index_tick_strand_.DispatchTask([entry, this]()
 			        {
 						this->index_ticker_->Register(entry);
 			        });
                 }else
                 {
-                    this->tick_strand_.PostTask([entry, this]()
+                    this->tick_strand_.DispatchTask([entry, this]()
 			        {
 				        this->stock_ticker_->Register(entry);
 			        });
@@ -629,8 +630,7 @@ void WinnerApp::DoStrategyTasksTimeout()
 				    this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
                 }
             }
-
-            //if( entry->cur_state() == TaskCurrentState::RUNNING )
+             
 			if( IsStateSet(entry->cur_state(), TaskStateElem::RUNNING) )
             {
                 if( IsNowTradeTime() && entry->life_count_++ > 60 )
@@ -645,8 +645,7 @@ void WinnerApp::DoStrategyTasksTimeout()
 	});
 
 }
-
-//void WinnerApp::DoShowUi(std::shared_ptr<std::string> str)
+ 
 void WinnerApp::DoShowUi(std::string* str, bool flash_taskbar)
 {
 	assert(str);

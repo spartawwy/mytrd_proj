@@ -368,7 +368,8 @@ BEFORE_TRADE:
                     judge_any_pos2sell(iter->cur_price, cur_index, avaliable_pos, true);
                     DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("Order Data Sell %d %.2f ok", qty, price));
                 }
-                
+                pre_trigged_price_ = price;
+                app()->Emit(this, static_cast<int>(TaskStatChangeType::PRE_TRIGG_PRICE_CHANGE));
                 reset_flag_price(price);
                 is_not_enough_capital_continue_ = 0;
 

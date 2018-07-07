@@ -49,7 +49,7 @@ public:
 		return para_.state != static_cast<int>(TaskStateElem::STOP);
     }
 
-    double GetQuoteTargetPrice(const QuotesData& data, bool is_buy);
+    double GetQuoteTargetPrice(const QuotesData& data, bool is_buy, bool is_chase_uplimit = false);
 
     void ObtainData(std::shared_ptr<QuotesData> &data);
     

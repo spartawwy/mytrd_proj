@@ -118,6 +118,10 @@ void WinnerWin::FillBuyTaskWin(TypeTask type, T_TaskInformation& info)
 		break;
 	case TypeTask::BREAKUP_BUY: 
         ui.combox_buy_type->setCurrentText(QString::fromLocal8Bit(STR_BREAKOUT_BUY));
+        if( info.assistant_field == "1" )
+            ui.cb_buytask_chase_limitup->setChecked(true);
+        else
+            ui.cb_buytask_chase_limitup->setChecked(false);
 		break;
 	case TypeTask::BATCHES_BUY: 
         ui.combox_buy_type->setCurrentText(QString::fromLocal8Bit(STR_BATCHES_BUY));
@@ -169,6 +173,7 @@ void WinnerWin::DoBuyTypeChanged(const QString&str)
 
 	m_bt_list_hint_->hide();
     ResetBuyTabTaskTime();
+    ui.cb_buytask_chase_limitup->hide();
 
    if( str == QString::fromLocal8Bit(STR_INFLECTION_BUY) )
    {  
@@ -194,6 +199,7 @@ void WinnerWin::DoBuyTypeChanged(const QString&str)
 		ui.wid_bt_retreat->setGeometry(wid_bt_retreat_rect);
 		ui.wid_bt_step_range->setGeometry(wid_bt_step_range_rect);
  
+        ui.cb_buytask_chase_limitup->show();
 		ui.wid_bt_retreat->hide();
 		ui.wid_bt_step_range->hide();
 
@@ -287,14 +293,16 @@ void WinnerWin::DoAddBuyTask()
         auto task_info = std::make_shared<T_TaskInformation>();
         task_info->type = TypeTask::BREAKUP_BUY; 
 		fill_common_ui(task_info); 
-        
+        task_info->assistant_field = ui.cb_buytask_chase_limitup->isChecked() ? "1" : "0";
         if( !app_->db_moudle().AddTaskInfo(task_info) )
         {
             // log error
             return;
         }
         app_->AppendTaskInfo(task_info->id, task_info);
-            
+        // add to task list ui
+        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+
         auto breakup_buy_task = std::make_shared<BreakUpBuyTask>(*task_info, this->app_);
         app_->AppendStrategyTask(std::shared_ptr<StrategyTask>(breakup_buy_task));
 
@@ -302,8 +310,7 @@ void WinnerWin::DoAddBuyTask()
         {
             app_->stock_ticker().Register(std::shared_ptr<StrategyTask>(breakup_buy_task));
         });
-        // add to task list ui
-        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+        
         app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("突破买入任务添加成功!"));
         app_->AppendLog2Ui("添加突破买入任务 : %d 成功\n", task_info->id);
 
@@ -327,7 +334,9 @@ void WinnerWin::DoAddBuyTask()
             return;
         }
         app_->AppendTaskInfo(task_info->id, task_info);
-            
+        // add to task list ui
+        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+
         auto inflection_buy_task = std::make_shared<InflectionBuyTask>(*task_info, this->app_);
         app_->AppendStrategyTask(std::shared_ptr<StrategyTask>(inflection_buy_task));
 
@@ -335,8 +344,7 @@ void WinnerWin::DoAddBuyTask()
         {
             app_->stock_ticker().Register(std::shared_ptr<StrategyTask>(inflection_buy_task));
         });
-        // add to task list ui
-        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+       
         app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("拐点买入任务添加成功!"));
         app_->AppendLog2Ui("添加拐点买入任务 : %d 成功!\n", task_info->id);
          
@@ -362,7 +370,9 @@ void WinnerWin::DoAddBuyTask()
             return;
         }
         app_->AppendTaskInfo(task_info->id, task_info);
-            
+        // add to task list ui
+        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+
         auto task = std::make_shared<BatchesBuyTask>(*task_info, this->app_);
         app_->AppendStrategyTask(std::shared_ptr<StrategyTask>(task));
 
@@ -370,8 +380,7 @@ void WinnerWin::DoAddBuyTask()
         {
             app_->stock_ticker().Register(std::shared_ptr<StrategyTask>(task));
         });
-        // add to task list ui
-        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+        
         app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("分批买入任务添加成功!"));
         app_->AppendLog2Ui("添加分批买入任务 : %d 成功!\n", task_info->id);
 

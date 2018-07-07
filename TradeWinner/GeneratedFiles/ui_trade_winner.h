@@ -82,6 +82,7 @@ public:
     QSpinBox *spinBox_buytask_quantity;
     QLabel *label_19;
     QPushButton *pbtn_buytask_all_quantity;
+    QCheckBox *cb_buytask_chase_limitup;
     QLabel *label_alert_bfh_2;
     QWidget *tab_sell_task;
     QWidget *wid_ticker;
@@ -272,7 +273,7 @@ public:
         tab_task_list->setObjectName(QStringLiteral("tab_task_list"));
         tbview_tasks = new QTableView(tab_task_list);
         tbview_tasks->setObjectName(QStringLiteral("tbview_tasks"));
-        tbview_tasks->setGeometry(QRect(10, 30, 801, 461));
+        tbview_tasks->setGeometry(QRect(10, 30, 821, 461));
         tbview_tasks->setContextMenuPolicy(Qt::CustomContextMenu);
         tabwid_holder->addTab(tab_task_list, QString());
         tab_buytask = new QWidget();
@@ -413,6 +414,9 @@ public:
         pbtn_buytask_all_quantity = new QPushButton(wid_bt_mid_line);
         pbtn_buytask_all_quantity->setObjectName(QStringLiteral("pbtn_buytask_all_quantity"));
         pbtn_buytask_all_quantity->setGeometry(QRect(240, 100, 75, 23));
+        cb_buytask_chase_limitup = new QCheckBox(wid_bt_mid_line);
+        cb_buytask_chase_limitup->setObjectName(QStringLiteral("cb_buytask_chase_limitup"));
+        cb_buytask_chase_limitup->setGeometry(QRect(230, 60, 111, 21));
         label_alert_bfh_2 = new QLabel(tab_buytask);
         label_alert_bfh_2->setObjectName(QStringLiteral("label_alert_bfh_2"));
         label_alert_bfh_2->setGeometry(QRect(450, 110, 31, 20));
@@ -1125,7 +1129,7 @@ public:
 
         retranslateUi(TradeWinnerClass);
 
-        tabwid_holder->setCurrentIndex(4);
+        tabwid_holder->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(TradeWinnerClass);
@@ -1158,6 +1162,7 @@ public:
         label_22->setText(QApplication::translate("TradeWinnerClass", "\347\247\222", 0));
         label_19->setText(QApplication::translate("TradeWinnerClass", "\346\234\200\345\244\247\345\217\257\344\271\260:", 0));
         pbtn_buytask_all_quantity->setText(QApplication::translate("TradeWinnerClass", "\345\205\250\351\203\250", 0));
+        cb_buytask_chase_limitup->setText(QApplication::translate("TradeWinnerClass", "\350\277\275\346\266\250\345\201\234", 0));
         label_alert_bfh_2->setText(QApplication::translate("TradeWinnerClass", "%", 0));
         tabwid_holder->setTabText(tabwid_holder->indexOf(tab_buytask), QApplication::translate("TradeWinnerClass", "\344\271\260\345\205\245\344\273\273\345\212\241", 0));
         lab_out_sell2->setText(QApplication::translate("TradeWinnerClass", "sell2", 0));

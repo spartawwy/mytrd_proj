@@ -8,6 +8,7 @@ BreakUpBuyTask::BreakUpBuyTask(T_TaskInformation &task_info, WinnerApp *app)
     : StrategyTask(task_info, app)
 	, time_point_bt_open_warning_(0)
 { 
+    is_chase_limit_up_ = task_info.assistant_field == "1" ? true : false;
 }
 
 
@@ -27,7 +28,7 @@ void BreakUpBuyTask::HandleQuoteData()
         bool is_to_order = false;
         __int64 time_span = 0;
           
-        double price = GetQuoteTargetPrice(*iter, false);// to choice price to buy
+        double price = GetQuoteTargetPrice(*iter, false, is_chase_limit_up_);// to choice price to buy
         if( para_.continue_second > 0 )
         {
             if( time_point_bt_open_warning_ != 0 )
@@ -49,7 +50,7 @@ void BreakUpBuyTask::HandleQuoteData()
                 auto now_iter = quotes_data_.find(this->code_data());
                 if( now_iter->second->cur_price > para_.alert_price ) // still meet condition
                 {
-                    price = GetQuoteTargetPrice(*now_iter->second, false);
+                    price = GetQuoteTargetPrice(*now_iter->second, false, is_chase_limit_up_);
                     is_to_order = true;
                 } 
             }else

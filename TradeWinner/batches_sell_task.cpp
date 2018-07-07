@@ -141,6 +141,8 @@ BEFORE_TRADE:
             });
             auto ret_str = new std::string(utility::FormatStr("执行任务:%d 分批出货 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, qty));
             this->app_->EmitSigShowUi(ret_str, true); 
+            pre_trigged_price_ = price;
+            app()->Emit(this, static_cast<int>(TaskStatChangeType::PRE_TRIGG_PRICE_CHANGE));
         }
         // update assistant filed in db ------------
         para_.assistant_field.clear();

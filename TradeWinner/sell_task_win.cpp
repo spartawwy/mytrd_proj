@@ -242,13 +242,14 @@ void WinnerWin::DoAddTask()
             
         auto break_down_task = std::make_shared<BreakDownTask>(*task_info, this->app_);
         app_->AppendStrategyTask(std::shared_ptr<StrategyTask>(break_down_task));
+        // add to task list ui
+        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
 
         app_->ticker_strand().PostTask([break_down_task, this]()
         {
             app_->stock_ticker().Register(std::shared_ptr<StrategyTask>(break_down_task));
         });
-        // add to task list ui
-        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+        
         app_->msg_win().ShowUI(QString::fromLocal8Bit("提示!"), QString::fromLocal8Bit("破位卖出任务添加成功!"));
         app_->AppendLog2Ui("添加破位卖出任务 : %d 成功\n", task_info->id);
 
@@ -271,7 +272,9 @@ void WinnerWin::DoAddTask()
             return;
         }
         app_->AppendTaskInfo(task_info->id, task_info);
-            
+        // add to task list ui
+        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+
         auto inflection_sell_task = std::make_shared<InflectionSellTask>(*task_info, this->app_);
         app_->AppendStrategyTask(std::shared_ptr<StrategyTask>(inflection_sell_task));
 
@@ -279,8 +282,7 @@ void WinnerWin::DoAddTask()
         {
             app_->stock_ticker().Register(std::shared_ptr<StrategyTask>(inflection_sell_task));
         });
-        // add to task list ui
-        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+       
         app_->msg_win().ShowUI(QString::fromLocal8Bit("提示!"), QString::fromLocal8Bit("拐点卖出任务添加成功!"));
         app_->AppendLog2Ui("添加拐点卖出任务 : %d 成功\n", task_info->id);
 
@@ -305,13 +307,14 @@ void WinnerWin::DoAddTask()
             
         auto follow_sell_task = std::make_shared<FollowSellTask>(*task_info, this->app_);
         app_->AppendStrategyTask(std::shared_ptr<StrategyTask>(follow_sell_task));
+        // add to task list ui
+        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
 
         app_->ticker_strand().PostTask([follow_sell_task, this]()
         {
             app_->stock_ticker().Register(std::shared_ptr<StrategyTask>(follow_sell_task));
         });
-        // add to task list ui
-        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+        
         app_->msg_win().ShowUI(QString::fromLocal8Bit("提示!"), QString::fromLocal8Bit("跟踪止盈任务添加成功!"));
         app_->AppendLog2Ui("添加跟踪止盈任务 : %d 成功\n", task_info->id);
 
@@ -335,13 +338,14 @@ void WinnerWin::DoAddTask()
             
         auto task = std::make_shared<BatchesSellTask>(*task_info, this->app_);
         app_->AppendStrategyTask(std::shared_ptr<StrategyTask>(task));
+        // add to task list ui
+        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
 
         app_->ticker_strand().PostTask([task, this]()
         {
             app_->stock_ticker().Register(std::shared_ptr<StrategyTask>(task));
         });
-        // add to task list ui
-        InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+        
         app_->msg_win().ShowUI(QString::fromLocal8Bit("提示!"), QString::fromLocal8Bit("分批卖出任务添加成功!"));
         app_->AppendLog2Ui("添加分批卖出任务 : %d 成功\n", task_info->id);
     }
