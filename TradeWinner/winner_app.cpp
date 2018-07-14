@@ -115,7 +115,7 @@ bool WinnerApp::Init()
 	p_user_broker_info_ = db_moudle_.FindUserBrokerByUser(user_info_.id);
 	assert(p_user_account_info_ && p_user_broker_info_);
 
-	trade_agent_.Init(p_user_broker_info_->remark, p_user_account_info_->account_no_in_broker_);
+	//trade_agent_.Init(p_user_broker_info_->remark, p_user_account_info_->account_no_in_broker_);
 #endif
 
 #if 1 //#ifdef USE_TRADE_FLAG
