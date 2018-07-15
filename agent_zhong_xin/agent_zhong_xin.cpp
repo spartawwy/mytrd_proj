@@ -139,7 +139,7 @@ int Agent_ZHONG_XIN::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
 	} 
 
 	std::string str_result = result->c_data();
-    //UtilityUse::WriteLog("QueryPosition ret:\n%s", result->c_data());
+    //UtilityUse::WriteLog("QueryPosition raw ret:\n%s", result->c_data());
 
 	UtilityUse::replace_all_distinct(str_result, "\n", "\t");
 	UtilityUse::replace_all_distinct(str_result, "\t\t\t", "\t");
@@ -160,7 +160,7 @@ int Agent_ZHONG_XIN::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
     }
 #endif
     int start = 19;
-    int content_col = 19;
+    int content_col = 18;
 
     int index = 0;
 	for( unsigned int n = 0 ; n < (result_array.size() - start) / content_col; ++n )
@@ -177,9 +177,9 @@ int Agent_ZHONG_XIN::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
             pos_data.total = std::stoi(result_array.at( start + n * content_col + 2 ));
 			pos_data.avaliable = std::stoi(result_array.at(start + n * content_col + 3));
             pos_data.cost = std::stod(result_array.at(start + n * content_col + 4));
-			pos_data.value = std::stod(result_array.at(start + n * content_col + 6));
-			pos_data.profit = std::stod(result_array.at(start + n * content_col + 7));
-			pos_data.profit_percent = std::stod(result_array.at(start + n * content_col + 8));
+			pos_data.value = std::stod(result_array.at(start + n * content_col + 7));
+			pos_data.profit = std::stod(result_array.at(start + n * content_col + 8));
+			pos_data.profit_percent = std::stod(result_array.at(start + n * content_col + 9));
 
 		}catch(std::exception &)
 		{ 
