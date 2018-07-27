@@ -68,9 +68,9 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
     , flash_win_timer_(nullptr)
 {
     ui.setupUi(this);
-
-    connect(ui.pbtn_query_capital, SIGNAL(clicked()), this, SLOT(DoQueryCapital()));
-     
+	//-------------------------
+	//this->setWindowTitle("my trade");
+	 
 #if 1
     //------------------tab task list 
     QStandardItemModel * model = new QStandardItemModel(0, cst_col_count, this);
@@ -132,6 +132,8 @@ WinnerWin::WinnerWin(WinnerApp *app, QWidget *parent)
 
     //------------------tab index trade task----------------
 	InitIndexTradeWin();
+
+	connect(ui.pbtn_query_capital, SIGNAL(clicked()), this, SLOT(DoQueryCapital()));
 
 	status_label_ = new QLabel("");
     status_label_->setIndent(3);
@@ -239,6 +241,11 @@ void WinnerWin::InsertIntoTbvTasklist(QTableView *tbv , T_TaskInformation &task_
  
 void WinnerWin::Init()
 {
+	assert(app_->user_broker_info());
+
+	QString title = QString("TradeWinner0.2 %1 %2").arg(QString::fromLocal8Bit(app_->user_broker_info()->remark.c_str())).arg(QString::fromLocal8Bit(app_->user_info().name.c_str()));
+	setWindowTitle(title);
+
     flash_win_timer_ = new QTimer(this);
     flash_win_timer_->setSingleShot(false); 
     flash_win_timer_->setInterval(600);
