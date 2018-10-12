@@ -1,4 +1,4 @@
-// StkQuoter.cpp : Defines the exported functions for the DLL application.
+// GET quote or his data from url
 //
 
 #include "stdafx.h"
