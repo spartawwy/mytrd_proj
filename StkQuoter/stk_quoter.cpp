@@ -99,7 +99,7 @@ EXIT_PROC:
     return index;
 }
 
-//ps: use delete[] to release datas;  
+//ps: use delete[] to release datas;  max T_StockHisDataItem is 265, so max days between is 265 * 3/2 =  396 
 extern "C" int STKQUOTER_IMEXPORT  StkHisData(char stocks[16], int start_date, int end_date, T_StockHisDataItem **datas)
 {
 	const unsigned int buf_size = 1024*20;
@@ -177,6 +177,7 @@ extern "C" int STKQUOTER_IMEXPORT  StkHisData(char stocks[16], int start_date, i
         if( p_cur_end )
         {
             *p_cur_end = '\0';
+            //int max_item = buf_size / strlen(p_rem);
             quotes = split(p_rem, ",");
             if( quotes.size() >= 10 )
                 has_enough_data = true; 
