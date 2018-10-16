@@ -35,10 +35,10 @@ bool Agent_MIN_SHENG::Login(char* ip, short port, char* ver, short yybid, char* 
 
     char error_info[1024] = {0};
     trade_client_id_ = -1;
-#if 0
+#if 1
     trade_client_id_ = trade_delegater_->Logon(ip, port, ver, yybid, account_no
         , trade_account, trade_pwd, txpwd, error);
-#elif 1
+#else
     std::string password = trade_pwd; //"005179";
     if( trade_client_id_ == -1 )
     {
@@ -49,19 +49,6 @@ bool Agent_MIN_SHENG::Login(char* ip, short port, char* ver, short yybid, char* 
             , account_no_
             , ""//const_cast<char*>(account.c_str())  // default trade no is account no  
             , const_cast<char*>(password.c_str())
-            , "" //, p_broker_info->type == TypeBroker::ZHONGY_GJ ? password.c_str() : ""// communication password 
-            , error_info);
-    }
-#elif 0
-    if( trade_client_id_ == -1 )
-    {
-        trade_client_id_ = trade_delegater_->Logon("114.141.171.133"  
-            , 7708
-            , "7.02"  
-            , 1
-            ,  account_no_
-            , ""//const_cast<char*>(account.c_str())  // default trade no is account no  
-            , password
             , "" //, p_broker_info->type == TypeBroker::ZHONGY_GJ ? password.c_str() : ""// communication password 
             , error_info);
     }
@@ -148,7 +135,7 @@ int Agent_MIN_SHENG::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
 	auto result_array = UtilityUse::split(str_result, "\t");
 
     int start = 21;
-    int content_col = 21;
+    int content_col = 20;
 
     int index = 0;
 	for( unsigned int n = 0 ; n < (result_array.size() - start) / content_col; ++n )
@@ -162,7 +149,7 @@ int Agent_MIN_SHENG::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
 		try
 		{
             strcpy_s(pos_data.pinyin, result_array.at( start + n * content_col + 1).c_str());
-            pos_data.total = std::stoi(result_array.at( start + n * content_col + 2 ));
+            pos_data.total = std::stoi(result_array.at( start + n * content_col + 3 ));
 			pos_data.avaliable = std::stoi(result_array.at(start + n * content_col + 4));
             pos_data.cost = std::stod(result_array.at(start + n * content_col + 5));
 			pos_data.value = std::stod(result_array.at(start + n * content_col + 10));
@@ -225,7 +212,7 @@ bool Agent_MIN_SHENG::QueryCapital(T_Capital *capital)
     try
     { 
          // ndchk:  ndedt:
-        capital->remain = std::stod(result_array.at(14));
+        capital->remain = std::stod(result_array.at(15));
         capital->available = std::stod(result_array.at(15));
         //result_array.at(17) ×ÜÊÐÖµ
         capital->total = std::stod(result_array.at(18));

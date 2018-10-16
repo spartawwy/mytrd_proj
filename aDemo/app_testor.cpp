@@ -46,7 +46,7 @@ void AppTestor::Initiate()
     bool ret = trade_agent_->Init("min_sheng", "5300002955");
     if( !ret )
         goto INI_FAIL;
-    char error_info[256] = {0}; 
+    char error_info[256] = {0};  
     ret = trade_agent_->Login("180.166.192.124", 7708, "7.09", 34, "5300002955", "5300002955", "005179", "", error_info);
 #endif
     if( !ret )
