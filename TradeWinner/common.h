@@ -73,11 +73,13 @@ enum class TypeUserLevel : char
 
 enum class TypeBroker : char
 {
-    FANG_ZHENG = 1,    //方正
-    PING_AN,           //平安
-	ZHONG_XIN,          //中信
-    ZHONGY_GJ,          //中银国际
-	YINGHE_ZQ,         //银河证券
+    FANG_ZHENG = 1,     //方正        1
+    PING_AN,            //平安        2
+	ZHONG_XIN,          //中信        3
+    ZHONGY_GJ,          //中银国际    4
+	YINGHE_ZQ,          //银河证券    5
+    GUOJIN_ZQ,          //国金证券    6
+    MIN_SHENG,          //民生证券    7
 };
 
 enum class TypeTask : char
