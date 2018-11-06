@@ -29,6 +29,7 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
     , reb_top_price_(MIN_STOCK_PRICE)
     , is_not_enough_capital_continue_(0)
     , is_not_position_continue_(0)
+    , time_point_open_warning_(0)
 { 
     assert(para_.advance_section_task.portion_sections.size() > 2 );
     assert(para_.rebounce > 0.0);
@@ -148,14 +149,29 @@ void AdvanceSectionTask::HandleQuoteData()
 
 	if( iter->cur_price < portions_.begin()->bottom_price() ) // in clear section 
 	{ 
-        action = TypeAction::CLEAR;
-        order_type = TypeOrderCategory::SELL;
-        cur_index = -1;
-        qty = GetAvaliablePosition();
-        DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("task:%d %s price:%.2f trigger clearing position ", para_.id, para_.stock.c_str(), iter->cur_price));
-        goto BEFORE_TRADE;
-	}
-	else if( iter->cur_price >= portions_.rbegin()->top_price() )
+        if( time_point_open_warning_ != 0 )
+        {
+            if( iter->time_stamp - time_point_open_warning_ >= 6 )
+            {
+                action = TypeAction::CLEAR;
+                order_type = TypeOrderCategory::SELL;
+                cur_index = -1;
+                qty = GetAvaliablePosition();
+                DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("advsec task:%d %s price:%.2f trigger clearing position ", para_.id, para_.stock.c_str(), iter->cur_price));
+                goto BEFORE_TRADE;
+            }else
+                goto NOT_TRADE;
+        }else // prepare clear
+        {
+            time_point_open_warning_ = iter->time_stamp;
+            this->app_->local_logger().LogLocal(TSystem::utility::FormatStr("advsec任务:%d %s 触及价格:%f 预警", para_.id, this->code_data(), iter->cur_price)); 
+        }
+    }else if( time_point_open_warning_ != 0 )
+    {
+        time_point_open_warning_ = 0; //reset
+        this->app_->local_logger().LogLocal(TSystem::utility::FormatStr("任务:%d %s 解除清仓预警", para_.id, this->code_data())); 
+    }
+	if( iter->cur_price >= portions_.rbegin()->top_price() )
     { 
 		action = TypeAction::NOOP;
         cur_index = portions_.size();
