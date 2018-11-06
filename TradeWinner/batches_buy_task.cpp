@@ -116,7 +116,12 @@ void BatchesBuyTask::HandleQuoteData()
     }
     if( is_waitting_removed_ )
         return;
-    assert( !quote_data_queue_.empty() );
+    if( quote_data_queue_.empty() )
+    {
+        app_->local_logger().LogLocal(TSystem::utility::FormatStr("error task %d BatchesBuyTask quote_data_queue_.empty", para_.id));
+        this->app_->AppendLog2Ui("error task %d BatchesBuyTask quote_data_queue_.empty", para_.id);
+        return;
+    }
     auto data_iter = quote_data_queue_.rbegin();
     std::shared_ptr<QuotesData> & iter = *data_iter;
     assert(iter);
@@ -170,7 +175,7 @@ void BatchesBuyTask::HandleQuoteData()
 
 NO_TRADE:
 
-    app_->local_logger().LogLocal("mutex", TSystem::utility::FormatStr(" task %d BatchesBuyTask timed_mutex_wrapper_.unlock", para_.id));  
+    //app_->local_logger().LogLocal("mutex", TSystem::utility::FormatStr(" task %d BatchesBuyTask timed_mutex_wrapper_.unlock", para_.id));  
     timed_mutex_wrapper_.unlock();
     return;
 
@@ -264,13 +269,13 @@ BEFORE_TRADE:
     } 
     app_->db_moudle().UpdateTaskInfo(para_);
 
-    if( times_has_buy_ >= para_.bs_times )
+    if( is_waitting_removed_ )
     {
         auto info_str = utility::FormatStr("分批买入任务:%d %s 已买 %d 次,任务结束!", para_.id, para_.stock.c_str(), times_has_buy_);
         this->app_->local_logger().LogLocal(info_str);
-        this->app_->AppendLog2Ui(info_str.c_str());
-		timed_mutex_wrapper_.unlock();
+        this->app_->AppendLog2Ui(info_str.c_str()); 
         this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_BUY);
+        timed_mutex_wrapper_.unlock();
     }
     
     });
