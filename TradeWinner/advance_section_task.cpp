@@ -35,26 +35,27 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
     assert(para_.rebounce > 0.0);
      
 	// setup portions_  ------------------
-    auto str_portion_vector = utility::split(para_.advance_section_task.portion_sections, ";");
-    if( str_portion_vector.size() && str_portion_vector.at(str_portion_vector.size()-1) == "" )
-        str_portion_vector.pop_back();
+    auto str_portion_price_vector = utility::split(para_.advance_section_task.portion_sections, ";");
+    if( str_portion_price_vector.size() && str_portion_price_vector.at(str_portion_price_vector.size()-1) == "" )
+        str_portion_price_vector.pop_back();
      
-    if( str_portion_vector.size() < 2 )
+    if( str_portion_price_vector.size() < 2 )
     {
-        ShowError(utility::FormatStr("error: AdvanceSectionTask %d str_portion_vector.size() < 2", para_.id));
+        ShowError(utility::FormatStr("error: AdvanceSectionTask %d str_portion_price_vector.size() < 2", para_.id));
         is_waitting_removed_ = true;
         return;
     }
     std::vector<double> price_vector;
-    for( int i = 0 ; i < str_portion_vector.size(); ++i ) 
-        price_vector.push_back(std::stod(str_portion_vector[i]));
+    for( int i = 0 ; i < str_portion_price_vector.size(); ++i ) 
+        price_vector.push_back(std::stod(str_portion_price_vector[i]));
 
     std::vector<std::string> str_portion_stat_vector = utility::split(para_.advance_section_task.portion_states, ";");
-
+    if( str_portion_stat_vector.size() && str_portion_stat_vector.at(str_portion_stat_vector.size()-1) == "" )
+        str_portion_stat_vector.pop_back();
     int portion_num = 0;
-    if( !para_.advance_section_task.is_original )
+    if( str_portion_stat_vector.size() > 0 )
     {  
-        if( str_portion_stat_vector.size() + 1 != str_portion_vector.size() )
+        if( str_portion_stat_vector.size() + 1 != str_portion_price_vector.size() )
         {
             ShowError(utility::FormatStr("error: AdvanceSectionTask %d portion_states.size + 1 != portion_sections.size", para_.id));
             is_waitting_removed_ = true;
@@ -62,11 +63,17 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
         }
         try
         { 
-            for( portion_num = 0; portion_num < str_portion_vector.size() - 1; ++portion_num ) 
+            for( portion_num = 0; portion_num < str_portion_price_vector.size() - 1 && portion_num < str_portion_stat_vector.size(); ++portion_num ) 
             {  
                 portions_.emplace_back(portion_num, price_vector[portion_num]
                          , price_vector[portion_num + 1]
                          , (PortionState)std::stoi(str_portion_stat_vector[portion_num]));
+            }
+            for( ; portion_num < str_portion_price_vector.size() - 1; ++portion_num ) 
+            {  
+                portions_.emplace_back(portion_num, price_vector[portion_num]
+                    , price_vector[portion_num + 1]
+                    , PortionState::UNKNOW);
             }
         }
         catch (...)
@@ -75,11 +82,11 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
             is_waitting_removed_ = true;
             return;
         } 
-    }else // original
+    }else  
     { 
         try
         { 
-            for( portion_num = 0; portion_num < str_portion_vector.size() - 1; ++portion_num ) 
+            for( portion_num = 0; portion_num < str_portion_price_vector.size() - 1; ++portion_num ) 
             {  
                 portions_.emplace_back(portion_num, price_vector[portion_num]
                     , price_vector[portion_num + 1]
@@ -353,12 +360,13 @@ BEFORE_TRADE:
         this->app_->local_logger().LogLocal(TagOfOrderLog(), 
             TSystem::utility::FormatStr("贝塔任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty)); 
         this->app_->AppendLog2Ui("贝塔任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty);
-
+#if 0
         // order the stock
         this->app_->trade_agent().SendOrder((int)order_type, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
             , price, qty
             , result, error_info); 
+#endif
 #endif 
           
         // judge result 
@@ -392,15 +400,12 @@ BEFORE_TRADE:
                 // translate portions state into para.advancesection.portion_states 
                 para_.advance_section_task.portion_states.clear(); 
                 for(auto item: this->portions_)
-                {
-                    switch( item.state() )
-                    {
-                    case PortionState::WAIT_BUY: para_.advance_section_task.portion_states.append(std::to_string(int(PortionState::WAIT_BUY)));break;
-                    case PortionState::WAIT_SELL: para_.advance_section_task.portion_states.append(std::to_string(int(PortionState::WAIT_SELL)));break;
-                    case PortionState::UNKNOW: para_.advance_section_task.portion_states.append(std::to_string(int(PortionState::UNKNOW)));break;
-                    default: assert(false); break;
-                    }
+                { 
+                    para_.advance_section_task.portion_states += std::to_string((unsigned char)(item.state())) + ";";
                 }
+                if( para_.advance_section_task.portion_states.size() > 0 )
+                    para_.advance_section_task.portion_states.resize(para_.advance_section_task.portion_states.size() - 1);
+
                 para_.advance_section_task.pre_trade_price = price;
                 para_.advance_section_task.is_original = false;
 
@@ -455,6 +460,7 @@ void AdvanceSectionTask::SetSectionState(double price, int position)
 	auto cur_index = cur_portion_iter->index();
 
     int remain_pos = position;
+    // from curindex to top index
     for( int i = cur_index; i < portions_.size(); ++i )
     {
         if( remain_pos < para_.quantity )
@@ -462,6 +468,14 @@ void AdvanceSectionTask::SetSectionState(double price, int position)
         portions_[i].state(PortionState::WAIT_SELL);
         remain_pos -= para_.quantity;
     }
+
+    para_.advance_section_task.portion_states.clear();
+    for( auto item :portions_)
+    {
+        para_.advance_section_task.portion_states += std::to_string((unsigned char)item.state()) + ";";
+    }
+    if( para_.advance_section_task.portion_states.size() > 0 )
+        para_.advance_section_task.portion_states.resize(para_.advance_section_task.portion_states.size() - 1);
 }
 
 void AdvanceSectionTask::reset_flag_price(double cur_price)

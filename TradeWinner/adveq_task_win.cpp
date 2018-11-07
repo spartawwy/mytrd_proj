@@ -9,6 +9,8 @@
 #include "HintList.h"
 #include "advance_section_task.h"
 
+#define  ADVSEC_BUILDPOS_CONDIDER_EXISTPOS
+
 void WinnerWin::InitAdveqTaskWin()
 {
     ui.combox_adveq_price_level->addItem(QString::fromLocal8Bit("即时价"), QVariant(static_cast<int>(TypeQuoteLevel::PRICE_CUR)));
@@ -140,26 +142,33 @@ void WinnerWin::DoAddAdveqTask()
      
     auto advance_section_task = std::make_shared<AdvanceSectionTask>(*task_info, this->app_);
      
+#ifdef ADVSEC_BUILDPOS_CONDIDER_EXISTPOS
+    // ajust postion state base on current positoin -----------
     auto p_position = app_->QueryPosition(task_info->stock);
     if( p_position && p_position->total >= task_info->quantity )
     {
         T_StockPriceInfo *p_info = app_->GetStockPriceInfo(task_info->stock, false);
         if( p_info )
+        {
             advance_section_task->SetSectionState(p_info->cur_price, p_position->total);
+            task_info->advance_section_task.portion_states  = advance_section_task->task_info().advance_section_task.portion_states;
+        }
     }
-
-    if( !app_->db_moudle().AddTaskInfo(task_info) )
+#endif 
+    if( !app_->db_moudle().AddTaskInfo(task_info) ) // allocate task id and save to db
     {
         // log error
 		app_->msg_win().ShowUI(QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("贝塔区间任务添加失败!"));
 		app_->AppendLog2Ui("添加贝塔区间任务 : %d 失败! fail db_moudle().AddTaskInfo \n", task_info->id);
         return;
     }
+    advance_section_task->task_info().id = task_info->id;
+
     app_->AppendTaskInfo(task_info->id, task_info);
-             
-    app_->AppendStrategyTask(std::shared_ptr<StrategyTask>(advance_section_task));
     // add to task list ui
-    InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);
+    InsertIntoTbvTasklist(ui.tbview_tasks, *task_info);             
+    app_->AppendStrategyTask(std::shared_ptr<StrategyTask>(advance_section_task));
+    
 
     app_->ticker_strand().PostTask([advance_section_task, this]()
     {

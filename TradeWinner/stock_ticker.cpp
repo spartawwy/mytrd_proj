@@ -286,6 +286,7 @@ void StockTicker::Procedure()
     ///qDebug() << QString::fromLocal8Bit(Result.data()) << "\n";  
 }
  
+// ps: also ajust task state
 void StockTicker::TellAllRelTasks(const std::list<unsigned int>& id_list, std::shared_ptr<QuotesData> &data)
 {
     // throu id list which this stock code related   

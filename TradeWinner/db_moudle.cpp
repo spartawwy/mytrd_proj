@@ -663,7 +663,7 @@ bool DBMoudle::AddTaskInfo(std::shared_ptr<T_TaskInformation> &info, char *error
                 , info->advance_section_task.pre_trade_price
                 , (int)info->advance_section_task.is_original
                 );
-            WriteLock locker(equalsection_table_mutex_);
+            WriteLock locker(advsection_table_mutex_);
             ret = db_conn_->ExecuteSQL(sql.c_str()); 
 
         }else if( info->type == TypeTask::INDEX_RISKMAN )
@@ -725,7 +725,7 @@ bool DBMoudle::DelTaskInfo(int task_id, TypeTask type)
     {
         // del related recorde in table IndexRelateTask
         std::string sql = utility::FormatStr("DELETE FROM AdvanceSectionTask WHERE id=%d ", task_id);
-        WriteLock locker(index_rel_table_mutex_);
+        WriteLock locker(advsection_table_mutex_);
         db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
         { 
             return 0;
@@ -828,7 +828,7 @@ void DBMoudle::UpdateAdvanceSection(T_TaskInformation &info)
         , info.advance_section_task.portion_sections.c_str(), info.advance_section_task.portion_states.c_str()
         , info.advance_section_task.pre_trade_price, (int)info.advance_section_task.is_original, info.id); 
     {
-        WriteLock locker(equalsection_table_mutex_);
+        WriteLock locker(advsection_table_mutex_);
         db_conn_->ExecuteSQL(sql.c_str(),[this](int num_cols, char** vals, char** names)->int
         { 
             return 0;
