@@ -65,6 +65,8 @@ private:
 
     //volatile bool  is_wait_trade_result_; 
     __int64 time_point_open_warning_; // if val is 0, means not in warning
+
+    unsigned int count_for_debug_;
 };
 
 

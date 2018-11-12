@@ -30,6 +30,7 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
     , is_not_enough_capital_continue_(0)
     , is_not_position_continue_(0)
     , time_point_open_warning_(0)
+    , count_for_debug_(0)
 { 
     assert(para_.advance_section_task.portion_sections.size() > 2 );
     assert(para_.rebounce > 0.0);
@@ -105,6 +106,8 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
 
 void AdvanceSectionTask::HandleQuoteData()
 {   
+    if( count_for_debug_++ % 200 == 0 ) 
+        DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("is_waitting_removed_:%d", is_waitting_removed_));
 	if( is_waitting_removed_ )
 		return;
     
@@ -116,7 +119,7 @@ void AdvanceSectionTask::HandleQuoteData()
 	const double pre_price = quote_data_queue_.size() > 1 ? (*(++data_iter))->cur_price : iter->cur_price;
 	if( IsPriceJumpDown(pre_price, iter->cur_price) || IsPriceJumpUp(pre_price, iter->cur_price) )
 	{
-		//app_->local_logger().LogLocal(cst_rebounce_debug, TSystem::utility::FormatStr("%d AdvanceSectionTask price jump %.2f to %.2f", para_.id, pre_price, iter->cur_price));
+		DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("%d AdvanceSectionTask price jump %.2f to %.2f", para_.id, pre_price, iter->cur_price));
 		return;
 	};
      
@@ -136,7 +139,7 @@ void AdvanceSectionTask::HandleQuoteData()
     int ms_for_wait_lock = 1000; 
     if( !timed_mutex_wrapper_.try_lock_for(ms_for_wait_lock) )  
     { 
-        //DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
+        DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
         //app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock fail"); 
         return;
     }
@@ -171,7 +174,7 @@ void AdvanceSectionTask::HandleQuoteData()
         }else // prepare clear
         {
             time_point_open_warning_ = iter->time_stamp;
-            this->app_->local_logger().LogLocal(TSystem::utility::FormatStr("advsec任务:%d %s 触及价格:%f 预警", para_.id, this->code_data(), iter->cur_price)); 
+            this->app_->local_logger().LogLocal(TSystem::utility::FormatStr("advsec任务:%d %s 触及价格:%f 清仓预警", para_.id, this->code_data(), iter->cur_price)); 
         }
     }else if( time_point_open_warning_ != 0 )
     {
