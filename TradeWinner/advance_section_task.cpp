@@ -22,6 +22,11 @@ AdvanceSectionTask::Portion::Portion(int index,double bottom, double top, Portio
 	mid_price_ = Round((bottom_price_ + top_price_) / 2, 2);
 }
 
+std::string AdvanceSectionTask::Portion::Detail()
+{
+    return TSystem::utility::FormatStr("index:%d bot:%.2f mid:%.2f top:%.2f", index_, bottom_price_, mid_price_, top_price_);
+}
+
 AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *app)
     : StrategyTask(task_info, app)
     , app_(app)
@@ -30,7 +35,7 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
     , is_not_enough_capital_continue_(0)
     , is_not_position_continue_(0)
     , time_point_open_warning_(0)
-    , count_for_debug_(0)
+    , inter_count_for_debug_(0)
 { 
     assert(para_.advance_section_task.portion_sections.size() > 2 );
     assert(para_.rebounce > 0.0);
@@ -101,16 +106,23 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
             return;
         } 
     }
-    
+    DO_LOG_BKTST(TagOfCurTask(), Detail().c_str());
 }
 
 void AdvanceSectionTask::HandleQuoteData()
 {   
-    if( count_for_debug_++ % 200 == 0 ) 
-        DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("is_waitting_removed_:%d", is_waitting_removed_));
-	if( is_waitting_removed_ )
-		return;
+    static auto log_state = [this](double cur_price, int cur_index, bool is_order)
+    {
+        DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("%s price:%.2f index:%d %s", (is_order ? "trigger order" : ""), cur_price, cur_index, Detail().c_str()));
+    };
+
+    inter_count_for_debug_++;
     
+	if( is_waitting_removed_ )
+    {
+        DO_LOG_BKTST(TagOfCurTask(), Detail().c_str());
+		return;
+    }
 	assert( !quote_data_queue_.empty() );
 	auto data_iter = quote_data_queue_.rbegin();
 	std::shared_ptr<QuotesData> & iter = *data_iter;
@@ -187,7 +199,6 @@ void AdvanceSectionTask::HandleQuoteData()
         cur_index = portions_.size();
         reb_top_price_ = iter->cur_price;
         reb_base_price_ = portions_.at(portions_.size()-1).mid_price();
-        //DO_LOG("AdvanceSec", utility::FormatStr("task:%d %s price:%.2f in stop trade section ", para_.id, para_.stock.c_str(), iter->cur_price));
         goto NOT_TRADE;
     }
     if( reb_top_price_ > portions_.rbegin()->top_price() )
@@ -237,7 +248,10 @@ void AdvanceSectionTask::HandleQuoteData()
         if( qty > 100 )
             goto BEFORE_TRADE;
         else
+        {
+
             goto NOT_TRADE;
+        }
     }
     //------------------ not is_original------------------------
      
@@ -314,12 +328,14 @@ void AdvanceSectionTask::HandleQuoteData()
     }
      
 NOT_TRADE:
-   
+    if( inter_count_for_debug_ % 200 == 0 ) 
+        log_state(iter->cur_price, cur_index, false);
     timed_mutex_wrapper_.unlock();
     return;
 
 BEFORE_TRADE:   
 
+    log_state(iter->cur_price, cur_index, true);
     reb_top_price_ = iter->cur_price;
     reb_bottom_price_ = iter->cur_price;
     
@@ -360,10 +376,10 @@ BEFORE_TRADE:
         assert(this->app_->trade_agent().account_data(market_type_));
 
         //auto sh_hld_code  = const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code;
-        this->app_->local_logger().LogLocal(TagOfOrderLog(), 
+        DO_LOG(TagOfOrderLog(), 
             TSystem::utility::FormatStr("贝塔任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty)); 
         this->app_->AppendLog2Ui("贝塔任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty);
-#if 0
+#if 1
         // order the stock
         this->app_->trade_agent().SendOrder((int)order_type, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
@@ -599,6 +615,24 @@ std::tuple<int, double, bool> AdvanceSectionTask::judge_any_pos2sell(double cur_
     }
 #endif 
     return std::make_tuple(local_qty_sell, portions_[cur_index].mid_price(), is_on_border);
+}
+
+std::string AdvanceSectionTask::Detail()
+{
+    std::string portion_detail;
+    for(auto portion_item: portions_)
+    {
+        portion_detail += portion_item.Detail() + "\n";
+    }
+    return TSystem::utility::FormatStr("wait_remove:%d pre_trig:%.2f reb_para:%.2f cur_base:%.2f cur_bot:%.2f cur_top:%.2f \n| %s"
+                                , is_waitting_removed_
+                                , pre_trigged_price_
+                                , para_.rebounce
+                                , reb_base_price_
+                                , reb_bottom_price_
+                                , reb_top_price_
+                                , portion_detail.c_str()
+                                );
 }
 
 std::string AdvanceSectionTask::TagOfCurTask()

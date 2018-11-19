@@ -384,6 +384,7 @@ QString ToQString(TypeQuoteLevel val);
 QString ToQString(TaskCurrentState val);
 QString ToQString(TindexTaskType val);
 std::string ToString(TypeEqSection val);
+std::string ToString(const T_TaskInformation &info);
 
 void Delay(__int64 mseconds);
 
@@ -417,5 +418,7 @@ double Get2DownRebouncePercent(double base, double top, double cur);
 double CaculateFee(double total, bool is_sell);
  
 typedef std::unordered_map<std::string, std::shared_ptr<QuotesData> > TCodeMapQuotesData;
+
+typedef void(*FuncTellAddtionPrice)(const std::string&, const std::string&);
 
 #endif

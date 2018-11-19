@@ -11,6 +11,8 @@
 
 #include "common.h"
 
+// <task id, task>
+ 
 enum class TypeAction : char { NOOP = 0, PREPARE_BUY, PREPARE_SELL, CLEAR};
 
 class WinnerApp;
@@ -27,7 +29,7 @@ public:
 
     virtual void HandleQuoteData() = 0;
 	virtual std::string Detail(){ return "";}
-    virtual void UnReg(){ }
+    virtual void UnReg(void *reg_man);
 
     bool IsPriceJumpUp(double pre_price, double cur_price);
     bool IsPriceJumpDown(double pre_price, double cur_price);
@@ -53,10 +55,16 @@ public:
 
     void ObtainData(std::shared_ptr<QuotesData> &data);
     
-    void cur_state(TaskCurrentState val) { cur_state_ = val; }
+    void cur_state(TaskCurrentState val) 
+    { 
+        cur_state_ = val; 
+    }
 	bool is_a_state_set(TaskStateElem val) { return (cur_state_ & (int)val) == (int)val; }
 	
-	void clear_a_state(TaskStateElem val) { cur_state_ &= ~(int)val; }
+	void clear_a_state(TaskStateElem val) 
+    { 
+        cur_state_ &= ~(int)val; 
+    }
 	void set_a_state(TaskStateElem val)
 	{ 
 		auto is_except_set = is_a_state_set(TaskStateElem::EXCEPT); 
@@ -65,9 +73,12 @@ public:
 	}
     TaskCurrentState cur_state() { return cur_state_; }
 
+    void SetWaitRemove(){ is_waitting_removed_ = true; }
     QTime tp_start() { return tp_start_; }
     QTime tp_end() { return tp_end_; }
 	double pre_trigged_price() { return pre_trigged_price_; }
+    TSystem::TaskStrand & Strand() { return strand_;}
+
     unsigned int life_count_;
     
 protected:
@@ -90,11 +101,11 @@ protected:
    double  cur_price_;
    double  pre_trigged_price_;
    volatile TaskCurrentState cur_state_;
-   bool is_waitting_removed_; 
+   volatile bool is_waitting_removed_; 
 
    TSystem::TaskStrand   strand_;
      
    TimedMutexWrapper  timed_mutex_wrapper_;
 };
-
+typedef std::unordered_map<unsigned int, std::shared_ptr<StrategyTask> > TTaskIdMapStrategyTask;
 #endif

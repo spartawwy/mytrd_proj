@@ -4,6 +4,7 @@
 #include <mutex>
 #include <memory>
 #include <unordered_map>
+#include <list>
 
 #include <TLib/core/tsystem_local_logger.h>
 
@@ -15,8 +16,7 @@
 
 class StrategyTask; 
 
-// <task id, task>
-typedef std::unordered_map<unsigned int, std::shared_ptr<StrategyTask> > TTaskIdMapStrategyTask;
+
 // <stock code, task_id>
 typedef std::unordered_map<std::string, std::list<unsigned int> > TCodeMapTasks;
 
@@ -30,7 +30,7 @@ class StockTicker : public Handler
 {
 public:
 
-    StockTicker(TSystem::LocalLogger  &logger);
+    StockTicker(TSystem::LocalLogger  &logger, void *app=nullptr);
     virtual ~StockTicker();
 
     virtual void Procedure() override;
@@ -40,12 +40,15 @@ public:
     void UnRegister(unsigned int task_id);
     void ClearAllTask();
 
+    void RegisterAdditionCode(const std::string& input_code);
+    void UnRegAdditionCode(const std::string& code);
+
     bool GetSecurityBars(int Category, int Market, char* Zqdm, short Start, short& Count, char* Result, char* ErrInfo);
 
     bool GetQuotes(char* stock_codes[], short count, Buffer &Result);
 
-    void DecodeStkQuoteResult(Buffer &Result, std::list<T_codeQuoteDateTuple> *ret_quotes_data=nullptr
-            , std::function<void(const std::list<unsigned int>& id_list, std::shared_ptr<QuotesData> &data)> tell_all_rel_task=nullptr);
+    void DecodeStkQuoteResult(Buffer &Result, INOUT TCodeMapQuotesData *codes_quote_datas=nullptr
+            , std::function<void(const std::list<unsigned int>& /*id_list*/, std::shared_ptr<QuotesData> &/*data*/)> tell_all_rel_task=nullptr);
 
     bool GetQuoteDatas(char* stock_codes[], short count, TCodeMapQuotesData &ret_quotes_data);
 
@@ -54,11 +57,15 @@ public:
 protected:
       
     TTaskIdMapStrategyTask  registered_tasks_;
-     
     TCodeMapTasks  codes_taskids_;
-
     std::mutex  tasks_list_mutex_;
+
+    std::list<std::string>  addtion_codes_;
+    std::mutex  addtion_codes_mutex_;
+
     TSystem::LocalLogger  &logger_;
+
+    void *app_;
 
 };
 

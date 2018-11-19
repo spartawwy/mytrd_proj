@@ -17,13 +17,30 @@ StrategyTask::StrategyTask(T_TaskInformation &task_info, WinnerApp *app)
     , tp_end_(Int2Qtime(task_info.end_time))
     , cur_price_(0.0)
 	, pre_trigged_price_(0.0)
-    , cur_state_(static_cast<TaskCurrentState>(TaskStateElem(task_info.state) != TaskStateElem::STOP ? TaskStateElem::WAITTING : TaskStateElem::STOP) )
+    //, cur_state_(static_cast<TaskCurrentState>(TaskStateElem(task_info.state) != TaskStateElem::STOP ? TaskStateElem::WAITTING : TaskStateElem::STOP) )
     , is_waitting_removed_(false)
     , life_count_(0)
     , strand_(app->task_pool())
     , timed_mutex_wrapper_(/* para_.type == TypeTask::BATCHES_BUY ? para_.id : 0, para_.type == TypeTask::BATCHES_BUY ? std::addressof(app->local_logger()) : nullptr*/ )
 {
-    
+    cur_state_ = (static_cast<TaskCurrentState>(TaskStateElem(task_info.state) != TaskStateElem::STOP ? TaskStateElem::WAITTING : TaskStateElem::STOP));
+    cur_state_ = static_cast<TaskCurrentState>(TaskStateElem::WAITTING);
+    cur_state_ = cur_state_;
+}
+
+void StrategyTask::UnReg(void *reg_man)
+{
+    if( reg_man )
+    {
+        strand_.DispatchTask( [reg_man, this]()
+        {
+            this->SetWaitRemove();
+            TTaskIdMapStrategyTask &reg_obj = *((TTaskIdMapStrategyTask*)reg_man);
+            auto iter = reg_obj.find(para_.id);
+            if( iter != reg_obj.end() )
+                reg_obj.erase(iter);
+        });
+    }
 }
 
 bool StrategyTask::IsPriceJumpUp(double pre_price, double cur_price)
@@ -89,6 +106,8 @@ void StrategyTask::ObtainData(std::shared_ptr<QuotesData> &data)
     strand_.PostTask([data, this]()
     {
         assert(data);
+        if( is_waitting_removed_ )
+            return;
         if( quote_data_queue_.size() > cst_max_data_count)
         { 
             auto iter_end_del = quote_data_queue_.begin();

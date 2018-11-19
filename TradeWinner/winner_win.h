@@ -50,6 +50,8 @@ public slots:
 
     void DoFlashWin();
 
+    void DoRecAdditionPrice(const QString& code, const QString& prices_str);
+
     // sell task win--------------------
     void DoAlertPercentChanged(double val);
     void DoSellTypeChanged(const QString&);
@@ -136,10 +138,12 @@ private:
     void InitSellTaskWin();
     void SetupSellTaskWin();
     void FillSellTaskWin(TypeTask type, T_TaskInformation& info);
-    
+    void DoSellWinAddtionCodeChange(const std::string& code);
+
     // buy task related
     void InitBuyTaskWin();
     void FillBuyTaskWin(TypeTask type, T_TaskInformation& info);
+    void DoBuyWinAddtionCodeChange(const std::string& code);
 
     // equal section task related
     void InitEqSectionTaskWin();
@@ -178,6 +182,10 @@ private:
     double eqsec_task_cur_price_;
 
     QTimer *flash_win_timer_;
+
+    QString buy_task_win_addtion_code_;
+    QString sell_task_win_addtion_code_;
+     
 };
 
 #endif // TRADE_WINNER_H

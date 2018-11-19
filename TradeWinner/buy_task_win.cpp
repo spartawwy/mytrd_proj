@@ -61,7 +61,6 @@ void WinnerWin::InitBuyTaskWin()
 
     ui.wid_bt_retreat->hide();
 	ui.wid_bt_step_range->hide();
-	ui.wid_ticker->hide();
 
     ResetBuyTabTaskTime();
     ChangeTabBuyAssistantImg(TypeTask::INFLECTION_BUY);

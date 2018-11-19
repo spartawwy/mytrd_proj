@@ -92,12 +92,17 @@ public:
     bool DelTaskById(int task_id, TypeTask task_type);
     std::shared_ptr<StrategyTask> FindStrategyTask(int task_id);
 
+    void RegisterAddtionPrice(const std::string& code);
+    void UnRegAddtionPrice(const std::string& code);
+
     void Emit(StrategyTask* p, int type) { emit SigTaskStatChange(p, type); }
     void EmitSigRemoveTask(int id) { emit SigRemoveTask(id);}
     // memory will be delete by this function 
     void EmitSigShowUi(std::string *str, bool flash_task_bar=false) { emit SigShowUi(str, flash_task_bar); }
     void EmitSigShowLongUi(std::string *str, bool flash_task_bar=false) { emit SigShowLongUi(str, flash_task_bar); }
 
+    void EmitSigAddtionPrice(const QString& code, const QString& prices_str){ emit SigAddtionPrice(code, prices_str);}
+     
     T_Capital Capital()
     { 
         ReadLock  locker(capital_mutex_);
@@ -131,6 +136,8 @@ signals:
     //void SigShowUi(std::shared_ptr<std::string>); //cause can't invoke so use raw point
     void SigShowUi(std::string*, bool);
     void SigShowLongUi(std::string*, bool);
+
+    void SigAddtionPrice(const QString& code, const QString& prices_str);
 
 public slots:
 

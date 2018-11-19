@@ -137,6 +137,45 @@ std::string ToString(TypeEqSection val)
     return "";
 }
 
+std::string ToString(const T_TaskInformation &info)
+{
+    switch(info.type)
+    {
+    case TypeTask::INFLECTION_BUY:
+        return TSystem::utility::FormatStr("inflect_b_%s_%.2f_%.2f_%d", info.stock.c_str(), info.alert_price, info.rebounce, info.quantity);
+    case TypeTask::BREAKUP_BUY:
+        return TSystem::utility::FormatStr("break_b_%s_%.2f_%d", info.stock.c_str(), info.alert_price, info.quantity);
+    case TypeTask::BATCHES_BUY:    
+        return TSystem::utility::FormatStr("batches_b_%s_%.2f_%d", info.stock.c_str(), info.alert_price, info.quantity);
+    case TypeTask::INFLECTION_SELL:  
+        return TSystem::utility::FormatStr("inflect_s_%s_%.2f_%.2f_%d", info.stock.c_str(), info.alert_price, info.rebounce, info.quantity);
+    case TypeTask::BREAK_SELL:      
+        return TSystem::utility::FormatStr("break_s_%s_%.2f_%d", info.stock.c_str(), info.alert_price, info.quantity);
+    case TypeTask::FOLLOW_SELL:     
+        return TSystem::utility::FormatStr("follow_s_%s_%.2f_%d", info.stock.c_str(), info.alert_price, info.quantity);
+    case TypeTask::BATCHES_SELL:    
+        return TSystem::utility::FormatStr("batches_s_%s_%.2f_%d", info.stock.c_str(), info.alert_price, info.quantity);
+    case TypeTask::EQUAL_SECTION:   
+        {
+            return TSystem::utility::FormatStr("eq_sec_%s_%.2f_%u_%.2f_%.2f_%.2f_%.2f", info.stock.c_str(), info.alert_price, info.quantity
+                , info.secton_task.raise_percent, info.secton_task.raise_infection, info.secton_task.fall_percent, info.secton_task.fall_infection);
+        }
+    case TypeTask::ADVANCE_SECTION: 
+        {
+            auto str_portion_vector = TSystem::utility::split(info.advance_section_task.portion_sections, ";");
+            if( str_portion_vector.size() < 2 ) 
+                return "advance_section_" + info.stock;
+            // code_portions_top_down_quantity_rebounce
+            return TSystem::utility::FormatStr("adv_sec_%s_%d_%s_%s_%u_%.2f", info.stock.c_str(), (str_portion_vector.size() - 1)
+                , str_portion_vector[0].c_str(), str_portion_vector[str_portion_vector.size() - 1].c_str()
+                , info.quantity, info.rebounce);
+        } 
+    case TypeTask::INDEX_RISKMAN:   return "index_riskman"; 
+    default: assert(0);
+    }
+    return "";
+}
+
 void Delay(__int64 mseconds)
 {
     //TSystem::WaitFor([]()->bool { return false;}, mseconds); // only make effect to timer

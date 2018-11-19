@@ -29,7 +29,7 @@ static bool SetCurrentEnvPath();
 //static void AjustTickFlag(bool & enable_flag);
 
 static const int cst_ticker_update_interval = 1100;  //ms :notice value have to be bigger than 1000
-static const int cst_normal_timer_interval = 2000;
+static const int cst_normal_timer_interval = 2000; 
 
 //static const unsigned int cst_result_len = 1024 * 1024;
 
@@ -65,7 +65,7 @@ WinnerApp::WinnerApp(int argc, char* argv[])
 {   
 	connect(strategy_tasks_timer_.get(), SIGNAL(timeout()), this, SLOT(DoStrategyTasksTimeout()));
 	connect(normal_timer_.get(), SIGNAL(timeout()), this, SLOT(DoNormalTimer()));
-
+    
 }
 
 WinnerApp::~WinnerApp()
@@ -147,19 +147,7 @@ bool WinnerApp::Init()
 
 	trade_agent_.SetupAccountInfo(result.data());
 #endif
-	//------------------------ create tasks ------------------
-#if 0
-	std::shared_ptr<StrategyTask> task0 = std::make_shared<BreakDownTask>(0, "000001", TypeMarket::SZ, this);
-
-	std::shared_ptr<StrategyTask> task1 = std::make_shared<BreakDownTask>(1, "600030", TypeMarket::SH, this);
-	std::shared_ptr<StrategyTask> task2 = std::make_shared<BreakDownTask>(2, "000959", TypeMarket::SZ, this);
 	 
-
-	strategy_tasks_.push_back(std::move(task0));
-	strategy_tasks_.push_back(std::move(task1));
-	strategy_tasks_.push_back(std::move(task2));
-#else
-
 	db_moudle_.LoadAllTaskInfo(task_infos_);
 
 	winner_win_.Init(); // inner use task_info
@@ -171,11 +159,10 @@ bool WinnerApp::Init()
 	//ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::string *)), this, SLOT(DoShowUi(std::string *)));
 	ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::string *, bool)), this, SLOT(DoShowUi(std::string *, bool)));
     ret1 = QObject::connect(this, SIGNAL(SigShowLongUi(std::string *, bool)), this, SLOT(DoShowLongUi(std::string *, bool)));
-#endif
 
 #if 1 
 
-	stock_ticker_ = std::make_shared<StockTicker>(this->local_logger());
+	stock_ticker_ = std::make_shared<StockTicker>(this->local_logger(), this);
 	stock_ticker_->Init();
 	 
 	if( !index_ticker_->Init() )
@@ -214,7 +201,7 @@ bool WinnerApp::Init()
 #endif
 
 	strategy_tasks_timer_->start(1000); //msec invoke DoStrategyTasksTimeout
-	normal_timer_->start(2000); // invoke DoNormalTimer
+	normal_timer_->start(cst_normal_timer_interval); // invoke DoNormalTimer
 	return true;
 }
 
@@ -363,6 +350,22 @@ std::shared_ptr<StrategyTask> WinnerApp::FindStrategyTask(int task_id)
 		}
 	}
 	return nullptr;
+}
+
+void WinnerApp::RegisterAddtionPrice(const std::string& code)
+{
+    tick_strand_.PostTask([code, this]()
+    {
+        this->stock_ticker_->RegisterAdditionCode(code);
+    });
+}
+
+void WinnerApp::UnRegAddtionPrice(const std::string& code)
+{
+    tick_strand_.PostTask([code, this]()
+    {
+        this->stock_ticker_->UnRegAdditionCode(code);
+    });
 }
 
 void WinnerApp::DownloadCapital()
@@ -550,6 +553,7 @@ T_StockPriceInfo * WinnerApp::GetStockPriceInfo(const std::string& code, bool is
 	    T_StockPriceInfo& info = stocks_price_info_.insert(std::make_pair(code, price_info[0])).first->second;
 	    return &info;
     }
+     
 }
 
 void WinnerApp::SlotStopAllTasks(bool)
@@ -666,6 +670,7 @@ void WinnerApp::DoShowLongUi(std::string* str, bool flash_taskbar)
         winner_win_.TriggerFlashWinTimer(true);
 }
 
+// cst_normal_timer_interval million second per inter
 void WinnerApp::DoNormalTimer()
 { 
 	ticker_enable_flag_ = IsNowTradeTime();
@@ -690,9 +695,10 @@ void WinnerApp::DoNormalTimer()
 	}
 
 	static int count_query = 0;
+    assert( cst_normal_timer_interval / 1000 > 0 );
 	// 30 second do a position query
-	assert( 30000 / cst_normal_timer_interval > 0 );
-	if( ++count_query % (30000 / cst_normal_timer_interval) == 0 )
+    const int query_capital_seconds = 30 / (cst_normal_timer_interval / 1000);
+	if( ++count_query % query_capital_seconds == 0 )
 	{
 		trade_strand().PostTask([this]()
 		{
@@ -703,6 +709,10 @@ void WinnerApp::DoNormalTimer()
             });
 		});
 	}
+    
+    const int heart_quote_quey_seconds = 5 / (cst_normal_timer_interval / 1000);
+    if( count_query % heart_quote_quey_seconds == 0 )
+        GetStockPriceInfo("601318", false);
 }
 
 
@@ -779,28 +789,29 @@ bool WinnerApp::SellAllPosition(IndexTask * task)
     }
     // decode  
     auto quotes_data_list = std::make_shared<std::list<T_codeQuoteDateTuple> >();
-    stock_ticker_->DecodeStkQuoteResult(Result, quotes_data_list.get(), nullptr);
+    auto quote_datas = std::make_shared<TCodeMapQuotesData>();
+    stock_ticker_->DecodeStkQuoteResult(Result, quote_datas.get(), nullptr);
      
     // send orders -----
-    trade_strand().PostTask([ quotes_data_list, p_stocks_pos, task, this]()
+    trade_strand().PostTask([ quote_datas, p_stocks_pos, task, this]()
     {
-        std::for_each( std::begin(*quotes_data_list), std::end(*quotes_data_list), [p_stocks_pos, task, this](T_codeQuoteDateTuple &entry)
+        std::for_each( std::begin(*quote_datas), std::end(*quote_datas), [p_stocks_pos, task, this](TCodeMapQuotesData::reference entry)
         {
-            auto iter = p_stocks_pos->find( std::get<0>(entry) );
+            auto iter = p_stocks_pos->find( entry.first );
             if( iter == p_stocks_pos->end() || iter->second.avaliable == 0 )
                 return;
 
             char result[1024] = {0};
             char error_info[1024] = {0};
             // get quote of buy
-            double price = task->GetQuoteTargetPrice(*(std::get<1>(entry)), false);
+            double price = task->GetQuoteTargetPrice(*entry.second, false);
             price -= 0.01;
 #ifdef USE_TRADE_FLAG
             // send order 
             this->trade_agent().SendOrder((int)TypeOrderCategory::SELL
 					, 0
-                    , const_cast<T_AccountData *>(this->trade_agent().account_data(GetStockMarketType( std::get<0>(entry) )))->shared_holder_code
-					, const_cast<char*>(std::get<0>(entry).c_str())
+                    , const_cast<T_AccountData *>(this->trade_agent().account_data(GetStockMarketType( entry.first )))->shared_holder_code
+					, const_cast<char*>(entry.first.c_str())
                     , price
 					, iter->second.avaliable
                     , result
@@ -810,7 +821,7 @@ bool WinnerApp::SellAllPosition(IndexTask * task)
             if( strlen(error_info) > 0 )
             {
                 auto ret_str = new std::string(utility::FormatStr("error %d 清仓卖出 %s %.2f %d 失败:%s"
-                    , task->task_id(), std::get<0>(entry).c_str(), price, iter->second.avaliable, error_info));
+                    , task->task_id(), entry.first.c_str(), price, iter->second.avaliable, error_info));
 
                 this->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
                 this->AppendLog2Ui(ret_str->c_str());
@@ -819,7 +830,7 @@ bool WinnerApp::SellAllPosition(IndexTask * task)
             }else
             {
                 auto ret_str = new std::string(utility::FormatStr("%d 清仓卖出 %s %.2f %d 成功:%s"
-                    , task->task_id(), std::get<0>(entry).c_str(), price, iter->second.avaliable, error_info));
+                    , task->task_id(), entry.first.c_str(), price, iter->second.avaliable, error_info));
                 this->EmitSigShowUi(ret_str, true);
             } 
 #endif  

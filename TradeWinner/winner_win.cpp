@@ -22,6 +22,14 @@
 //static const QString cst_str_breakout_buy = QString::fromLocal8Bit("Í»ÆÆÂòÈë");
 //static const QString cst_str_Inflection_buy = QString::fromLocal8Bit("¹ÕµãÂòÈë");
 
+static const int cst_tasklist_tab_index  = 0;
+static const int cst_buytask_tab_index   = 1;
+static const int cst_selltask_tab_index  = 2;
+static const int cst_eqtask_tab_index    = 3;
+static const int cst_adveqtask_tab_index = 4;
+static const int cst_capital_tab_index   = 5;
+static const int cst_log_tab_index       = 6;
+static const int cst_indextask_tab_index = 7;
 
 static const unsigned short cst_col_count = 11;
 
@@ -255,6 +263,7 @@ void WinnerWin::Init()
 	connect(ui.tabwid_holder, SIGNAL(currentChanged(int)), this, SLOT(SlotTabChanged(int)));
 
     ret = connect(ui.actionStopAllTask, SIGNAL(triggered(bool)), this->app_, SLOT(SlotStopAllTasks(bool)));
+    
     // ndedt
     ret = connect(ui.actionOpenCalcWin, SIGNAL(triggered(bool)), this, SLOT(SlotOpenCalcWin(bool)));
     ui.tbview_tasks->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -312,7 +321,8 @@ void WinnerWin::Init()
      
         ui.pte_log->appendPlainText(QString::fromLocal8Bit(buf->c_data()));
     }
-     
+    ret = connect(this->app_, SIGNAL(SigAddtionPrice(const QString&, const QString&)), this, SLOT(DoRecAdditionPrice(const QString&, const QString&)));
+    ret = ret;
 }
 
 void WinnerWin::keyPressEvent(QKeyEvent *event)
@@ -390,6 +400,7 @@ void WinnerWin::SlotTabChanged(int /*index*/)
     m_bt_list_hint_->hide();
     m_eqsec_list_hint_->hide();
     m_adveq_list_hint_->hide();
+    
 }
 
 void WinnerWin::SlotTbvTasksContextMenu(QPoint p)
@@ -636,6 +647,38 @@ void WinnerWin::DoFlashWin()
     FlashWindow( HWND(this->winId()), 1);
 }
 
+void WinnerWin::DoRecAdditionPrice(const QString& code, const QString& prices_str)
+{
+    std::vector<std::string> quotas = TSystem::utility::split(prices_str.toLocal8Bit().data(), ";");
+    if( buy_task_win_addtion_code_ == code )
+    {
+        ui.lab_bw_out_buy1->setText(quotas[0].c_str());
+        ui.lab_bw_out_sell1->setText(quotas[1].c_str());
+        ui.lab_bw_out_buy2->setText(quotas[2].c_str());
+        ui.lab_bw_out_sell2->setText(quotas[3].c_str());
+        ui.lab_bw_out_buy3->setText(quotas[4].c_str());
+        ui.lab_bw_out_sell3->setText(quotas[5].c_str());
+        ui.lab_bw_out_buy4->setText(quotas[6].c_str());
+        ui.lab_bw_out_sell4->setText(quotas[7].c_str());
+        ui.lab_bw_out_buy5->setText(quotas[8].c_str());
+        ui.lab_bw_out_sell5->setText(quotas[9].c_str());
+    }
+    if( sell_task_win_addtion_code_ == code )
+    {
+        ui.lab_out_buy1->setText(quotas[0].c_str());
+        ui.lab_out_sell1->setText(quotas[1].c_str());
+        ui.lab_out_buy2->setText(quotas[2].c_str());
+        ui.lab_out_sell2->setText(quotas[3].c_str());
+        ui.lab_out_buy3->setText(quotas[4].c_str());
+        ui.lab_out_sell3->setText(quotas[5].c_str());
+        ui.lab_out_buy4->setText(quotas[6].c_str());
+        ui.lab_out_sell4->setText(quotas[7].c_str());
+        ui.lab_out_buy5->setText(quotas[8].c_str());
+        ui.lab_out_sell5->setText(quotas[9].c_str());
+    }
+    
+}
+
 void WinnerWin::DoLeStockEditingFinished()
 {
     if( !ui.le_stock->isModified() )
@@ -864,7 +907,11 @@ void WinnerWin::ChangeFromStationText(QString text)
 	 
     QString::SectionFlag flag = QString::SectionSkipEmpty;
     QString tgt_tag = text.section('/', 0, 0, flag);
-	T_StockPriceInfo *p_info = app_->GetStockPriceInfo(tgt_tag.toLocal8Bit().data(), false);
+    std::string code = tgt_tag.toLocal8Bit().data();
+    if( !IsStrNum(code) || code.size() != 6 )
+        return;
+
+	T_StockPriceInfo *p_info = app_->GetStockPriceInfo(code, false);
 	if( p_info )
     {
 		if( p_dbspb_price )
@@ -887,6 +934,32 @@ void WinnerWin::ChangeFromStationText(QString text)
 		else if( ui.tabwid_holder->currentIndex() == cst_tab_index_eqsec_task )
 			eqsec_task_cur_price_ = 0.0;
     }
+    if( ui.tabwid_holder->currentIndex() == cst_buytask_tab_index && buy_task_win_addtion_code_ != code.c_str() )
+    {
+        DoBuyWinAddtionCodeChange(code);
+    }else if( ui.tabwid_holder->currentIndex() == cst_selltask_tab_index && sell_task_win_addtion_code_ != code.c_str() )
+    {
+        DoSellWinAddtionCodeChange(code);
+    }
+    
+}
+
+void WinnerWin::DoSellWinAddtionCodeChange(const std::string& code)
+{
+    if( !sell_task_win_addtion_code_.isEmpty() 
+        && buy_task_win_addtion_code_ != sell_task_win_addtion_code_ )
+        this->app_->UnRegAddtionPrice(sell_task_win_addtion_code_.toLocal8Bit().data());
+    sell_task_win_addtion_code_ = code.c_str();
+    this->app_->RegisterAddtionPrice(code);
+}
+
+void WinnerWin::DoBuyWinAddtionCodeChange(const std::string& code)
+{
+    if( !buy_task_win_addtion_code_.isEmpty() 
+        && buy_task_win_addtion_code_ != sell_task_win_addtion_code_ )
+        this->app_->UnRegAddtionPrice(buy_task_win_addtion_code_.toLocal8Bit().data());
+    buy_task_win_addtion_code_ = code.c_str();
+    this->app_->RegisterAddtionPrice(code);
 }
 
 void WinnerWin::AssignHintListAndLineEdit(HintList *& p_list, QLineEdit *&p_edit, QDoubleSpinBox *&p_dbspb_alert_price, QDoubleSpinBox *&p_dbspb_percent)
@@ -967,6 +1040,7 @@ void WinnerWin::DoShowTaskDetail(int task_id)
         cur_price_ = 0.0;
         FillSellTaskWin(p_tskinfo->type, *p_tskinfo);
 		ui.tabwid_holder->setCurrentIndex(cst_tab_index_sell_task);
+        DoSellWinAddtionCodeChange(p_tskinfo->stock);
         break;
     case TypeTask::BREAKUP_BUY:
     case TypeTask::INFLECTION_BUY:
@@ -974,6 +1048,7 @@ void WinnerWin::DoShowTaskDetail(int task_id)
         buytask_cur_price_ = 0.0;
         FillBuyTaskWin(p_tskinfo->type, *p_tskinfo);
 		ui.tabwid_holder->setCurrentIndex(cst_tab_index_buy_task);
+        DoBuyWinAddtionCodeChange(p_tskinfo->stock);
         break;
     case TypeTask::EQUAL_SECTION:
         {

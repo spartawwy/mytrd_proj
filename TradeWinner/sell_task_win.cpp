@@ -60,6 +60,7 @@ void WinnerWin::InitSellTaskWin()
 
     ui.wid_retreat->hide();
 	ui.wid_step_range->hide();
+    //ui.wid_sell_win_ticker->hide();
 
     ResetSellTabTaskTime();
     ChangeTabSellAssistantImg(TypeTask::BREAK_SELL);

@@ -15,7 +15,11 @@ public:
 
     virtual ~EqualSectionTask(){}
     virtual void HandleQuoteData() override;
-    virtual void UnReg() override { timed_mutex_wrapper_.unlock(); } 
+    virtual void UnReg(void *reg_man) override 
+    { 
+        StrategyTask::UnReg(reg_man); 
+        timed_mutex_wrapper_.unlock(); 
+    } 
 
 private:
 

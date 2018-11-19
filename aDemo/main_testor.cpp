@@ -15,6 +15,22 @@ public:
 
     int main(int argc, char* argv[])
     {
+#if 1
+    std::unordered_map<int, int>  ord_map;
+    ord_map.insert(std::make_pair(1, 10));
+
+    ord_map.insert(std::make_pair(1, 20));
+
+    printf("val:%d \n", ord_map[1]); // out 10
+    printf("val:%d \n", ord_map.find(1)->second); // out 10
+
+    ord_map[1] = 20;
+    printf("val:%d \n", ord_map[1]); // out 20
+
+    ord_map[2] = 30;
+    printf("val:%d \n", ord_map[2]); // out 30
+    getchar();
+#endif
         TSystem::utility::ProjectTag("WZF");
 
         AppTestor  app_testor;

@@ -602,15 +602,403 @@
        <string>%</string>
       </property>
      </widget>
+     <widget class="QWidget" name="wid_buyl_win_ticker" native="true">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>270</y>
+        <width>201</width>
+        <height>251</height>
+       </rect>
+      </property>
+      <widget class="QLabel" name="lab_bw_out_sell2">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>90</y>
+         <width>91</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_12">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>50</y>
+         <width>46</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>卖4</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_13">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>30</y>
+         <width>46</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>卖5</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_14">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>130</y>
+         <width>211</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>--------------------------------------</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lab_bw_out_buy1">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>150</y>
+         <width>91</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_15">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>110</y>
+         <width>46</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>卖1</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_16">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>70</y>
+         <width>46</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>卖3</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_17">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>90</y>
+         <width>46</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>卖2</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lab_bw_out_buy3">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>190</y>
+         <width>91</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lab_bw_out_buy5">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>230</y>
+         <width>91</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lab_bw_out_sell4">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>50</y>
+         <width>71</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_18">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>230</y>
+         <width>46</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>买5</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_20">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>170</y>
+         <width>46</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>买2</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lab_bw_out_sell1">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>110</y>
+         <width>91</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lab_bw_out_sell3">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>70</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lab_bw_out_buy4">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>210</y>
+         <width>91</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lab_bw_out_sell5">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>30</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_25">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>210</y>
+         <width>46</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>买4</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lab_bw_out_buy2">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>170</y>
+         <width>101</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_26">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>150</y>
+         <width>46</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>买1</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_27">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>190</y>
+         <width>46</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>买3</string>
+       </property>
+      </widget>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_sell_task">
      <attribute name="title">
       <string>卖出任务</string>
      </attribute>
-     <widget class="QWidget" name="wid_ticker" native="true">
+     <widget class="QWidget" name="wid_sell_win_ticker" native="true">
       <property name="geometry">
        <rect>
-        <x>700</x>
+        <x>640</x>
         <y>270</y>
         <width>201</width>
         <height>251</height>
@@ -631,7 +1019,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell2</string>
+        <string>-</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_4">
@@ -649,7 +1037,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell4</string>
+        <string>卖4</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_5">
@@ -667,7 +1055,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell5</string>
+        <string>卖5</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_6">
@@ -703,7 +1091,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell5</string>
+        <string>-</string>
        </property>
       </widget>
       <widget class="QLabel" name="label">
@@ -721,7 +1109,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell1</string>
+        <string>卖1</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_3">
@@ -739,7 +1127,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell3</string>
+        <string>卖3</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_2">
@@ -757,7 +1145,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell2</string>
+        <string>卖2</string>
        </property>
       </widget>
       <widget class="QLabel" name="lab_out_buy3">
@@ -775,7 +1163,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell3</string>
+        <string>-</string>
        </property>
       </widget>
       <widget class="QLabel" name="lab_out_buy5">
@@ -793,7 +1181,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell1</string>
+        <string>-</string>
        </property>
       </widget>
       <widget class="QLabel" name="lab_out_sell4">
@@ -811,7 +1199,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell4</string>
+        <string>-</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_7">
@@ -829,7 +1217,7 @@
         </font>
        </property>
        <property name="text">
-        <string>buy5</string>
+        <string>买5</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_11">
@@ -847,7 +1235,7 @@
         </font>
        </property>
        <property name="text">
-        <string>buy2</string>
+        <string>买2</string>
        </property>
       </widget>
       <widget class="QLabel" name="lab_out_sell1">
@@ -865,7 +1253,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell1</string>
+        <string>-</string>
        </property>
       </widget>
       <widget class="QLabel" name="lab_out_sell3">
@@ -883,7 +1271,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell3</string>
+        <string>-</string>
        </property>
       </widget>
       <widget class="QLabel" name="lab_out_buy4">
@@ -901,7 +1289,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell2</string>
+        <string>-</string>
        </property>
       </widget>
       <widget class="QLabel" name="lab_out_sell5">
@@ -919,7 +1307,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell5</string>
+        <string>-</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_10">
@@ -937,7 +1325,7 @@
         </font>
        </property>
        <property name="text">
-        <string>buy4</string>
+        <string>买4</string>
        </property>
       </widget>
       <widget class="QLabel" name="lab_out_buy2">
@@ -955,7 +1343,7 @@
         </font>
        </property>
        <property name="text">
-        <string>sell4</string>
+        <string>-</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_8">
@@ -973,7 +1361,7 @@
         </font>
        </property>
        <property name="text">
-        <string>buy1</string>
+        <string>买1</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_9">
@@ -991,7 +1379,7 @@
         </font>
        </property>
        <property name="text">
-        <string>buy3</string>
+        <string>买3</string>
        </property>
       </widget>
      </widget>
