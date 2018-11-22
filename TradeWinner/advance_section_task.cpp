@@ -111,9 +111,12 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
 
 void AdvanceSectionTask::HandleQuoteData()
 {   
-    static auto log_state = [this](double cur_price, int cur_index, bool is_order)
+    static auto log_state = [this](double cur_price, int cur_index, bool is_order, const std::string &other_info)
     {
-        DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("%s price:%.2f index:%d %s", (is_order ? "trigger order" : ""), cur_price, cur_index, Detail().c_str()));
+        if( is_order 
+            || ( !is_order && this->inter_count_for_debug_ % 20 == 0 ) )
+            DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("%s price:%.2f index:%d %s %s", (is_order ? "trigger order" : "")
+            , cur_price, cur_index, Detail().c_str(), other_info.c_str()));
     };
 
     inter_count_for_debug_++;
@@ -186,12 +189,12 @@ void AdvanceSectionTask::HandleQuoteData()
         }else // prepare clear
         {
             time_point_open_warning_ = iter->time_stamp;
-            this->app_->local_logger().LogLocal(TSystem::utility::FormatStr("advsec任务:%d %s 触及价格:%f 清仓预警", para_.id, this->code_data(), iter->cur_price)); 
+            DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("advsec任务:%d %s 触及价格:%f 清仓预警", para_.id, this->code_data(), iter->cur_price)); 
         }
     }else if( time_point_open_warning_ != 0 )
     {
         time_point_open_warning_ = 0; //reset
-        this->app_->local_logger().LogLocal(TSystem::utility::FormatStr("任务:%d %s 解除清仓预警", para_.id, this->code_data())); 
+        DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("advsec任务:%d %s 解除清仓预警", para_.id, this->code_data())); 
     }
 	if( iter->cur_price >= portions_.rbegin()->top_price() )
     { 
@@ -199,6 +202,8 @@ void AdvanceSectionTask::HandleQuoteData()
         cur_index = portions_.size();
         reb_top_price_ = iter->cur_price;
         reb_base_price_ = portions_.at(portions_.size()-1).mid_price();
+        log_state(iter->cur_price, cur_index, false
+            , utility::FormatStr(" > top %.2f", portions_.rbegin()->top_price()));
         goto NOT_TRADE;
     }
     if( reb_top_price_ > portions_.rbegin()->top_price() )
@@ -215,6 +220,7 @@ void AdvanceSectionTask::HandleQuoteData()
     {
         assert(false);
         app_->local_logger().LogLocal(utility::FormatStr("error: task %d AdvanceSectionTask::HandleQuoteData can't find portions!", para_.id));
+        DO_LOG_BKTST(TagOfCurTask(), "error: can't find portions!");
         goto NOT_TRADE;
     }  
 	cur_index = cur_portion_iter->index();
@@ -224,8 +230,12 @@ void AdvanceSectionTask::HandleQuoteData()
     if( para_.advance_section_task.is_original )
     {
         if( up_rebounce < para_.rebounce )
+        {
+            log_state(iter->cur_price, cur_index, false
+                , utility::FormatStr("up_reb:%.2f < %.2f", up_rebounce, para_.rebounce));
             goto NOT_TRADE;
-        // create position --------------
+        }
+        //   --------------
         double capital = this->app_->Capital().available;
           
         qty_can_buy = int(capital / iter->cur_price) / 100 * 100;
@@ -246,10 +256,12 @@ void AdvanceSectionTask::HandleQuoteData()
         cur_mid_price = std::get<1>(val);
         qty = std::get<0>(val);
         if( qty > 100 )
-            goto BEFORE_TRADE;
-        else
         {
-
+            goto BEFORE_TRADE;
+        }else
+        {
+            log_state(iter->cur_price, cur_index, false
+                , utility::FormatStr("qty:%d < 100up_reb:%.2f > %.2f reb_base:%.2f reb_btm:%.2f", qty, up_rebounce, para_.rebounce, reb_base_price_, reb_bottom_price_));
             goto NOT_TRADE;
         }
     }
@@ -259,8 +271,11 @@ void AdvanceSectionTask::HandleQuoteData()
     if( iter->cur_price < para_.advance_section_task.pre_trade_price ) 
     {
         if( up_rebounce < para_.rebounce )
+        {
+            log_state(iter->cur_price, cur_index, false
+                , utility::FormatStr("up_reb:%.2f < %.2f ", up_rebounce, para_.rebounce));
             goto NOT_TRADE;
-         
+        }
         double capital = this->app_->Capital().available;
         
         qty_can_buy = int(capital / iter->cur_price) / 100 * 100;
@@ -296,7 +311,11 @@ void AdvanceSectionTask::HandleQuoteData()
         // when rebounce down in up ward: consider sell ------------------
         const double down_rebounce = Get2DownRebouncePercent(reb_base_price_, reb_top_price_, iter->cur_price);
         if( down_rebounce < para_.rebounce )
+        {
+            log_state(iter->cur_price, cur_index, false
+                , utility::FormatStr("down_reb:%.2f < %.2f ", down_rebounce, para_.rebounce));
             goto NOT_TRADE;
+        }
           
         order_type = TypeOrderCategory::SELL;
         //int qty_sell = 0;
@@ -324,18 +343,23 @@ void AdvanceSectionTask::HandleQuoteData()
         if( qty > 0 )
             goto BEFORE_TRADE;
         else
+        {
+            log_state(iter->cur_price, cur_index, false
+                , "judge sell but qty <=0 no trade");
+            goto NOT_TRADE;
             reset_flag_price(iter->cur_price);
+        }
     }
      
 NOT_TRADE:
-    if( inter_count_for_debug_ % 200 == 0 ) 
-        log_state(iter->cur_price, cur_index, false);
+    
+    //log_state(iter->cur_price, cur_index, false);
     timed_mutex_wrapper_.unlock();
     return;
 
 BEFORE_TRADE:   
 
-    log_state(iter->cur_price, cur_index, true);
+    log_state(iter->cur_price, cur_index, true, "");
     reb_top_price_ = iter->cur_price;
     reb_bottom_price_ = iter->cur_price;
     
@@ -428,7 +452,7 @@ BEFORE_TRADE:
                 para_.advance_section_task.pre_trade_price = price;
                 para_.advance_section_task.is_original = false;
 
-                // todo: save to db: save cur_price as start_price in assistant_field 
+                // save to db: save cur_price as start_price in assistant_field 
                 app_->db_moudle().UpdateAdvanceSection(para_);
                  
             }else
