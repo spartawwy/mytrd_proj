@@ -648,8 +648,9 @@ std::string AdvanceSectionTask::Detail()
     {
         portion_detail += portion_item.Detail() + "\n";
     }
-    return TSystem::utility::FormatStr("wait_remove:%d pre_trig:%.2f reb_para:%.2f cur_base:%.2f cur_bot:%.2f cur_top:%.2f \n| %s"
+    return TSystem::utility::FormatStr("wait_remove:%d is_ori:%d pre_trig:%.2f reb_para:%.2f cur_base:%.2f cur_bot:%.2f cur_top:%.2f \n| %s"
                                 , is_waitting_removed_
+                                , para_.advance_section_task.is_original
                                 , pre_trigged_price_
                                 , para_.rebounce
                                 , reb_base_price_
