@@ -114,7 +114,7 @@ void AdvanceSectionTask::HandleQuoteData()
     static auto log_state = [this](double cur_price, int cur_index, bool is_order, const std::string &other_info)
     {
         if( is_order 
-            || ( !is_order && this->inter_count_for_debug_ % 20 == 0 ) )
+            || ( !is_order && this->inter_count_for_debug_ % 10 == 0 ) )
             DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("%s price:%.2f index:%d %s %s", (is_order ? "trigger order" : "")
             , cur_price, cur_index, Detail().c_str(), other_info.c_str()));
     };
@@ -261,7 +261,7 @@ void AdvanceSectionTask::HandleQuoteData()
         }else
         {
             log_state(iter->cur_price, cur_index, false
-                , utility::FormatStr("qty:%d < 100up_reb:%.2f > %.2f reb_base:%.2f reb_btm:%.2f", qty, up_rebounce, para_.rebounce, reb_base_price_, reb_bottom_price_));
+                , utility::FormatStr("qty:%d < 100 up_reb:%.2f > %.2f reb_base:%.2f reb_btm:%.2f", qty, up_rebounce, para_.rebounce, reb_base_price_, reb_bottom_price_));
             goto NOT_TRADE;
         }
     }
