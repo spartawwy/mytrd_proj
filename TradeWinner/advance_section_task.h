@@ -49,6 +49,7 @@ private:
     std::string TagOfCurTask();
     //void ResetRebBottomPrice(){ reb_bottom_price_ = MAX_STOCK_PRICE;};
     
+    void LogState(double cur_price, int cur_index, bool is_order, const std::string &other_info);
 
 private:
 

@@ -109,16 +109,16 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
     DO_LOG_BKTST(TagOfCurTask(), Detail().c_str());
 }
 
-void AdvanceSectionTask::HandleQuoteData()
-{   
-    static auto log_state = [this](double cur_price, int cur_index, bool is_order, const std::string &other_info)
-    {
-        if( is_order 
+void AdvanceSectionTask::LogState(double cur_price, int cur_index, bool is_order, const std::string &other_info)
+{
+    if( is_order 
             || ( !is_order && this->inter_count_for_debug_ % 10 == 0 ) )
-            DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("%s price:%.2f index:%d %s %s", (is_order ? "trigger order" : "")
-            , cur_price, cur_index, Detail().c_str(), other_info.c_str()));
-    };
+        DO_LOG_BKTST(TagOfCurTask(), TSystem::utility::FormatStr("%s price:%.2f index:%d %s %s", (is_order ? "trigger order" : "")
+                        , cur_price, cur_index, Detail().c_str(), other_info.c_str()));
+}
 
+void AdvanceSectionTask::HandleQuoteData()
+{    
     inter_count_for_debug_++;
     
 	if( is_waitting_removed_ )
@@ -202,7 +202,7 @@ void AdvanceSectionTask::HandleQuoteData()
         cur_index = portions_.size();
         reb_top_price_ = iter->cur_price;
         reb_base_price_ = portions_.at(portions_.size()-1).mid_price();
-        log_state(iter->cur_price, cur_index, false
+        LogState(iter->cur_price, cur_index, false
             , utility::FormatStr(" > top %.2f", portions_.rbegin()->top_price()));
         goto NOT_TRADE;
     }
@@ -231,7 +231,7 @@ void AdvanceSectionTask::HandleQuoteData()
     {
         if( up_rebounce < para_.rebounce )
         {
-            log_state(iter->cur_price, cur_index, false
+            LogState(iter->cur_price, cur_index, false
                 , utility::FormatStr("up_reb:%.2f < %.2f", up_rebounce, para_.rebounce));
             goto NOT_TRADE;
         }
@@ -260,7 +260,7 @@ void AdvanceSectionTask::HandleQuoteData()
             goto BEFORE_TRADE;
         }else
         {
-            log_state(iter->cur_price, cur_index, false
+            LogState(iter->cur_price, cur_index, false
                 , utility::FormatStr("qty:%d < 100 up_reb:%.2f > %.2f reb_base:%.2f reb_btm:%.2f", qty, up_rebounce, para_.rebounce, reb_base_price_, reb_bottom_price_));
             goto NOT_TRADE;
         }
@@ -272,7 +272,7 @@ void AdvanceSectionTask::HandleQuoteData()
     {
         if( up_rebounce < para_.rebounce )
         {
-            log_state(iter->cur_price, cur_index, false
+            LogState(iter->cur_price, cur_index, false
                 , utility::FormatStr("up_reb:%.2f < %.2f ", up_rebounce, para_.rebounce));
             goto NOT_TRADE;
         }
@@ -312,7 +312,7 @@ void AdvanceSectionTask::HandleQuoteData()
         const double down_rebounce = Get2DownRebouncePercent(reb_base_price_, reb_top_price_, iter->cur_price);
         if( down_rebounce < para_.rebounce )
         {
-            log_state(iter->cur_price, cur_index, false
+            LogState(iter->cur_price, cur_index, false
                 , utility::FormatStr("down_reb:%.2f < %.2f ", down_rebounce, para_.rebounce));
             goto NOT_TRADE;
         }
@@ -344,7 +344,7 @@ void AdvanceSectionTask::HandleQuoteData()
             goto BEFORE_TRADE;
         else
         {
-            log_state(iter->cur_price, cur_index, false
+            LogState(iter->cur_price, cur_index, false
                 , "judge sell but qty <=0 no trade");
             goto NOT_TRADE;
             reset_flag_price(iter->cur_price);
@@ -353,13 +353,13 @@ void AdvanceSectionTask::HandleQuoteData()
      
 NOT_TRADE:
     
-    //log_state(iter->cur_price, cur_index, false);
+    //LogState(iter->cur_price, cur_index, false);
     timed_mutex_wrapper_.unlock();
     return;
 
 BEFORE_TRADE:   
 
-    log_state(iter->cur_price, cur_index, true, "");
+    LogState(iter->cur_price, cur_index, true, "");
     reb_top_price_ = iter->cur_price;
     reb_bottom_price_ = iter->cur_price;
     
@@ -403,7 +403,7 @@ BEFORE_TRADE:
         DO_LOG(TagOfOrderLog(), 
             TSystem::utility::FormatStr("贝塔任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty)); 
         this->app_->AppendLog2Ui("贝塔任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty);
-#if 1
+#if 0
         // order the stock
         this->app_->trade_agent().SendOrder((int)order_type, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()

@@ -21,6 +21,9 @@
 #include "strategy_task.h"
 #include "winner_app.h"
 
+#ifdef USE_WINNER_SYS_API
+#include "winner_hq_api.h"
+#endif
 //#define DEBUG_GETQUOTES
  //»ñÈ¡apiº¯Êý
 TdxHq_ConnectDelegate TdxHq_Connect = nullptr;
@@ -101,6 +104,44 @@ bool StockTicker::Init()
     }
     qDebug() << Result.data() << endl;
     logger_.LogLocal(std::string("StockTicker::Init") + Result.data());
+
+#ifdef USE_WINNER_SYS_API
+    HMODULE api_handle = LoadLibrary("winner_api.dll");
+    if( !api_handle )
+    {
+        std::cout << "LoadLibrary winner_api.dll fail" << std::endl;
+        return 1;
+    }
+    //void *p_tchk = GetProcAddress(api_handle, "WinnerHisHq_Connect");
+    WinnerHisHq_ConnectDelegate WinnerHisHq_Connect = (WinnerHisHq_ConnectDelegate)GetProcAddress(api_handle, "WinnerHisHq_Connect"); 
+    if ( !WinnerHisHq_Connect )
+    {
+        std::cout << " GetProcAddress WinnerHisHq_Connect fail " << std::endl;
+        return 1;
+    }
+
+    WinnerHisHq_DisconnectDelegate WinnerHisHq_DisConnect =  (WinnerHisHq_DisconnectDelegate)GetProcAddress(api_handle, "WinnerHisHq_Disconnect"); 
+    
+    WinnerHisHq_GetHisFenbiDataDelegate WinnerHisHq_GetHisFenbiData 
+        = (WinnerHisHq_GetHisFenbiDataDelegate)GetProcAddress(api_handle, "WinnerHisHq_GetHisFenbiData"); 
+    if( !WinnerHisHq_GetHisFenbiData )
+    {
+        std::cout << " GetProcAddress WinnerHisHq_GetHisFenbiData fail " << std::endl;
+        return 1;
+    }
+    WinnerHisHq_GetKDataDelegate  WinnerHisHq_GetKData
+        = (WinnerHisHq_GetKDataDelegate)GetProcAddress(api_handle, "WinnerHisHq_GetKData"); 
+    char result[1024] = {0};
+    char error[1024] = {0};
+#if 0
+    auto ret = WinnerHisHq_Connect("192.168.1.5", 50010, result, error);
+#else
+    auto ret = WinnerHisHq_Connect("128.1.1.3", 50010, result, error);
+    if( ret != 0 )
+        std::cout << " WinnerHisHq_Connect fail " << std::endl;
+#endif 
+
+#endif
     return true;
 }
 
