@@ -776,6 +776,7 @@ bool WinnerApp::SellAllPosition(IndexTask * task)
     }
 
     // get quotes --------------------------
+
     Buffer Result(cst_result_len);
     Buffer ErrInfo(cst_error_len);
         
@@ -791,7 +792,7 @@ bool WinnerApp::SellAllPosition(IndexTask * task)
     auto quotes_data_list = std::make_shared<std::list<T_codeQuoteDateTuple> >();
     auto quote_datas = std::make_shared<TCodeMapQuotesData>();
     stock_ticker_->DecodeStkQuoteResult(Result, quote_datas.get(), nullptr);
-     
+ 
     // send orders -----
     trade_strand().PostTask([ quote_datas, p_stocks_pos, task, this]()
     {

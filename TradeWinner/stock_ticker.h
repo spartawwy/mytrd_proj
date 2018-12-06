@@ -25,7 +25,7 @@ static const unsigned int cst_error_len = 1024;
 static const unsigned int cst_max_stock_code_count = 128;
 
 typedef std::tuple<std::string, std::shared_ptr<QuotesData> > T_codeQuoteDateTuple;
-
+ 
 class StockTicker : public Handler
 {
 public:
@@ -67,6 +67,7 @@ protected:
 
     void *app_;
 
+    void  *WinnerHisHq_GetQuote_;
 };
 
 //////////////////////////////////////////////////////////////////

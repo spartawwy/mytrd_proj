@@ -17,6 +17,8 @@
 
 #include <TLib/core/tsystem_utility_functions.h>
 #include <TLib/tool/tsystem_rational_number.h>
+#include <TLib/core/tsystem_time.h>
+
 //#include "common.h"
 #include "strategy_task.h"
 #include "winner_app.h"
@@ -122,15 +124,15 @@ bool StockTicker::Init()
 
     WinnerHisHq_DisconnectDelegate WinnerHisHq_DisConnect =  (WinnerHisHq_DisconnectDelegate)GetProcAddress(api_handle, "WinnerHisHq_Disconnect"); 
     
-    WinnerHisHq_GetHisFenbiDataDelegate WinnerHisHq_GetHisFenbiData 
+    /*WinnerHisHq_GetHisFenbiDataDelegate WinnerHisHq_GetHisFenbiData 
         = (WinnerHisHq_GetHisFenbiDataDelegate)GetProcAddress(api_handle, "WinnerHisHq_GetHisFenbiData"); 
     if( !WinnerHisHq_GetHisFenbiData )
     {
         std::cout << " GetProcAddress WinnerHisHq_GetHisFenbiData fail " << std::endl;
         return 1;
-    }
-    WinnerHisHq_GetKDataDelegate  WinnerHisHq_GetKData
-        = (WinnerHisHq_GetKDataDelegate)GetProcAddress(api_handle, "WinnerHisHq_GetKData"); 
+    }*/
+    WinnerHisHq_GetQuote_
+        = (WinnerHisHq_GetQuoteDelegate)GetProcAddress(api_handle, "WinnerHisHq_GetQuote"); 
     char result[1024] = {0};
     char error[1024] = {0};
 #if 0
@@ -152,7 +154,7 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
     {
         markets[i] = (byte)GetStockMarketType(stock_codes[i]);
     }
-
+ 
     Buffer ErrInfo(cst_error_len);
     auto ret = TdxHq_GetSecurityQuotes(markets, stock_codes, count, Result.data(), ErrInfo.data());
     if ( !ret )
@@ -272,7 +274,14 @@ void StockTicker::DecodeStkQuoteResult(Buffer &Result, INOUT TCodeMapQuotesData 
 bool StockTicker::GetQuoteDatas(char* stock_codes[], short count, TCodeMapQuotesData &ret_quotes_data)
 {
     assert(ret_quotes_data.empty());
-
+#ifdef  USE_WINNER_SYS_API
+    int date = TSystem::Today();
+    for( int i = 0; i < count; ++i )
+    {
+        T_QuoteAtomData  atom_data;
+        ((WinnerHisHq_GetQuoteDelegate)WinnerHisHq_GetQuote_)(stock_codes[i], date, 0, &atom_data);
+    }
+#else 
     Buffer Result(cst_result_len);
     //Buffer ErrInfo(cst_error_len);
     if( !GetQuotes(stock_codes, count, Result) )
@@ -313,6 +322,7 @@ bool StockTicker::GetQuoteDatas(char* stock_codes[], short count, TCodeMapQuotes
         }
         ret_quotes_data.insert(std::make_pair(stock_code, std::move(quote_data)));
     }
+#endif 
     return true;
 }
 
