@@ -23,7 +23,7 @@
 #include "strategy_task.h"
 #include "winner_app.h"
 
-#ifdef USE_WINNER_SYS_API
+#ifdef USE_WINNER_MOCK
 #include "winner_hq_api.h"
 #endif
 //#define DEBUG_GETQUOTES
@@ -107,7 +107,7 @@ bool StockTicker::Init()
     qDebug() << Result.data() << endl;
     logger_.LogLocal(std::string("StockTicker::Init") + Result.data());
 
-#ifdef USE_WINNER_SYS_API
+#ifdef USE_WINNER_MOCK
     HMODULE api_handle = LoadLibrary("winner_api.dll");
     if( !api_handle )
     {
@@ -274,13 +274,40 @@ void StockTicker::DecodeStkQuoteResult(Buffer &Result, INOUT TCodeMapQuotesData 
 bool StockTicker::GetQuoteDatas(char* stock_codes[], short count, TCodeMapQuotesData &ret_quotes_data)
 {
     assert(ret_quotes_data.empty());
-#ifdef  USE_WINNER_SYS_API
-    int date = TSystem::Today();
+
+#ifdef  USE_WINNER_MOCK
+    assert(WinnerHisHq_GetQuote_);
+    //int date = TSystem::Today();
+    const int fake_year = 2018;
+    const int fake_mon = 10;
+    const int fake_day = 22;
+    const int fake_hour = 9;
+    auto t_p = TSystem::MakeTimePoint(fake_year, fake_mon, fake_day);
+      
+    TSystem::TimePoint tp_for_day(t_p);
+    int date = tp_for_day.year() * 10000 + tp_for_day.month() * 100 + tp_for_day.day();
+
+    auto tp_now = std::chrono::system_clock::now();
+    TSystem::TimePoint tp_for_hhmmss(tp_now);
+    
+
     for( int i = 0; i < count; ++i )
     {
+        int hhmmss = fake_hour * 10000 + tp_for_hhmmss.minute() * 100 + tp_for_hhmmss.sec();
         T_QuoteAtomData  atom_data;
-        ((WinnerHisHq_GetQuoteDelegate)WinnerHisHq_GetQuote_)(stock_codes[i], date, 0, &atom_data);
+        ((WinnerHisHq_GetQuoteDelegate)WinnerHisHq_GetQuote_)(stock_codes[i], date, hhmmss, &atom_data);
+         
+        auto quote_data = std::make_shared<QuotesData>();
+        quote_data->cur_price = atom_data.price;
+        quote_data->price_b_1 = atom_data.b_1;
+        quote_data->price_b_2 = atom_data.b_2;
+        quote_data->price_b_3 = atom_data.b_3;
+        quote_data->price_b_4 = atom_data.b_4;
+        quote_data->price_b_5 = atom_data.b_5;
+
+        ret_quotes_data.insert(std::make_pair(stock_codes[i], std::move(quote_data)));
     }
+
 #else 
     Buffer Result(cst_result_len);
     //Buffer ErrInfo(cst_error_len);

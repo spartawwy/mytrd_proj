@@ -33,7 +33,8 @@
 
 #define DO_LOG(tag, b)  do{ app_->local_logger().LogLocal((tag), b); }while(0);
 #define USE_TRADE_FLAG
-#define USE_WINNER_SYS_API
+
+#define USE_WINNER_MOCK
 
 #if 0
 std::vector<std::string> split(const std::string& line, const std::string& seperator = " ", 
