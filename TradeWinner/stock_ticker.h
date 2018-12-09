@@ -54,6 +54,14 @@ public:
 
     void TellAllRelTasks(const std::list<unsigned int>& id_list, std::shared_ptr<QuotesData> &data);
 
+#ifdef USE_WINNER_MOCK
+    bool GetQuoteDatas_Mock(char* stock_codes[], short count, int date, int hhmmss, TCodeMapQuotesData &ret_quotes_data);
+
+    void DecodeStkQuoteResult_Mock( INOUT TCodeMapQuotesData &codes_quote_datas 
+        , std::function<void(const std::list<unsigned int>& /*id_list*/, std::shared_ptr<QuotesData> &/*data*/)> tell_all_rel_task=nullptr);
+
+    bool ConnectHisHqServer();
+#endif
 protected:
       
     TTaskIdMapStrategyTask  registered_tasks_;
@@ -66,8 +74,18 @@ protected:
     TSystem::LocalLogger  &logger_;
 
     void *app_;
-
+#ifdef USE_WINNER_MOCK
+    void  *winner_hishq_api_handle_;
+    void  *WinnerHisHq_Connect_;
+    void  *WinnerHisHq_DisConnect_;
     void  *WinnerHisHq_GetQuote_;
+    bool  is_winner_hishq_connected_;
+
+    unsigned int hour_val_fake_;
+    unsigned int minute_val_fake_;
+    unsigned int second_val_fake_;
+         
+#endif
 };
 
 //////////////////////////////////////////////////////////////////

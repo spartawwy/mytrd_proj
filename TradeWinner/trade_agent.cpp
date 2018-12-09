@@ -78,13 +78,13 @@ void TradeAgent::SendOrder(int Category, int PriceType, char* Gddm, char* Zqdm, 
     p_agent_interface_->SendOrder(Category, PriceType, Gddm, Zqdm, Price, Quantity, Result,  ErrInfo);
 }
 
-
+// sync method
 int TradeAgent::QueryPosition(T_PositionData *out_pos_data, int max_pos_size, char* error)
 {
     assert(p_agent_interface_);
     return p_agent_interface_->QueryPosition(out_pos_data, max_pos_size, error);
 }
-
+// sync method
 bool TradeAgent::QueryCapital(T_Capital *capital)
 {
     assert(p_agent_interface_);

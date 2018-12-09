@@ -114,8 +114,7 @@ bool WinnerApp::Init()
 	p_user_account_info_ = db_moudle_.FindUserAccountInfo(user_info_.id);
 	p_user_broker_info_ = db_moudle_.FindUserBrokerByUser(user_info_.id);
 	assert(p_user_account_info_ && p_user_broker_info_);
-
-	//trade_agent_.Init(p_user_broker_info_->remark, p_user_account_info_->account_no_in_broker_);
+     
 #endif
 
 #if 1 //#ifdef USE_TRADE_FLAG
@@ -160,8 +159,6 @@ bool WinnerApp::Init()
 	ret1 = QObject::connect(this, SIGNAL(SigShowUi(std::string *, bool)), this, SLOT(DoShowUi(std::string *, bool)));
     ret1 = QObject::connect(this, SIGNAL(SigShowLongUi(std::string *, bool)), this, SLOT(DoShowLongUi(std::string *, bool)));
 
-#if 1 
-
 	stock_ticker_ = std::make_shared<StockTicker>(this->local_logger(), this);
 	stock_ticker_->Init();
 	 
@@ -177,11 +174,13 @@ bool WinnerApp::Init()
 	{
 		while(!this->exit_flag_)
 		{
+#ifdef USE_WINNER_MOCK
+            Delay(50);  
+#else
 			Delay(cst_ticker_update_interval);
-#if 1
+#endif
 			if( !this->ticker_enable_flag_ )
 				continue;
-#endif
  
 			tick_strand_.PostTask([this]()
 			{
@@ -198,7 +197,6 @@ bool WinnerApp::Init()
 		qDebug() << "out loop \n";
 	});
 	//----------------
-#endif
 
 	strategy_tasks_timer_->start(1000); //msec invoke DoStrategyTasksTimeout
 	normal_timer_->start(cst_normal_timer_interval); // invoke DoNormalTimer
@@ -368,6 +366,7 @@ void WinnerApp::UnRegAddtionPrice(const std::string& code)
     });
 }
 
+// sync method
 void WinnerApp::DownloadCapital()
 {
     T_Capital  capital = QueryCapital();
@@ -375,7 +374,7 @@ void WinnerApp::DownloadCapital()
     capital_ = capital;
 }
 
-// ps: except app's init, make sure it's called in trade_strand
+// sync method . ps: except app's init, make sure it's called in trade_strand
 T_CodeMapPosition WinnerApp::QueryPosition()
 { 
     T_PositionData  pos_data[256];
@@ -511,9 +510,9 @@ T_Capital WinnerApp::QueryCapital()
 	return capital;
 }
 
+// ps: code is normal stock code not index code
 T_StockPriceInfo * WinnerApp::GetStockPriceInfo(const std::string& code, bool is_lazy)
 {
-	assert(index_ticker_->StkQuoteGetQuote_);
 	char stocks[1][16];
    
 	auto iter = stocks_price_info_.find(code);
@@ -528,6 +527,7 @@ T_StockPriceInfo * WinnerApp::GetStockPriceInfo(const std::string& code, bool is
  
 	T_StockPriceInfo price_info[1];
 #if 0
+    assert(index_ticker_->StkQuoteGetQuote_);
 	auto num = index_ticker_->StkQuoteGetQuote_(stocks, 1, price_info);
 	if( num < 1 )
 		return nullptr;
@@ -637,12 +637,20 @@ void WinnerApp::DoStrategyTasksTimeout()
              
 			if( IsStateSet(entry->cur_state(), TaskStateElem::RUNNING) )
             {
-                if( IsNowTradeTime() && entry->life_count_++ > 60 )
+                if( IsNowTradeTime() )
                 {
-                    this->local_logger().LogLocal(utility::FormatStr("error: task %d not in running", entry->task_id()));
-					entry->set_a_state(TaskStateElem::EXCEPT); 
-                    this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+                    if( entry->life_count_++ > 60 )
+                    {
+                        this->local_logger().LogLocal(utility::FormatStr("error: task %d not in running", entry->task_id()));
+                        entry->set_a_state(TaskStateElem::TIMEOUT); 
+                        this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+                    }else if( IsStateSet(entry->cur_state(), TaskStateElem::TIMEOUT) )
+                    {
+                        entry->clear_a_state(TaskStateElem::TIMEOUT); 
+                        this->Emit(entry.get(), static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
+                    }
                 }
+                
             }
         } 
          
@@ -698,7 +706,7 @@ void WinnerApp::DoNormalTimer()
     assert( cst_normal_timer_interval / 1000 > 0 );
 	// 30 second do a position query
     const int query_capital_seconds = 30 / (cst_normal_timer_interval / 1000);
-	if( ++count_query % query_capital_seconds == 0 )
+	if( count_query++ % query_capital_seconds == 0 )
 	{
 		trade_strand().PostTask([this]()
 		{

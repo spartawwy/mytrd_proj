@@ -57,6 +57,16 @@ StockTicker::StockTicker(TSystem::LocalLogger  &logger, void *app)
     , tasks_list_mutex_()
     , logger_(logger)
     , app_(app)
+#ifdef USE_WINNER_MOCK
+    , winner_hishq_api_handle_(nullptr)
+    , WinnerHisHq_Connect_(nullptr)
+    , WinnerHisHq_DisConnect_(nullptr)
+    , WinnerHisHq_GetQuote_(nullptr) 
+    , is_winner_hishq_connected_(false)
+    , hour_val_fake_(9)
+    , minute_val_fake_(30)
+    , second_val_fake_(0) 
+#endif
 {
 
 }
@@ -67,6 +77,15 @@ StockTicker::~StockTicker()
         FreeLibrary(TdxApiHMODULE);*/
     if( TdxHq_Disconnect )
         TdxHq_Disconnect();
+#ifdef USE_WINNER_MOCK
+    if( WinnerHisHq_DisConnect_ )
+    {
+        ((WinnerHisHq_DisconnectDelegate)WinnerHisHq_DisConnect_)();
+        WinnerHisHq_DisConnect_ = nullptr;
+    }
+    //if( winner_hishq_api_handle_ ) // no use it cause it's make disconnect fail
+    //    FreeLibrary((HMODULE)winner_hishq_api_handle_);
+#endif
 }
 
 bool StockTicker::Init()
@@ -108,43 +127,26 @@ bool StockTicker::Init()
     logger_.LogLocal(std::string("StockTicker::Init") + Result.data());
 
 #ifdef USE_WINNER_MOCK
-    HMODULE api_handle = LoadLibrary("winner_api.dll");
+    winner_hishq_api_handle_ = LoadLibrary("winner_api.dll");
+    HMODULE api_handle = (HMODULE)winner_hishq_api_handle_;
     if( !api_handle )
     {
         std::cout << "LoadLibrary winner_api.dll fail" << std::endl;
         return 1;
     }
-    //void *p_tchk = GetProcAddress(api_handle, "WinnerHisHq_Connect");
-    WinnerHisHq_ConnectDelegate WinnerHisHq_Connect = (WinnerHisHq_ConnectDelegate)GetProcAddress(api_handle, "WinnerHisHq_Connect"); 
-    if ( !WinnerHisHq_Connect )
+    WinnerHisHq_Connect_ = (WinnerHisHq_ConnectDelegate)GetProcAddress(api_handle, "WinnerHisHq_Connect"); 
+    if ( !WinnerHisHq_Connect_ )
     {
         std::cout << " GetProcAddress WinnerHisHq_Connect fail " << std::endl;
         return 1;
     }
 
-    WinnerHisHq_DisconnectDelegate WinnerHisHq_DisConnect =  (WinnerHisHq_DisconnectDelegate)GetProcAddress(api_handle, "WinnerHisHq_Disconnect"); 
-    
-    /*WinnerHisHq_GetHisFenbiDataDelegate WinnerHisHq_GetHisFenbiData 
-        = (WinnerHisHq_GetHisFenbiDataDelegate)GetProcAddress(api_handle, "WinnerHisHq_GetHisFenbiData"); 
-    if( !WinnerHisHq_GetHisFenbiData )
-    {
-        std::cout << " GetProcAddress WinnerHisHq_GetHisFenbiData fail " << std::endl;
-        return 1;
-    }*/
-    WinnerHisHq_GetQuote_
-        = (WinnerHisHq_GetQuoteDelegate)GetProcAddress(api_handle, "WinnerHisHq_GetQuote"); 
-    char result[1024] = {0};
-    char error[1024] = {0};
-#if 0
-    auto ret = WinnerHisHq_Connect("192.168.1.5", 50010, result, error);
-#else
-    auto ret = WinnerHisHq_Connect("128.1.1.3", 50010, result, error);
-    if( ret != 0 )
-        std::cout << " WinnerHisHq_Connect fail " << std::endl;
-#endif 
+    WinnerHisHq_DisConnect_ =  (WinnerHisHq_DisconnectDelegate)GetProcAddress(api_handle, "WinnerHisHq_Disconnect"); 
+    WinnerHisHq_GetQuote_ = (WinnerHisHq_GetQuoteDelegate)GetProcAddress(api_handle, "WinnerHisHq_GetQuote"); 
 
+    return ConnectHisHqServer();
 #endif
-    return true;
+   return true;
 }
 
 bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
@@ -274,41 +276,7 @@ void StockTicker::DecodeStkQuoteResult(Buffer &Result, INOUT TCodeMapQuotesData 
 bool StockTicker::GetQuoteDatas(char* stock_codes[], short count, TCodeMapQuotesData &ret_quotes_data)
 {
     assert(ret_quotes_data.empty());
-
-#ifdef  USE_WINNER_MOCK
-    assert(WinnerHisHq_GetQuote_);
-    //int date = TSystem::Today();
-    const int fake_year = 2018;
-    const int fake_mon = 10;
-    const int fake_day = 22;
-    const int fake_hour = 9;
-    auto t_p = TSystem::MakeTimePoint(fake_year, fake_mon, fake_day);
-      
-    TSystem::TimePoint tp_for_day(t_p);
-    int date = tp_for_day.year() * 10000 + tp_for_day.month() * 100 + tp_for_day.day();
-
-    auto tp_now = std::chrono::system_clock::now();
-    TSystem::TimePoint tp_for_hhmmss(tp_now);
-    
-
-    for( int i = 0; i < count; ++i )
-    {
-        int hhmmss = fake_hour * 10000 + tp_for_hhmmss.minute() * 100 + tp_for_hhmmss.sec();
-        T_QuoteAtomData  atom_data;
-        ((WinnerHisHq_GetQuoteDelegate)WinnerHisHq_GetQuote_)(stock_codes[i], date, hhmmss, &atom_data);
-         
-        auto quote_data = std::make_shared<QuotesData>();
-        quote_data->cur_price = atom_data.price;
-        quote_data->price_b_1 = atom_data.b_1;
-        quote_data->price_b_2 = atom_data.b_2;
-        quote_data->price_b_3 = atom_data.b_3;
-        quote_data->price_b_4 = atom_data.b_4;
-        quote_data->price_b_5 = atom_data.b_5;
-
-        ret_quotes_data.insert(std::make_pair(stock_codes[i], std::move(quote_data)));
-    }
-
-#else 
+     
     Buffer Result(cst_result_len);
     //Buffer ErrInfo(cst_error_len);
     if( !GetQuotes(stock_codes, count, Result) )
@@ -349,7 +317,7 @@ bool StockTicker::GetQuoteDatas(char* stock_codes[], short count, TCodeMapQuotes
         }
         ret_quotes_data.insert(std::make_pair(stock_code, std::move(quote_data)));
     }
-#endif 
+
     return true;
 }
 
@@ -365,7 +333,7 @@ void StockTicker::Procedure()
 
     short stock_count = 0;
      
-    auto  cur_time = QTime::currentTime();
+    //auto  cur_time = QTime::currentTime();
     //---------------------------  
     stock_count = GetRegisteredCodes(registered_tasks_, stock_codes, markets);
     
@@ -378,6 +346,7 @@ void StockTicker::Procedure()
 
     if( stock_count < 1 )
         return;
+#ifndef USE_WINNER_MOCK
     if( !GetQuotes(stock_codes, stock_count, Result) )
     {   
         logger_.LogLocal("error GetQuotes fail");
@@ -387,6 +356,31 @@ void StockTicker::Procedure()
     
     DecodeStkQuoteResult(Result, &addtion_quote_datas, std::bind(&StockTicker::TellAllRelTasks, this, std::placeholders::_1, std::placeholders::_2));
     ///qDebug() << QString::fromLocal8Bit(Result.data()) << "\n";  
+#else
+    int date = 20180807;
+    if( ++second_val_fake_ >= 60 )
+    {
+        if( ++minute_val_fake_ >= 60 )
+        {
+            minute_val_fake_ = 0;
+            if( ++hour_val_fake_ >= 24 )
+                hour_val_fake_ = 0;
+        }
+        second_val_fake_ = 0;
+    }
+
+    int hhmmss = hour_val_fake_ * 10000 + minute_val_fake_* 100 + second_val_fake_;
+    if( hhmmss > 150001 )
+        return;
+    TCodeMapQuotesData  ret_quotes_data;
+    if( !GetQuoteDatas_Mock(stock_codes, stock_count, date, hhmmss, ret_quotes_data) )
+    {   
+        logger_.LogLocal("error GetQuotes fail");
+        return;
+    } 
+    if( ret_quotes_data.size() > 0 )
+        DecodeStkQuoteResult_Mock(ret_quotes_data, std::bind(&StockTicker::TellAllRelTasks, this, std::placeholders::_1, std::placeholders::_2));
+#endif
 }
  
 // ps: also ajust task state
@@ -419,6 +413,33 @@ void StockTicker::TellAllRelTasks(const std::list<unsigned int>& id_list, std::s
     });
 }
 
+#ifdef USE_WINNER_MOCK
+bool StockTicker::GetQuoteDatas_Mock(char* stock_codes[], short count, int date, int hhmmss, TCodeMapQuotesData &ret_quotes_data)
+{
+    if( !is_winner_hishq_connected_ )
+        ConnectHisHqServer();
+    if( !is_winner_hishq_connected_ )
+        return false; 
+    for( int i = 0; i < count; ++i )
+    { 
+        T_QuoteAtomData  atom_data;
+        char error[1024] = {'\0'};
+        int ret = ((WinnerHisHq_GetQuoteDelegate)WinnerHisHq_GetQuote_)(stock_codes[i], date, hhmmss, &atom_data, error);
+        if( ret == 0 ) 
+        {
+            auto quote_data = std::make_shared<QuotesData>();
+            quote_data->cur_price = atom_data.price;
+            quote_data->price_b_1 = atom_data.b_1;
+            quote_data->price_b_2 = atom_data.b_2;
+            quote_data->price_b_3 = atom_data.b_3;
+            quote_data->price_b_4 = atom_data.b_4;
+            quote_data->price_b_5 = atom_data.b_5;
+            ret_quotes_data.insert(std::make_pair(stock_codes[i], std::move(quote_data)));
+        }
+    }
+    return true;
+}
+#endif
 // insert into registered_tasks_ PS: make sure called  by tick strand
 void StockTicker::Register(const std::shared_ptr<StrategyTask> & task)
 { //std::lock_guard<std::mutex>  locker(tasks_list_mutex_);
@@ -531,7 +552,47 @@ bool StockTicker::GetSecurityBars(int Category, int Market, char* Zqdm, short St
     return TdxHq_GetSecurityBars(Category, Market, Zqdm, Start, Count, Result, ErrInfo);
 }
 
+#ifdef USE_WINNER_MOCK
+void StockTicker::DecodeStkQuoteResult_Mock( INOUT TCodeMapQuotesData &codes_quote_datas 
+                               , std::function<void(const std::list<unsigned int>& /*id_list*/, std::shared_ptr<QuotesData> &/*data*/)> tell_all_rel_task)
 
+{
+    if( !tell_all_rel_task )
+        return;
+
+    //auto tp_now = std::chrono::system_clock::now();
+    //time_t t_t = std::chrono::system_clock::to_time_t(tp_now); 
+        
+    std::for_each( std::begin(codes_quote_datas), std::end(codes_quote_datas), [&, this](TCodeMapQuotesData::reference entry)
+    {
+        auto task_ids_iter = codes_taskids_.find(entry.first);
+
+        if( tell_all_rel_task && task_ids_iter != codes_taskids_.end() )
+            tell_all_rel_task(task_ids_iter->second, entry.second); 
+         
+    });
+}
+
+
+bool StockTicker::ConnectHisHqServer()
+{
+    int winner_hishq_server_port = 50010;
+#if 1
+    std::string winner_hishq_srver_addr = "192.168.1.5";
+#else
+    std::string winner_hishq_srver_addr = "128.1.1.3"; 
+#endif 
+    char result[1024] = {0};
+    char error[1024] = {0};
+    int ret = ((WinnerHisHq_ConnectDelegate)WinnerHisHq_Connect_)(const_cast<char*>(winner_hishq_srver_addr.c_str()), winner_hishq_server_port, result, error);
+    if( ret != 0 ) 
+    {
+        logger_.LogLocal(utility::FormatStr(" WinnerHisHq_Connect %s : %d fail ", winner_hishq_srver_addr.c_str(), winner_hishq_server_port));
+    }
+    is_winner_hishq_connected_ = (ret == 0);
+    return is_winner_hishq_connected_;
+}
+#endif
 //////////////////////////////////////////////////////////////////
 // IndexTicker  for  index ticker
 //////////////////////////////////////////////////////////////////

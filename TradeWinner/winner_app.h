@@ -95,7 +95,10 @@ public:
     void RegisterAddtionPrice(const std::string& code);
     void UnRegAddtionPrice(const std::string& code);
 
-    void Emit(StrategyTask* p, int type) { emit SigTaskStatChange(p, type); }
+    void Emit(StrategyTask* p, int type) 
+    { 
+        emit SigTaskStatChange(p, type); 
+    }
     void EmitSigRemoveTask(int id) { emit SigRemoveTask(id);}
     // memory will be delete by this function 
     void EmitSigShowUi(std::string *str, bool flash_task_bar=false) { emit SigShowUi(str, flash_task_bar); }

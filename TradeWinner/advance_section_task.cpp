@@ -12,7 +12,7 @@
 #include "winner_app.h"
 
 #define DO_LOG_BKTST  DO_LOG
-
+ 
 AdvanceSectionTask::Portion::Portion(int index,double bottom, double top, PortionState state) 
 	: index_(index)
 	, bottom_price_(bottom)
@@ -24,7 +24,7 @@ AdvanceSectionTask::Portion::Portion(int index,double bottom, double top, Portio
 
 std::string AdvanceSectionTask::Portion::Detail()
 {
-    return TSystem::utility::FormatStr("index:%d bot:%.2f mid:%.2f top:%.2f", index_, bottom_price_, mid_price_, top_price_);
+    return TSystem::utility::FormatStr("index:%d bot:%.2f mid:%.2f top:%.2f %s", index_, bottom_price_, mid_price_, top_price_, ToString(state_).c_str());
 }
 
 AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *app)
@@ -244,7 +244,7 @@ void AdvanceSectionTask::HandleQuoteData()
         if( qty_can_buy < 100 )
         {
             if( is_not_enough_capital_continue_++ % 300 == 0 )
-                DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("warning:cur_p:%d  to create position but capital:%.2f not enough! | %.2f %.2f %.2f", cur_index, capital, reb_base_price_, reb_bottom_price_, iter->cur_price));
+                DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("warning:cur_index:%d  to create position but capital:%.2f not enough! | %.2f %.2f %.2f", cur_index, capital, reb_base_price_, reb_bottom_price_, iter->cur_price));
             goto NOT_TRADE;
         }else
             is_not_enough_capital_continue_ = 0;
@@ -285,14 +285,14 @@ void AdvanceSectionTask::HandleQuoteData()
         {
             if( is_not_enough_capital_continue_++ % 300 == 0 )
             {
-                DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("cur_p:%d downward, up rebounce trigger judge buy :%.2f | %.2f %.2f %.2f", cur_index, up_rebounce, reb_base_price_, reb_top_price_, iter->cur_price));
-                DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("warning:cur_p:%d to buy but capital:%.2f not enough! | %.2f %.2f %.2f", cur_index, capital, reb_base_price_, reb_bottom_price_, iter->cur_price));
+                DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("cur_index:%d downward, up rebounce trigger judge buy :%.2f | %.2f %.2f %.2f capital:%.2f"
+                    , cur_index, up_rebounce, reb_base_price_, reb_top_price_, iter->cur_price, capital));
             }
             goto NOT_TRADE;
         }else
         {
             is_not_enough_capital_continue_ = 0;
-            DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("cur_p:%d downward, up rebounce trigger judge buy :%.2f | %.2f %.2f %.2f", cur_index, up_rebounce, reb_base_price_, reb_top_price_, iter->cur_price));
+            DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("cur_index:%d downward, up rebounce trigger judge buy :%.2f | %.2f %.2f %.2f", cur_index, up_rebounce, reb_base_price_, reb_top_price_, iter->cur_price));
         }
         
         // judge if any portion need buy  
@@ -324,15 +324,14 @@ void AdvanceSectionTask::HandleQuoteData()
         {
             if( is_not_position_continue_++ % 300 == 0 )
             {
-                DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("cur_p:%d upward, down rebounce trigger judge sell :%.2f | %.2f %.2f %.2f", cur_index, down_rebounce, reb_base_price_, reb_top_price_, iter->cur_price));
-                DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("warning: cur_p:%d to sell but avaliable pos is 0 ", cur_index));
+                DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("cur_index:%d upward, down rebounce, but no avaliable pos  :%.2f | %.2f %.2f %.2f", cur_index, down_rebounce, reb_base_price_, reb_top_price_, iter->cur_price));
             }
             reset_flag_price(iter->cur_price);
             goto NOT_TRADE;
         }else
         {
             is_not_position_continue_ = 0;
-            DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("cur_p:%d upward, down rebounce trigger judge sell :%.2f | %.2f %.2f %.2f", cur_index, down_rebounce, reb_base_price_, reb_top_price_, iter->cur_price));
+            DO_LOG_BKTST(TagOfCurTask(), utility::FormatStr("cur_index:%d upward, down rebounce to judge sell :%.2f | %.2f %.2f %.2f", cur_index, down_rebounce, reb_base_price_, reb_top_price_, iter->cur_price));
         }
  
         // judge if any portion need sell 
@@ -345,7 +344,7 @@ void AdvanceSectionTask::HandleQuoteData()
         else
         {
             LogState(iter->cur_price, cur_index, false
-                , "judge sell but qty <=0 no trade");
+                , "judge sell: no position need sell");
             goto NOT_TRADE;
             reset_flag_price(iter->cur_price);
         }
@@ -403,7 +402,7 @@ BEFORE_TRADE:
         DO_LOG(TagOfOrderLog(), 
             TSystem::utility::FormatStr("贝塔任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty)); 
         this->app_->AppendLog2Ui("贝塔任务:%d %s %s 价格:%.2f 数量:%d ", para_.id, cn_order_str.c_str(), this->code_data(), price, qty);
-#if 0
+#ifndef USE_WINNER_MOCK
         // order the stock
         this->app_->trade_agent().SendOrder((int)order_type, 0
             , const_cast<T_AccountData *>(this->app_->trade_agent().account_data(market_type_))->shared_holder_code, this->code_data()
@@ -621,12 +620,12 @@ std::tuple<int, double, bool> AdvanceSectionTask::judge_any_pos2sell(double cur_
             }
         }
     }
-    for( int i = cur_index-1; i >= 1; --i )
+    for( int i = cur_index-1; i >= 0; --i )
     {
         assert(cur_price > portions_[i].mid_price());
         if( local_qty_sell + para_.quantity > para_avaliable_pos )
             break;
-        if( portions_[i-1].state() == PortionState::WAIT_SELL )
+        if( portions_[i].state() == PortionState::WAIT_SELL )
         {
             if( is_do_change )
             {
@@ -663,4 +662,15 @@ std::string AdvanceSectionTask::Detail()
 std::string AdvanceSectionTask::TagOfCurTask()
 { 
     return TSystem::utility::FormatStr("AdvSec_%d_%s_%d", para_.id, para_.stock.c_str(), TSystem::Today());
+}
+
+std::string ToString(AdvanceSectionTask::PortionState val)
+{
+    switch(val)
+    {
+    case AdvanceSectionTask::PortionState::UNKNOW: return "UNKNOW";
+    case AdvanceSectionTask::PortionState::WAIT_BUY: return "WAIT_BUY";
+    case AdvanceSectionTask::PortionState::WAIT_SELL: return "WAIT_SELL";
+    default: return "except";
+    }
 }

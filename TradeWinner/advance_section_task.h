@@ -8,7 +8,8 @@ class AdvanceSectionTask : public StrategyTask
 {
 public:
 	enum class PortionState : unsigned char { WAIT_BUY = 0, WAIT_SELL, UNKNOW = 255 }; // UNKNOW means wait create position
-	class Portion
+	
+    class Portion
 	{
 	public:
 		Portion(int index,double bottom, double top, PortionState state);
@@ -73,5 +74,6 @@ private:
     unsigned int inter_count_for_debug_;
 };
 
+std::string ToString(AdvanceSectionTask::PortionState val);
 
 #endif // ADVANCE_SECTION_TASK_SSDFS3DFDS_H_

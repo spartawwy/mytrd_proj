@@ -92,7 +92,8 @@ QString ToQString(TaskCurrentState val)
 		return QString::fromLocal8Bit("停止"); 
 	if( IS_BIT_SET(val, TaskStateElem::EXCEPT) )
 		return QString::fromLocal8Bit("异常");
-
+    if( IS_BIT_SET(val, TaskStateElem::TIMEOUT) )
+        return QString::fromLocal8Bit("超时");
 	if( IS_BIT_SET(val, TaskStateElem::WAITTING) )
 		ret_str.append(QString::fromLocal8Bit("等待"));
 	if( IS_BIT_SET(val, TaskStateElem::STARTING) )
@@ -101,7 +102,6 @@ QString ToQString(TaskCurrentState val)
 		ret_str.append(QString::fromLocal8Bit("运行"));
 	if( IS_BIT_SET(val, TaskStateElem::REST) )
 		ret_str.append(QString::fromLocal8Bit("休市"));
-
 #endif
     return ret_str;
 }

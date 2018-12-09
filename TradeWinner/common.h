@@ -34,7 +34,7 @@
 #define DO_LOG(tag, b)  do{ app_->local_logger().LogLocal((tag), b); }while(0);
 #define USE_TRADE_FLAG
 
-#define USE_WINNER_MOCK
+//#define USE_WINNER_MOCK
 
 #if 0
 std::vector<std::string> split(const std::string& line, const std::string& seperator = " ", 
@@ -129,6 +129,7 @@ enum class TaskStateElem : TaskCurrentState
     RUNNING  = 0x00000004,
     REST     = 0x00000008,     // exchange is in rest time
     EXCEPT   = 0x00000010,   // exception : in running time but not in running state
+    TIMEOUT  = 0x00000020,   // exception : in running time but not in running state
 };
 
 bool IsStateSet(TaskCurrentState val, TaskStateElem state);
