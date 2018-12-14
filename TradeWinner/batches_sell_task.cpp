@@ -56,15 +56,18 @@ void BatchesSellTask::HandleQuoteData()
     auto data_iter = quote_data_queue_.rbegin();
     std::shared_ptr<QuotesData> & iter = *data_iter;
     assert(iter);
+    double pre_price = quote_data_queue_.size() > 1 ? (*(++data_iter))->cur_price : iter->cur_price;
+    if( IsPriceJumpDown(pre_price, iter->cur_price) || IsPriceJumpUp(pre_price, iter->cur_price) )
+		return;
 
     if( !timed_mutex_wrapper_.try_lock_for(1000) )  
-    {
-        //DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
+    { 
         app_->local_logger().LogLocal("error: BatchesSellTask::HandleQuoteData timed_mutex_wrapper_ lock fail"); 
         return;
     }
     if( is_waitting_removed_ )
-        return; 
+        goto NO_TRADE;
+   
     if( iter->cur_price < para_.alert_price - 0.0001 )
         goto NO_TRADE;
 

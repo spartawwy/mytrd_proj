@@ -21,8 +21,9 @@ void BreakUpBuyTask::HandleQuoteData()
     auto data_iter = quote_data_queue_.rbegin();
     std::shared_ptr<QuotesData> & iter = *data_iter;
     //assert(iter);
-    //double pre_price = quote_data_queue_.size() > 1 ? (*(++data_iter))->cur_price : iter->cur_price;
-
+    double pre_price = quote_data_queue_.size() > 1 ? (*(++data_iter))->cur_price : iter->cur_price;
+    if( IsPriceJumpDown(pre_price, iter->cur_price) || IsPriceJumpUp(pre_price, iter->cur_price) )
+		return;
     if( iter->cur_price > 0 && iter->cur_price > para_.alert_price )
     {
         bool is_to_order = false;

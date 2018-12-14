@@ -33,12 +33,8 @@ void InflectionBuyTask::HandleQuoteData()
     std::shared_ptr<QuotesData> & iter = *data_iter;
     assert(iter);
     double pre_price = quote_data_queue_.size() > 1 ? (*(++data_iter))->cur_price : iter->cur_price;
-
-    if( IsPriceJumpDown(pre_price, iter->cur_price) )
-    {
-        app_->local_logger().LogLocal(TagOfCurTask(), TSystem::utility::FormatStr("%d InflectionBuyTask price jump %.2f to %.2f", para_.id, pre_price, iter->cur_price));
-        return;
-    };
+    if( IsPriceJumpDown(pre_price, iter->cur_price) || IsPriceJumpUp(pre_price, iter->cur_price) )
+		return;
      
     bool is_to_send = false; 
     bool is_first_open = false;

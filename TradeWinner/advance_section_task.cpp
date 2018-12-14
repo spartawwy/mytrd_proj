@@ -417,7 +417,6 @@ BEFORE_TRADE:
             auto ret_str = new std::string(utility::FormatStr("贝塔任务:%d %s %s %.2f %d 成功!", para_.id, cn_order_str.c_str(), para_.stock.c_str(), price, qty));
             this->app_->local_logger().LogLocal(TagOfOrderLog(), *ret_str);
             this->app_->EmitSigShowUi(ret_str, true);
-			this->app_->Emit(this, static_cast<int>(TaskStatChangeType::PRE_TRIGG_PRICE_CHANGE));
 
             para_.advance_section_task.is_original = false;
             para_.advance_section_task.pre_trade_price = price;

@@ -126,6 +126,10 @@ void BatchesBuyTask::HandleQuoteData()
     std::shared_ptr<QuotesData> & iter = *data_iter;
     assert(iter);
        
+    double pre_price = quote_data_queue_.size() > 1 ? (*(++data_iter))->cur_price : iter->cur_price;
+    if( IsPriceJumpDown(pre_price, iter->cur_price) )
+        return;
+
     if( continue_trade_fail_count_ >= 3 )
     {
         if( ++trade_fail_ctr_count_ % 60 != 0 )
@@ -135,8 +139,6 @@ void BatchesBuyTask::HandleQuoteData()
         }
     }
 
-    double pre_price = quote_data_queue_.size() > 1 ? (*(++data_iter))->cur_price : iter->cur_price;
-     
     if( iter->cur_price > para_.alert_price - 0.0001 )
         goto NO_TRADE;
  

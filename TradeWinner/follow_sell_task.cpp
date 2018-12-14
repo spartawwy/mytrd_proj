@@ -25,13 +25,8 @@ void FollowSellTask::HandleQuoteData()
     std::shared_ptr<QuotesData> & iter = *data_iter;
     assert(iter);
     double pre_price = quote_data_queue_.size() > 1 ? (*(++data_iter))->cur_price : iter->cur_price;
-
-    if( IsPriceJumpUp(pre_price, iter->cur_price) )
-    {
-        app_->local_logger().LogLocal( 
-                    TSystem::utility::FormatStr("%d FollowSellTask price jump %.2f to %.2f", para_.id, pre_price, iter->cur_price));
-        return;
-    }
+    if( IsPriceJumpDown(pre_price, iter->cur_price) || IsPriceJumpUp(pre_price, iter->cur_price) )
+		return;
     bool is_to_send = false;
     if( !timed_mutex_wrapper_.try_lock_for(1000) )  
     {
