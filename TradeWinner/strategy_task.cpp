@@ -34,13 +34,18 @@ void StrategyTask::UnReg(void *reg_man)
     {
         strand_.DispatchTask( [reg_man, this]()
         {
-            this->SetWaitRemove();
+            is_waitting_removed(true, "UnReg");
             TTaskIdMapStrategyTask &reg_obj = *((TTaskIdMapStrategyTask*)reg_man);
             auto iter = reg_obj.find(para_.id);
             if( iter != reg_obj.end() )
                 reg_obj.erase(iter);
         });
     }
+}
+void StrategyTask::is_waitting_removed(bool val, const std::string &info)
+{
+    is_waitting_removed_ = val;
+    app_->local_logger().LogLocal(utility::FormatStr("task %d %s set waitting remove %d | %s ", para_.id, para_.stock.c_str(), val, info.c_str()));
 }
 
 bool StrategyTask::IsPriceJumpUp(double pre_price, double cur_price)

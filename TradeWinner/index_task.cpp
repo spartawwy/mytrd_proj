@@ -14,7 +14,7 @@ IndexTask::IndexTask(T_TaskInformation &task_info, WinnerApp *app)
 
 void IndexTask::HandleQuoteData()
 {
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
         return;
     assert( !quote_data_queue_.empty() );
     auto data_iter = quote_data_queue_.rbegin();
@@ -33,7 +33,7 @@ void IndexTask::HandleQuoteData()
             {
 				const auto time_span = iter->time_stamp - time_point_open_warning_;
                 time_point_open_warning_ = 0; //reset
-                is_waitting_removed_ = true;
+                is_waitting_removed(true, "index task line 36");
                  
                 std::string *str = nullptr;
                 std::string str_header = utility::FormatStr("任务:%d %s(%s) %s %.2f 时间阀值:%d", para_.id, para_.stock.c_str()

@@ -51,7 +51,9 @@ bool TradeProxy::Setup(TypeBroker broker_type, std::string &account_no)
     TdxApiHMODULE = LoadLibrary(path_str);
     if( TdxApiHMODULE == nullptr )
     {
-        QMessageBox::information(nullptr, "info", "load trade.dll fail");
+        char buf[256];
+        sprintf_s(buf, "load %s fail\0", path_str);
+        QMessageBox::information(nullptr, "info", buf);
         //throw excepton;
         return false;
     }

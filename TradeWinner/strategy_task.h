@@ -73,7 +73,9 @@ public:
 	}
     TaskCurrentState cur_state() { return cur_state_; }
 
-    void SetWaitRemove(){ is_waitting_removed_ = true; }
+    bool is_waitting_removed() { return is_waitting_removed_; }
+    void is_waitting_removed(bool val, const std::string &info);
+
     QTime tp_start() { return tp_start_; }
     QTime tp_end() { return tp_end_; }
 	double pre_trigged_price() { return pre_trigged_price_; }
@@ -101,11 +103,13 @@ protected:
    double  cur_price_;
    double  pre_trigged_price_;
    volatile TaskCurrentState cur_state_;
-   volatile bool is_waitting_removed_; 
-
+    
    TSystem::TaskStrand   strand_;
      
    TimedMutexWrapper  timed_mutex_wrapper_;
+
+private:
+    volatile bool is_waitting_removed_; 
 };
 typedef std::unordered_map<unsigned int, std::shared_ptr<StrategyTask> > TTaskIdMapStrategyTask;
 #endif

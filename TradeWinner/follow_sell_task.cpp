@@ -18,7 +18,7 @@ FollowSellTask::FollowSellTask(T_TaskInformation &task_info, WinnerApp *app)
 
 void FollowSellTask::HandleQuoteData()
 {
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
         return;
     assert( !quote_data_queue_.empty() );
     auto data_iter = quote_data_queue_.rbegin();
@@ -33,7 +33,7 @@ void FollowSellTask::HandleQuoteData()
         //DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
         return;
     } 
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
         return;
     // 1.conddition attach profile line
     if( is_out_warn_ ) 
@@ -127,7 +127,7 @@ void FollowSellTask::HandleQuoteData()
             auto ret_str = new std::string(utility::FormatStr("任务:%d 跟踪止盈 %s %.2f %d 成功!", para_.id, para_.stock.c_str(), price, qty));
             this->app_->EmitSigShowUi(ret_str, true);
         }
-        is_waitting_removed_ = true;
+        is_waitting_removed(true, "follow sell line 130");
         timed_mutex_wrapper_.unlock();    
         this->app_->RemoveTask(this->task_id(), TypeTask::FOLLOW_SELL);
 

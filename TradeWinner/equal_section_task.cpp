@@ -136,7 +136,7 @@ EqualSectionTask::EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app)
             this->app_->EmitSigShowUi(str); 
 			this->cur_state(static_cast<TaskCurrentState>(TaskStateElem::EXCEPT));
 			this->app_->Emit((StrategyTask*)this, static_cast<int>(TaskStatChangeType::CUR_STATE_CHANGE));
-			is_waitting_removed_ = true;
+			is_waitting_removed(true, "eqsec line 139");
 #if 0  // another way to procedue the erro
             auto p_stk_price = app->GetStockPriceInfo(task_info.stock);
             if( p_stk_price )
@@ -148,12 +148,12 @@ EqualSectionTask::EqualSectionTask(T_TaskInformation &task_info, WinnerApp *app)
 				}else
 				{
 					task_info.state = static_cast<int>(TaskCurrentState::EXCEPT);
-					is_waitting_removed_ = true;
+					is_waitting_removed(true, "eqsec line 151");
 				}
             }else
             {
                 task_info.state = static_cast<int>(TaskCurrentState::EXCEPT);
-                is_waitting_removed_ = true;
+                is_waitting_removed(true, "eqsec line 156");
             }
 #endif
             /*ThrowTException( TSystem::CoreErrorCategory::ErrorCode::BAD_CONTENT
@@ -247,7 +247,7 @@ void EqualSectionTask::PrintSections()
 
 void EqualSectionTask::HandleQuoteData()
 {  
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
         return;
 	TypeOrderCategory order_type = TypeOrderCategory::SELL;
 	int qty = para_.quantity;
@@ -569,7 +569,7 @@ BEFORE_TRADE:
                 auto ret_str = new std::string(utility::FormatStr(" 区间任务:%d %s 破底清仓!", para_.id, para_.stock.c_str()));
                 this->app_->AppendLog2Ui(ret_str->c_str());
                 
-                is_waitting_removed_ = true;
+                is_waitting_removed(true, "eqsec line 572");
                 //app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ unlock");
                 this->timed_mutex_wrapper_.unlock();
                  

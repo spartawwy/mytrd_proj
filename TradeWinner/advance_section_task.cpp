@@ -48,7 +48,7 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
     if( str_portion_price_vector.size() < 2 )
     {
         ShowError(utility::FormatStr("error: AdvanceSectionTask %d str_portion_price_vector.size() < 2", para_.id));
-        is_waitting_removed_ = true;
+        is_waitting_removed(true, "line 51");
         return;
     }
     std::vector<double> price_vector;
@@ -64,7 +64,7 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
         if( str_portion_stat_vector.size() + 1 != str_portion_price_vector.size() )
         {
             ShowError(utility::FormatStr("error: AdvanceSectionTask %d portion_states.size + 1 != portion_sections.size", para_.id));
-            is_waitting_removed_ = true;
+            is_waitting_removed(true, "adv line 67");
             return;
         }
         try
@@ -85,7 +85,7 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
         catch (...)
         {
             ShowError(utility::FormatStr("error: AdvanceSectionTask %d illegal content in portion_sections or portion_states", para_.id));
-            is_waitting_removed_ = true;
+            is_waitting_removed(true, "adv line 88");
             return;
         } 
     }else  
@@ -102,7 +102,7 @@ AdvanceSectionTask::AdvanceSectionTask(T_TaskInformation &task_info, WinnerApp *
         catch (...)
         {
             ShowError(utility::FormatStr("error: AdvanceSectionTask %d illegal content in portion_sections or portion_states", para_.id));
-            is_waitting_removed_ = true;
+            is_waitting_removed(true, "adv line 105");
             return;
         } 
     }
@@ -121,7 +121,7 @@ void AdvanceSectionTask::HandleQuoteData()
 {    
     inter_count_for_debug_++;
     
-	if( is_waitting_removed_ )
+	if( is_waitting_removed() )
     {
         DO_LOG_BKTST(TagOfCurTask(), Detail().c_str());
 		return;
@@ -158,7 +158,7 @@ void AdvanceSectionTask::HandleQuoteData()
         //app_->local_logger().LogLocal("mutex", "timed_mutex_wrapper_ lock fail"); 
         return;
     }
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
         return;
     TypeAction action = TypeAction::NOOP;
     TypeOrderCategory order_type = TypeOrderCategory::SELL;
@@ -455,7 +455,7 @@ BEFORE_TRADE:
                  
             }else
             {
-                is_waitting_removed_ = true;
+                is_waitting_removed(true, "adv line 458");
 				timed_mutex_wrapper_.unlock();
                 ShowError(utility::FormatStr("贝塔任务:%d %s 已破底清仓! 将移除任务!", para_.id, para_.stock.c_str()));
                 this->app_->RemoveTask(this->task_id(), TypeTask::ADVANCE_SECTION); // invoker delete self
@@ -647,7 +647,7 @@ std::string AdvanceSectionTask::Detail()
         portion_detail += portion_item.Detail() + "\n";
     }
     return TSystem::utility::FormatStr("wait_remove:%d is_ori:%d pre_trig:%.2f reb_para:%.2f cur_base:%.2f cur_bot:%.2f cur_top:%.2f \n| %s"
-                                , is_waitting_removed_
+                                , is_waitting_removed()
                                 , para_.advance_section_task.is_original
                                 , pre_trigged_price_
                                 , para_.rebounce

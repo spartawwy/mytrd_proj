@@ -49,7 +49,7 @@ void BatchesSellTask::HandleQuoteData()
         return -1;
     };
 
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
         return;
      
     assert( !quote_data_queue_.empty() );
@@ -65,7 +65,7 @@ void BatchesSellTask::HandleQuoteData()
         app_->local_logger().LogLocal("error: BatchesSellTask::HandleQuoteData timed_mutex_wrapper_ lock fail"); 
         return;
     }
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
         goto NO_TRADE;
    
     if( iter->cur_price < para_.alert_price - 0.0001 )
@@ -102,7 +102,7 @@ BEFORE_TRADE:
         if( is_to_clear )
             qty = GetAvaliablePosition();
         else
-            qty = HandleSellByStockPosition(price, is_waitting_removed_);
+            qty = HandleSellByStockPosition(price, is_waitting_removed());
         if( qty == 0 )
         {
             timed_mutex_wrapper_.unlock();
@@ -136,7 +136,7 @@ BEFORE_TRADE:
         {
             step_items_[index].has_selled = true;
             if( index == step_items_.size() - 1 )
-                is_waitting_removed_ = true;
+                is_waitting_removed(true, "breakdown line 139");
             this->app_->SubAvaliablePosition(para_.stock, qty); // sub availiable position
             this->app()->capital_strand().PostTask([this]()
             {
@@ -162,7 +162,7 @@ BEFORE_TRADE:
 
         app_->db_moudle().UpdateTaskInfo(para_);
 		timed_mutex_wrapper_.unlock();
-        if( is_waitting_removed_ )
+        if( is_waitting_removed() )
         {
             this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_SELL);
         }

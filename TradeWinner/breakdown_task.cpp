@@ -15,7 +15,7 @@ BreakDownTask::BreakDownTask(T_TaskInformation &task_info, WinnerApp *app)
 
 void BreakDownTask::HandleQuoteData()
 {
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
         return;
     assert( !quote_data_queue_.empty() );
     auto data_iter = quote_data_queue_.rbegin();
@@ -33,7 +33,8 @@ void BreakDownTask::HandleQuoteData()
             {
 				const auto time_span = iter->time_stamp - time_point_open_warning_;
                 time_point_open_warning_ = 0; //reset
-                is_waitting_removed_ = true;
+                if( this->app_->QueryPosAvaliable_LazyMode(para_.stock) == 0 )
+                    return;
                 app_->trade_strand().PostTask([iter, time_span, this]()
                 {
                  // send order 
@@ -48,7 +49,7 @@ void BreakDownTask::HandleQuoteData()
 	            int qty = HandleSellByStockPosition(price);
                 if( qty == 0 )
                     return;
-                
+                is_waitting_removed(true, "breakdown line 52");
 #ifdef USE_TRADE_FLAG
                 assert(this->app_->trade_agent().account_data(market_type_));
 

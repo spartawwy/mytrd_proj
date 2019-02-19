@@ -14,7 +14,7 @@ BreakUpBuyTask::BreakUpBuyTask(T_TaskInformation &task_info, WinnerApp *app)
 
 void BreakUpBuyTask::HandleQuoteData()
 {
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
         return; 
 
     //assert( !quote_data_queue_.empty() );
@@ -61,7 +61,7 @@ void BreakUpBuyTask::HandleQuoteData()
         if( is_to_order )
         {
             time_point_bt_open_warning_ = 0; //reset
-            is_waitting_removed_ = true;
+            is_waitting_removed(true, "breakup line 64");
             app_->trade_strand().DispatchTask([price, time_span, this]()
             {
                 // send order 

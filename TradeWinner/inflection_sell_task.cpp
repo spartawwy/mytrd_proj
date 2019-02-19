@@ -25,7 +25,7 @@ void InflectionSellTask::HandleQuoteData()
         return percent_inflect;
     };
 
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
         return;
      
     assert( !quote_data_queue_.empty() );
@@ -113,7 +113,7 @@ void InflectionSellTask::HandleQuoteData()
 
     if( is_to_send ) 
     {  
-        is_waitting_removed_ = true;
+        is_waitting_removed(true, "inf sell line 116");
         time_point_open_warning_ = 0; //reset
 
         app_->trade_strand().PostTask([iter, this]()

@@ -101,11 +101,11 @@ void BatchesBuyTask::HandleQuoteData()
         return -1;
     };
     
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
         return;
     if( !is_ok_ )
     {
-        is_waitting_removed_ = true;
+        is_waitting_removed(true, "batch buy line 108");
         this->app_->RemoveTask(this->task_id(), TypeTask::BATCHES_BUY);
         return;
     }
@@ -114,7 +114,7 @@ void BatchesBuyTask::HandleQuoteData()
         //DO_LOG(TagOfCurTask(), TSystem::utility::FormatStr("%d EqualSectionTask price %.2f timed_mutex wait fail", para_.id, iter->cur_price));
         return;
     }
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
         return;
     if( quote_data_queue_.empty() )
     {
@@ -235,7 +235,7 @@ BEFORE_TRADE:
                 quantity += para_.quantity;
                 if( ++times_has_buy_ >= para_.bs_times )
                 {
-                    is_waitting_removed_ = true;
+                    is_waitting_removed(true, "batch buy line 238");
                     break;
                 }
             }
@@ -271,7 +271,7 @@ BEFORE_TRADE:
     } 
     app_->db_moudle().UpdateTaskInfo(para_);
 
-    if( is_waitting_removed_ )
+    if( is_waitting_removed() )
     {
         auto info_str = utility::FormatStr("分批买入任务:%d %s 已买 %d 次,任务结束!", para_.id, para_.stock.c_str(), times_has_buy_);
         this->app_->local_logger().LogLocal(info_str);
