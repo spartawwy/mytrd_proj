@@ -33,8 +33,7 @@ void StrategyTask::UnReg(void *reg_man)
     if( reg_man )
     {
         strand_.DispatchTask( [reg_man, this]()
-        {
-            is_waitting_removed(true, "UnReg");
+        { 
             TTaskIdMapStrategyTask &reg_obj = *((TTaskIdMapStrategyTask*)reg_man);
             auto iter = reg_obj.find(para_.id);
             if( iter != reg_obj.end() )
@@ -42,6 +41,7 @@ void StrategyTask::UnReg(void *reg_man)
         });
     }
 }
+
 void StrategyTask::is_waitting_removed(bool val, const std::string &info)
 {
     is_waitting_removed_ = val;

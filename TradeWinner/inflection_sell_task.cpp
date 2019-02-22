@@ -113,9 +113,13 @@ void InflectionSellTask::HandleQuoteData()
 
     if( is_to_send ) 
     {  
-        is_waitting_removed(true, "inf sell line 116");
         time_point_open_warning_ = 0; //reset
-
+        if( GetTototalPosition() == 0 )
+        {
+            is_waitting_removed(true, "inf sell line 119");
+            this->app_->RemoveTask(this->task_id(), TypeTask::INFLECTION_SELL);
+            return;
+        }
         app_->trade_strand().PostTask([iter, this]()
         {
             // send order 
@@ -127,6 +131,7 @@ void InflectionSellTask::HandleQuoteData()
         int qty = HandleSellByStockPosition(price);
         if( qty == 0 )
             return;
+        is_waitting_removed(true, "inf sell line 134");
 #ifdef USE_TRADE_FLAG
         assert(this->app_->trade_agent().account_data(market_type_));
 

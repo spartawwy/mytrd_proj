@@ -446,7 +446,7 @@ void StockTicker::Register(const std::shared_ptr<StrategyTask> & task)
 
     if( registered_tasks_.find(task->task_id()) != registered_tasks_.end() )
         return;
-
+    logger_.LogLocal(utility::FormatStr("StockTicker::Register task %d", task->task_id()));
     registered_tasks_.insert(std::make_pair(task->task_id(), task));
 
     auto iter = codes_taskids_.find(task->stock_code());

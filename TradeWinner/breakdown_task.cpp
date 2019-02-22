@@ -33,7 +33,13 @@ void BreakDownTask::HandleQuoteData()
             {
 				const auto time_span = iter->time_stamp - time_point_open_warning_;
                 time_point_open_warning_ = 0; //reset
-                if( this->app_->QueryPosAvaliable_LazyMode(para_.stock) == 0 )
+                if( GetTototalPosition() == 0 )
+                {
+                    is_waitting_removed(true, "breakdown line 38");
+                    this->app_->RemoveTask(this->task_id(), TypeTask::BREAK_SELL);
+                    return;
+                }
+                if( GetAvaliablePosition() == 0 )
                     return;
                 app_->trade_strand().PostTask([iter, time_span, this]()
                 {
