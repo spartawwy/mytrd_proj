@@ -36,6 +36,7 @@
 
 //#define USE_WINNER_MOCK
 
+
 #if 0
 std::vector<std::string> split(const std::string& line, const std::string& seperator = " ", 
 		const std::string& quotation = "\"");

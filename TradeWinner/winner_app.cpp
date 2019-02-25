@@ -569,7 +569,11 @@ void WinnerApp::DoStrategyTasksTimeout()
 {
     static auto is_in_task_time = [](const QTime &current, const QTime &start, const QTime &end) ->bool
     {
+#ifdef USE_WINNER_MOCK
+        return true;
+#else
         return current >= start && current <= end;
+#endif
     };
 	
     auto cur_time = QTime::currentTime(); 

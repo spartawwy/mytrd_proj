@@ -25,7 +25,13 @@
 
 #ifdef USE_WINNER_MOCK
 #include "winner_hq_api.h"
+
+#define  DATE_MOCK  20180903
+#define  HOUR_BEG_MOCK    9
+#define  MINUTE_BEG_MOCK  30
+#define  SECOND_BEG_MOCK  0
 #endif
+
 //#define DEBUG_GETQUOTES
  //»ñÈ¡apiº¯Êý
 TdxHq_ConnectDelegate TdxHq_Connect = nullptr;
@@ -63,9 +69,9 @@ StockTicker::StockTicker(TSystem::LocalLogger  &logger, void *app)
     , WinnerHisHq_DisConnect_(nullptr)
     , WinnerHisHq_GetQuote_(nullptr) 
     , is_winner_hishq_connected_(false)
-    , hour_val_fake_(9)
-    , minute_val_fake_(30)
-    , second_val_fake_(0) 
+    , hour_val_fake_(HOUR_BEG_MOCK)
+    , minute_val_fake_(MINUTE_BEG_MOCK)
+    , second_val_fake_(SECOND_BEG_MOCK) 
 #endif
 {
 
@@ -357,7 +363,7 @@ void StockTicker::Procedure()
     DecodeStkQuoteResult(Result, &addtion_quote_datas, std::bind(&StockTicker::TellAllRelTasks, this, std::placeholders::_1, std::placeholders::_2));
     ///qDebug() << QString::fromLocal8Bit(Result.data()) << "\n";  
 #else
-    int date = 20180807;
+    int date = DATE_MOCK;
     if( ++second_val_fake_ >= 60 )
     {
         if( ++minute_val_fake_ >= 60 )
@@ -428,6 +434,7 @@ bool StockTicker::GetQuoteDatas_Mock(char* stock_codes[], short count, int date,
         if( ret == 0 ) 
         {
             auto quote_data = std::make_shared<QuotesData>();
+            quote_data->time_stamp = atom_data.time;
             quote_data->cur_price = atom_data.price;
             quote_data->price_b_1 = atom_data.b_1;
             quote_data->price_b_2 = atom_data.b_2;
@@ -745,7 +752,9 @@ int GetRegisteredCodes(TTaskIdMapStrategyTask  &registered_tasks, char* stock_co
     std::for_each( std::begin(registered_tasks), std::end(registered_tasks), [&](TTaskIdMapStrategyTask::reference entry)
     {
         if( entry.second->is_to_run() 
+#ifndef USE_WINNER_MOCK
             && cur_time >= entry.second->tp_start() && cur_time < entry.second->tp_end()
+#endif
             && !is_codes_in(stock_codes, entry.second->code_data()) )
         { 
             stock_codes[stock_count] = entry.second->code_data();
