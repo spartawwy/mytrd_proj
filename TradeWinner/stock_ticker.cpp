@@ -157,6 +157,7 @@ bool StockTicker::Init()
 
 bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
 {
+    assert( Result.data() );
     byte markets[cst_max_stock_code_count];
     for( int i = 0; i < count; ++i )
     {
@@ -164,7 +165,18 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
     }
  
     Buffer ErrInfo(cst_error_len);
-    auto ret = TdxHq_GetSecurityQuotes(markets, stock_codes, count, Result.data(), ErrInfo.data());
+
+    assert( count > 0 );
+
+    bool ret = false; 
+    try 
+    {
+        ret = TdxHq_GetSecurityQuotes(markets, stock_codes, count, Result.data(), ErrInfo.data());
+    }catch(...)
+    {
+        logger_.LogLocal("StockTicker::GetQuotes TdxHq_GetSecurityQuotes exception");
+        return false;
+    }
     if ( !ret )
     {
         qDebug() << ErrInfo.data() << endl;
@@ -200,11 +212,11 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
         }
         }catch(std::exception &e)
         {
-            logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes exception:%s", e.what()));
+            logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect exception:%s", e.what()));
             return false;
         }catch(...)
         {
-            logger_.LogLocal("StockTicker::GetQuotes exception");
+            logger_.LogLocal("StockTicker::GetQuotes TdxHq_Connect exception");
             return false;
         }
          
