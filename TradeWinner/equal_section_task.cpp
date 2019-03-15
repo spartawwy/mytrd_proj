@@ -533,6 +533,10 @@ BEFORE_TRADE:
         // judge result 
         if( strlen(error_info) == 0 ) // trade ok
         { 
+            this->app()->capital_strand().PostTask([this]()
+            {
+                this->app_->DownloadCapital(); 
+            });
             auto ret_str = new std::string(utility::FormatStr(" 区间任务:%d %s %s %.2f %d 成功!", para_.id, cn_order_str.c_str(), para_.stock.c_str(), price, qty));
             
             DO_LOG(TagOfOrderLog(), *ret_str);
@@ -546,7 +550,7 @@ BEFORE_TRADE:
                 if( cur_type_action_ == TypeAction::CLEAR ) is_to_clear = true;
             }else if( this->sections_[index].section_type == TypeEqSection::CLEAR )
                 is_to_clear = true;
-         
+            
             if( !is_to_clear )
             {  // re calculate
                 CalculateSections(iter->cur_price, para_, sections_, "EqualSectionTask::HandleQuoteData trade ok line 520");
@@ -575,11 +579,9 @@ BEFORE_TRADE:
                  
                 this->app_->EmitSigShowUi(ret_str);
                 this->app_->RemoveTask(this->task_id(), TypeTask::EQUAL_SECTION); // invoker delete self
+                return;
             }
-            this->app()->capital_strand().PostTask([this]()
-            {
-                this->app_->DownloadCapital(); 
-            });
+           
         }else  // trade fail
         {
             auto ret_str = new std::string(utility::FormatStr(" error %d %s %s %.2f %d error:%s"
