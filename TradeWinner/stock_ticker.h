@@ -63,6 +63,8 @@ public:
     bool ConnectHisHqServer();
 #endif
 protected:
+
+    bool ConnectTdxHqServer();
       
     TTaskIdMapStrategyTask  registered_tasks_;
     TCodeMapTasks  codes_taskids_;

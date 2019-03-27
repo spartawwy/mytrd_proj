@@ -50,7 +50,11 @@ TdxHq_GetFinanceInfoDelegate TdxHq_GetFinanceInfo = nullptr;
 
 using namespace TSystem;
 
-static char cst_hq_server[] = "122.224.66.108";
+//static char cst_hq_server[] = "122.224.66.108";
+static char * cst_hq_server[] = {
+                                "218.75.126.9",
+                                "221.12.19.90",
+                                "115.238.90.170"};
 static int  cst_hq_port = 7709;
 
 
@@ -96,6 +100,8 @@ StockTicker::~StockTicker()
 
 bool StockTicker::Init()
 {
+    logger_.LogLocal("StockTicker::Init");
+
     //载入dll, dll要复制到debug和release目录下,必须采用多字节字符集编程设置,用户编程时需自己控制浮点数显示的小数位数与精度
     HMODULE TdxApiHMODULE = LoadLibrary("TdxHqApi20991230.dll");
     if( TdxApiHMODULE == nullptr )
@@ -119,18 +125,10 @@ bool StockTicker::Init()
     TdxHq_GetXDXRInfo = (TdxHq_GetXDXRInfoDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetXDXRInfo");
     TdxHq_GetFinanceInfo = (TdxHq_GetFinanceInfoDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetFinanceInfo");
 
-    Buffer Result(cst_result_len);
-    Buffer ErrInfo(cst_error_len);
+    //Buffer Result(cst_result_len);
     
-    bool bool1 = TdxHq_Connect(cst_hq_server, cst_hq_port, Result.data(), ErrInfo.data());
-    if (!bool1)
-    { 
-        qDebug() << ErrInfo.data() << "\n";//连接失败
-        logger_.LogLocal(std::string("StockTicker::Init TdxHq_Connect fail:") + Result.data());
-        return false;
-    }
-    qDebug() << Result.data() << endl;
-    logger_.LogLocal(std::string("StockTicker::Init") + Result.data());
+    ConnectTdxHqServer();
+    //qDebug() << Result.data() << endl;
 
 #ifdef USE_WINNER_MOCK
     winner_hishq_api_handle_ = LoadLibrary("winner_api.dll");
@@ -155,6 +153,29 @@ bool StockTicker::Init()
    return true;
 }
 
+bool StockTicker::ConnectTdxHqServer()
+{
+    char buf[1024] = {'\0'};
+    char error_buf[1024] = {'\0'};
+    bool ret = false;
+    for( int i = 0; i < sizeof(cst_hq_server)/sizeof(cst_hq_server[0]); ++i )
+    {
+        ret = TdxHq_Connect(cst_hq_server[i], 7709, buf, error_buf);
+        if( ret < 0 )
+        {
+            //std::cout << error_buf << std::endl;
+            logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer TdxHq_Connect %s : %d fail:%s ", cst_hq_server[i], cst_hq_port, error_buf));
+            continue;
+        }else
+        { 
+            logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer TdxHq_Connect %s : %d ok ", cst_hq_server[i], cst_hq_port));
+            break;
+        }
+    } 
+    return ret == 0;
+    //logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect ok!"));
+}
+
 bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
 {
     assert( Result.data() );
@@ -177,39 +198,40 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
         logger_.LogLocal("StockTicker::GetQuotes TdxHq_GetSecurityQuotes exception");
         return false;
     }
+
     if ( !ret )
     {
         qDebug() << ErrInfo.data() << endl;
         logger_.LogLocal(std::string("StockTicker::GetQuotes TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
+        /* // may crash
         if( !strstr(ErrInfo.data(), "请重新连接") )
-            TdxHq_Disconnect();
+            TdxHq_Disconnect();*/
 
         logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect %s : %d ", cst_hq_server, cst_hq_port) );
-        Result.reset(); 
-        ErrInfo.reset();
+        
         try
         {
-        ret = TdxHq_Connect(cst_hq_server, cst_hq_port, Result.data(), ErrInfo.data());
-        if ( !ret )
-        {
-            logger_.LogLocal(std::string("StockTicker::GetQuotes retry TdxHq_Connect fail:") + ErrInfo.data());
-            return false;
-        }
-        logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect ok!"));
-        Result.reset(); 
-        ErrInfo.reset();
+            ret = ConnectTdxHqServer();
+            if( !ret )
+                return false;
+        
 #ifdef DEBUG_GETQUOTES
         // debug 
         for( int i = 0; i < count; ++i )
             logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes stock_codes[%d]:%s", i, stock_codes[i]));
         // end debug
 #endif
-        ret = TdxHq_GetSecurityQuotes(markets, stock_codes, count, Result.data(), ErrInfo.data());
-        if ( !ret )
-        {
-            logger_.LogLocal(std::string("StockTicker::GetQuotes retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
-            return false;
-        }
+            Result.reset(); 
+            ErrInfo.reset();
+            assert(Result.data());
+            assert(ErrInfo.data());
+            ret = TdxHq_GetSecurityQuotes(markets, stock_codes, count, Result.data(), ErrInfo.data());
+            if ( !ret )
+            {
+                logger_.LogLocal(std::string("StockTicker::GetQuotes retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
+                return false;
+            }
+
         }catch(std::exception &e)
         {
             logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect exception:%s", e.what()));
@@ -219,8 +241,8 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
             logger_.LogLocal("StockTicker::GetQuotes TdxHq_Connect exception");
             return false;
         }
-         
     }
+
     return true;
 }
 
@@ -339,6 +361,7 @@ bool StockTicker::GetQuoteDatas(char* stock_codes[], short count, TCodeMapQuotes
     return true;
 }
 
+// called by xxx tick strand 
 void StockTicker::Procedure()
 {  
     Buffer Result(cst_result_len);
