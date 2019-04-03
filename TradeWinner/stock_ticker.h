@@ -88,6 +88,8 @@ protected:
     unsigned int second_val_fake_;
          
 #endif
+    int cur_hq_svr_index_;
+    std::mutex connect_hq_svr_mutext_;
 };
 
 //////////////////////////////////////////////////////////////////

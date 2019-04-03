@@ -76,7 +76,8 @@ StockTicker::StockTicker(TSystem::LocalLogger  &logger, void *app)
     , hour_val_fake_(HOUR_BEG_MOCK)
     , minute_val_fake_(MINUTE_BEG_MOCK)
     , second_val_fake_(SECOND_BEG_MOCK) 
-#endif
+#endif 
+    , cur_hq_svr_index_(0)
 {
 
 }
@@ -158,10 +159,13 @@ bool StockTicker::ConnectTdxHqServer()
     char buf[1024] = {'\0'};
     char error_buf[1024] = {'\0'};
     bool ret = false;
-    for( int i = 0; i < sizeof(cst_hq_server)/sizeof(cst_hq_server[0]); ++i )
+    std::lock_guard<std::mutex>  locker(connect_hq_svr_mutext_);
+    const int svr_num = sizeof(cst_hq_server)/sizeof(cst_hq_server[0]);
+    for( int i = (cur_hq_svr_index_ + 1) % svr_num; i < svr_num; ++i )
     {
-        ret = TdxHq_Connect(cst_hq_server[i], 7709, buf, error_buf);
-        if( ret < 0 )
+        logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer TdxHq_Connect %s : %d ", cst_hq_server[i], cst_hq_port));
+        ret = TdxHq_Connect(cst_hq_server[i], cst_hq_port, buf, error_buf);
+        if( !ret )
         {
             //std::cout << error_buf << std::endl;
             logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer TdxHq_Connect %s : %d fail:%s ", cst_hq_server[i], cst_hq_port, error_buf));
@@ -169,10 +173,11 @@ bool StockTicker::ConnectTdxHqServer()
         }else
         { 
             logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer TdxHq_Connect %s : %d ok ", cst_hq_server[i], cst_hq_port));
+            cur_hq_svr_index_ = i;
             break;
         }
     } 
-    return ret == 0;
+    return ret;
     //logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect ok!"));
 }
 
@@ -207,10 +212,11 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
         if( !strstr(ErrInfo.data(), "请重新连接") )
             TdxHq_Disconnect();*/
 
-        logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect %s : %d ", cst_hq_server, cst_hq_port) );
+        //logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect ", cst_hq_server, cst_hq_port) );
         
         try
         {
+            std::lock_guard<std::mutex>  locker(connect_hq_svr_mutext_);
             ret = ConnectTdxHqServer();
             if( !ret )
                 return false;
