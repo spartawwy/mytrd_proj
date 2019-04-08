@@ -216,7 +216,6 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
         
         try
         {
-            std::lock_guard<std::mutex>  locker(connect_hq_svr_mutext_);
             ret = ConnectTdxHqServer();
             if( !ret )
                 return false;
