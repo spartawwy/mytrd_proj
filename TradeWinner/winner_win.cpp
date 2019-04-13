@@ -703,7 +703,7 @@ void WinnerWin::DoLeStockEditingFinished()
     auto result = std::make_shared<Buffer>(1024*1024);
     char error[2*1024] = {0};
     short count = 1;
-    app_->stock_ticker().GetSecurityBars(category, market, stock_code.toLocal8Bit().data(), 0, count, result->data(), error);
+   // app_->stock_ticker().GetSecurityBars(category, market, stock_code.toLocal8Bit().data(), 0, count, result->data(), error);
 #endif
 }
 

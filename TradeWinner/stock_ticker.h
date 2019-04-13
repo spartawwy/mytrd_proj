@@ -43,7 +43,7 @@ public:
     void RegisterAdditionCode(const std::string& input_code);
     void UnRegAdditionCode(const std::string& code);
 
-    bool GetSecurityBars(int Category, int Market, char* Zqdm, short Start, short& Count, char* Result, char* ErrInfo);
+    //bool GetSecurityBars(int Category, int Market, char* Zqdm, short Start, short& Count, char* Result, char* ErrInfo);
 
     bool GetQuotes(char* stock_codes[], short count, Buffer &Result);
 
@@ -90,6 +90,8 @@ protected:
 #endif
     int cur_hq_svr_index_;
     std::mutex connect_hq_svr_mutext_;
+
+    int connn_id_;
 };
 
 //////////////////////////////////////////////////////////////////

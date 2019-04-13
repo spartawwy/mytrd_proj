@@ -13,7 +13,11 @@
 
 #include <boost/lexical_cast.hpp>
 
+#ifdef USE_OLD_TDXHQ
 #include "TdxHqApi.h"
+#else
+#include "HqApi.h"
+#endif
 
 #include <TLib/core/tsystem_utility_functions.h>
 #include <TLib/tool/tsystem_rational_number.h>
@@ -33,6 +37,8 @@
 #endif
 
 //#define DEBUG_GETQUOTES
+
+#ifdef USE_OLD_TDXHQ
  //获取api函数
 TdxHq_ConnectDelegate TdxHq_Connect = nullptr;
 TdxHq_DisconnectDelegate TdxHq_Disconnect = nullptr;
@@ -47,6 +53,22 @@ TdxHq_GetCompanyInfoCategoryDelegate TdxHq_GetCompanyInfoCategory = nullptr;
 TdxHq_GetCompanyInfoContentDelegate TdxHq_GetCompanyInfoContent = nullptr;
 TdxHq_GetXDXRInfoDelegate TdxHq_GetXDXRInfo = nullptr;
 TdxHq_GetFinanceInfoDelegate TdxHq_GetFinanceInfo = nullptr;
+#else
+
+typedef int (__stdcall* TdxHq_ConnectDelegate)(char* IP, int Port, char* Result, char* ErrInfo);
+ 
+typedef void (__stdcall* TdxHq_DisconnectDelegate)();
+
+typedef void (__stdcall* TdxHq_SetTimeoutDelegate)(int nConnID, int nReadTimeout, int nWriteTimeout);
+
+typedef bool (__stdcall* TdxHq_GetSecurityQuotesDelegate)(int nConnID, /*const*/ char nMarket[], /*const*/ char *pszZqdm[], short *pnCount, char *pszResult, char *pszErrInfo);
+
+
+TdxHq_ConnectDelegate Func_TdxHq_Connect = nullptr;
+TdxHq_DisconnectDelegate Func_TdxHq_Disconnect = nullptr;
+TdxHq_GetSecurityQuotesDelegate Func_TdxHq_GetSecurityQuotes = nullptr;
+
+#endif
 
 using namespace TSystem;
 
@@ -78,6 +100,7 @@ StockTicker::StockTicker(TSystem::LocalLogger  &logger, void *app)
     , second_val_fake_(SECOND_BEG_MOCK) 
 #endif 
     , cur_hq_svr_index_(0)
+    , connn_id_(0)
 {
 
 }
@@ -86,8 +109,14 @@ StockTicker::~StockTicker()
 {
     /*if( TdxApiHMODULE )
         FreeLibrary(TdxApiHMODULE);*/
+#ifdef USE_OLD_TDXHQ
     if( TdxHq_Disconnect )
         TdxHq_Disconnect();
+#else
+    if( Func_TdxHq_Disconnect )
+        Func_TdxHq_Disconnect();
+#endif
+
 #ifdef USE_WINNER_MOCK
     if( WinnerHisHq_DisConnect_ )
     {
@@ -103,17 +132,23 @@ bool StockTicker::Init()
 {
     logger_.LogLocal("StockTicker::Init");
 
+#ifdef USE_OLD_TDXHQ
     //载入dll, dll要复制到debug和release目录下,必须采用多字节字符集编程设置,用户编程时需自己控制浮点数显示的小数位数与精度
     HMODULE TdxApiHMODULE = LoadLibrary("TdxHqApi20991230.dll");
+#else
+    HMODULE TdxApiHMODULE = LoadLibrary("hqapi.dll");
+#endif
     if( TdxApiHMODULE == nullptr )
     {
         QMessageBox::information(nullptr, "info", "null dll");
         //throw excepton;
         return false;
     }
+#ifdef USE_OLD_TDXHQ
     //获取api函数
     TdxHq_Connect = (TdxHq_ConnectDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_Connect");
     TdxHq_Disconnect = (TdxHq_DisconnectDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_Disconnect");
+
     TdxHq_GetSecurityBars = (TdxHq_GetSecurityBarsDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetSecurityBars");
     TdxHq_GetIndexBars = (TdxHq_GetIndexBarsDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetIndexBars");
     TdxHq_GetMinuteTimeData = (TdxHq_GetMinuteTimeDataDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetMinuteTimeData");
@@ -125,7 +160,13 @@ bool StockTicker::Init()
     TdxHq_GetCompanyInfoContent = (TdxHq_GetCompanyInfoContentDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetCompanyInfoContent");
     TdxHq_GetXDXRInfo = (TdxHq_GetXDXRInfoDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetXDXRInfo");
     TdxHq_GetFinanceInfo = (TdxHq_GetFinanceInfoDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetFinanceInfo");
-
+#else
+    //获取api函数
+    Func_TdxHq_Connect = (TdxHq_ConnectDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_Connect");
+    Func_TdxHq_Disconnect = (TdxHq_DisconnectDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_Disconnect");
+    Func_TdxHq_GetSecurityQuotes = (TdxHq_GetSecurityQuotesDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetSecurityQuotes");
+      
+#endif
     //Buffer Result(cst_result_len);
     
     ConnectTdxHqServer();
@@ -164,7 +205,12 @@ bool StockTicker::ConnectTdxHqServer()
     for( int i = (cur_hq_svr_index_ + 1) % svr_num; i < svr_num; ++i )
     {
         logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer TdxHq_Connect %s : %d ", cst_hq_server[i], cst_hq_port));
+#ifdef USE_OLD_TDXHQ        
         ret = TdxHq_Connect(cst_hq_server[i], cst_hq_port, buf, error_buf);
+#else
+        connn_id_ = Func_TdxHq_Connect(cst_hq_server[i], cst_hq_port, buf, error_buf);
+        ret = connn_id_ == 0;
+#endif
         if( !ret )
         {
             //std::cout << error_buf << std::endl;
@@ -184,20 +230,40 @@ bool StockTicker::ConnectTdxHqServer()
 bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
 {
     assert( Result.data() );
+    
+    Buffer ErrInfo(cst_error_len);
+
+    assert( count > 0 );
+#ifdef USE_OLD_TDXHQ   
     byte markets[cst_max_stock_code_count];
     for( int i = 0; i < count; ++i )
     {
         markets[i] = (byte)GetStockMarketType(stock_codes[i]);
     }
- 
-    Buffer ErrInfo(cst_error_len);
-
-    assert( count > 0 );
-
+    
+#else
+     
+    char markets[cst_max_stock_code_count];
+    for( int i = 0; i < count; ++i )
+    {
+        markets[i] = (char)GetStockMarketType(stock_codes[i]);
+    }
+#endif
     bool ret = false; 
     try 
     {
+#ifdef USE_OLD_TDXHQ   
         ret = TdxHq_GetSecurityQuotes(markets, stock_codes, count, Result.data(), ErrInfo.data());
+#else
+       /* 
+        const char * cst_stkck_codes[256];
+        for( int i = 0; i < count; ++i )
+        {
+            cst_stkck_codes[i] =  stock_codes[i];
+        }*/
+        short n_count = count;
+        ret = Func_TdxHq_GetSecurityQuotes(connn_id_, markets, stock_codes, &n_count, Result.data(), ErrInfo.data());
+#endif
     }catch(...)
     {
         logger_.LogLocal("StockTicker::GetQuotes TdxHq_GetSecurityQuotes exception");
@@ -230,7 +296,12 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
             ErrInfo.reset();
             assert(Result.data());
             assert(ErrInfo.data());
+#ifdef USE_OLD_TDXHQ   
             ret = TdxHq_GetSecurityQuotes(markets, stock_codes, count, Result.data(), ErrInfo.data());
+#else
+            short n_count = count;
+            ret = Func_TdxHq_GetSecurityQuotes(connn_id_, markets, stock_codes, &n_count, Result.data(), ErrInfo.data());
+#endif
             if ( !ret )
             {
                 logger_.LogLocal(std::string("StockTicker::GetQuotes retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
@@ -594,10 +665,11 @@ void StockTicker::UnRegAdditionCode(const std::string& code)
     }
 }
 
-bool StockTicker::GetSecurityBars(int Category, int Market, char* Zqdm, short Start, short& Count, char* Result, char* ErrInfo)
-{
-    return TdxHq_GetSecurityBars(Category, Market, Zqdm, Start, Count, Result, ErrInfo);
-}
+//bool StockTicker::GetSecurityBars(int Category, int Market, char* Zqdm, short Start, short& Count, char* Result, char* ErrInfo)
+//{
+//    short n_count = Count;
+//    return TdxHq_GetSecurityBars(connn_id_, Category, Market, Zqdm, Start, &n_count, Result, ErrInfo);
+//}
 
 #ifdef USE_WINNER_MOCK
 void StockTicker::DecodeStkQuoteResult_Mock( INOUT TCodeMapQuotesData &codes_quote_datas 
