@@ -425,4 +425,6 @@ typedef std::unordered_map<std::string, std::shared_ptr<QuotesData> > TCodeMapQu
 
 typedef void(*FuncTellAddtionPrice)(const std::string&, const std::string&);
 
+#define  USE_OLD_TDXHQ
+
 #endif

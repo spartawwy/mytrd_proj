@@ -200,6 +200,9 @@ bool WinnerApp::Init()
 
 	strategy_tasks_timer_->start(1000); //msec invoke DoStrategyTasksTimeout
 	normal_timer_->start(cst_normal_timer_interval); // invoke DoNormalTimer
+
+    SlotStopAllTasks(true);
+
 	return true;
 }
 
@@ -724,7 +727,7 @@ void WinnerApp::DoNormalTimer()
     
     const int heart_quote_quey_seconds = 5 / (cst_normal_timer_interval / 1000);
     if( count_query % heart_quote_quey_seconds == 0 )
-        GetStockPriceInfo("601318", false);
+        GetStockPriceInfo("601398", false);
 }
 
 

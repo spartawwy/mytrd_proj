@@ -100,7 +100,7 @@ StockTicker::StockTicker(TSystem::LocalLogger  &logger, void *app)
     , second_val_fake_(SECOND_BEG_MOCK) 
 #endif 
     , cur_hq_svr_index_(0)
-    , connn_id_(0)
+    , connn_id_(-1)
 {
 
 }
@@ -198,23 +198,49 @@ bool StockTicker::Init()
 bool StockTicker::ConnectTdxHqServer()
 {
     char buf[1024] = {'\0'};
-    char error_buf[1024] = {'\0'};
+    Buffer error_buf(cst_error_len);
     bool ret = false;
+
     std::lock_guard<std::mutex>  locker(connect_hq_svr_mutext_);
-    const int svr_num = sizeof(cst_hq_server)/sizeof(cst_hq_server[0]);
-    for( int i = (cur_hq_svr_index_ + 1) % svr_num; i < svr_num; ++i )
-    {
-        logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer TdxHq_Connect %s : %d ", cst_hq_server[i], cst_hq_port));
-#ifdef USE_OLD_TDXHQ        
-        ret = TdxHq_Connect(cst_hq_server[i], cst_hq_port, buf, error_buf);
+
+    // ---------try quote again------------
+    
+    char *zqdm[1] = {"601398"};
+    short count = 1;
+    Buffer result(cst_result_len);
+#ifdef USE_OLD_TDXHQ   
+    byte maket[1] = {(byte)TypeMarket::SH};
+    ret = TdxHq_GetSecurityQuotes(maket, zqdm, count, result.data(), error_buf.data());
 #else
-        connn_id_ = Func_TdxHq_Connect(cst_hq_server[i], cst_hq_port, buf, error_buf);
-        ret = connn_id_ == 0;
+    char maket[1] = {(char)TypeMarket::SH};
+    ret = Func_TdxHq_GetSecurityQuotes(connn_id_, maket, zqdm, &count, result.data(), error_buf.data());
+#endif
+    if( ret )
+        return true;
+
+    error_buf.reset();
+    const int svr_num = sizeof(cst_hq_server)/sizeof(cst_hq_server[0]);
+    for( int j = 0, i = (cur_hq_svr_index_ + 1) % svr_num;
+        j < svr_num; ++j , i = (i + 1) % svr_num )
+    {
+#ifdef USE_OLD_TDXHQ        
+        TdxHq_Disconnect();
+        logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer TdxHq_Connect %s : %d ", cst_hq_server[i], cst_hq_port));
+        ret = TdxHq_Connect(cst_hq_server[i], cst_hq_port, buf, error_buf.data());
+#else
+        if( connn_id_ >= 0 )
+        {
+            logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer Disconnect %d", connn_id_));
+            Func_TdxHq_Disconnect();
+        }
+        logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer TdxHq_Connect %s : %d ", cst_hq_server[i], cst_hq_port));
+        connn_id_ = Func_TdxHq_Connect(cst_hq_server[i], cst_hq_port, buf, error_buf.data());
+        ret = connn_id_ >= 0;
 #endif
         if( !ret )
         {
             //std::cout << error_buf << std::endl;
-            logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer TdxHq_Connect %s : %d fail:%s ", cst_hq_server[i], cst_hq_port, error_buf));
+            logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer TdxHq_Connect %s : %d fail:%s ", cst_hq_server[i], cst_hq_port, error_buf.c_data()));
             continue;
         }else
         { 
@@ -223,26 +249,24 @@ bool StockTicker::ConnectTdxHqServer()
             break;
         }
     } 
+    
     return ret;
     //logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect ok!"));
 }
 
 bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
 {
-    assert( Result.data() );
-    
-    Buffer ErrInfo(cst_error_len);
-
+    assert( Result.data() ); 
+    Buffer ErrInfo(cst_error_len); 
     assert( count > 0 );
+
 #ifdef USE_OLD_TDXHQ   
     byte markets[cst_max_stock_code_count];
     for( int i = 0; i < count; ++i )
     {
         markets[i] = (byte)GetStockMarketType(stock_codes[i]);
-    }
-    
-#else
-     
+    } 
+#else 
     char markets[cst_max_stock_code_count];
     for( int i = 0; i < count; ++i )
     {
@@ -250,17 +274,13 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
     }
 #endif
     bool ret = false; 
+   
     try 
     {
+        std::lock_guard<std::mutex>  locker(connect_hq_svr_mutext_);
 #ifdef USE_OLD_TDXHQ   
         ret = TdxHq_GetSecurityQuotes(markets, stock_codes, count, Result.data(), ErrInfo.data());
-#else
-       /* 
-        const char * cst_stkck_codes[256];
-        for( int i = 0; i < count; ++i )
-        {
-            cst_stkck_codes[i] =  stock_codes[i];
-        }*/
+#else 
         short n_count = count;
         ret = Func_TdxHq_GetSecurityQuotes(connn_id_, markets, stock_codes, &n_count, Result.data(), ErrInfo.data());
 #endif
@@ -274,12 +294,7 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
     {
         qDebug() << ErrInfo.data() << endl;
         logger_.LogLocal(std::string("StockTicker::GetQuotes TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());
-        /* // may crash
-        if( !strstr(ErrInfo.data(), "请重新连接") )
-            TdxHq_Disconnect();*/
-
-        //logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect ", cst_hq_server, cst_hq_port) );
-        
+         
         try
         {
             ret = ConnectTdxHqServer();
