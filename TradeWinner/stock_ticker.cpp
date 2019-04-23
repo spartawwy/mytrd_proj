@@ -72,6 +72,8 @@ TdxHq_GetSecurityQuotesDelegate Func_TdxHq_GetSecurityQuotes = nullptr;
 
 using namespace TSystem;
 
+static const char cst_hq_api_dll_name[] = "hqapi.dll";
+
 //static char cst_hq_server[] = "122.224.66.108";
 static char * cst_hq_server[] = {
                                 "218.75.126.9",
@@ -101,6 +103,7 @@ StockTicker::StockTicker(TSystem::LocalLogger  &logger, void *app)
 #endif 
     , cur_hq_svr_index_(0)
     , connn_id_(-1)
+    , tdx_api_(nullptr)
 {
 
 }
@@ -132,44 +135,9 @@ bool StockTicker::Init()
 {
     logger_.LogLocal("StockTicker::Init");
 
-#ifdef USE_OLD_TDXHQ
-    //载入dll, dll要复制到debug和release目录下,必须采用多字节字符集编程设置,用户编程时需自己控制浮点数显示的小数位数与精度
-    HMODULE TdxApiHMODULE = LoadLibrary("TdxHqApi20991230.dll");
-#else
-    HMODULE TdxApiHMODULE = LoadLibrary("hqapi.dll");
-#endif
-    if( TdxApiHMODULE == nullptr )
-    {
-        QMessageBox::information(nullptr, "info", "null dll");
-        //throw excepton;
-        return false;
-    }
-#ifdef USE_OLD_TDXHQ
-    //获取api函数
-    TdxHq_Connect = (TdxHq_ConnectDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_Connect");
-    TdxHq_Disconnect = (TdxHq_DisconnectDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_Disconnect");
-
-    TdxHq_GetSecurityBars = (TdxHq_GetSecurityBarsDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetSecurityBars");
-    TdxHq_GetIndexBars = (TdxHq_GetIndexBarsDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetIndexBars");
-    TdxHq_GetMinuteTimeData = (TdxHq_GetMinuteTimeDataDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetMinuteTimeData");
-    TdxHq_GetHistoryMinuteTimeData = (TdxHq_GetHistoryMinuteTimeDataDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetHistoryMinuteTimeData");
-    TdxHq_GetTransactionData = (TdxHq_GetTransactionDataDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetTransactionData");
-    TdxHq_GetHistoryTransactionData = (TdxHq_GetHistoryTransactionDataDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetHistoryTransactionData");
-    TdxHq_GetSecurityQuotes = (TdxHq_GetSecurityQuotesDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetSecurityQuotes");
-    TdxHq_GetCompanyInfoCategory = (TdxHq_GetCompanyInfoCategoryDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetCompanyInfoCategory");
-    TdxHq_GetCompanyInfoContent = (TdxHq_GetCompanyInfoContentDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetCompanyInfoContent");
-    TdxHq_GetXDXRInfo = (TdxHq_GetXDXRInfoDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetXDXRInfo");
-    TdxHq_GetFinanceInfo = (TdxHq_GetFinanceInfoDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetFinanceInfo");
-#else
-    //获取api函数
-    Func_TdxHq_Connect = (TdxHq_ConnectDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_Connect");
-    Func_TdxHq_Disconnect = (TdxHq_DisconnectDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_Disconnect");
-    Func_TdxHq_GetSecurityQuotes = (TdxHq_GetSecurityQuotesDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetSecurityQuotes");
-      
-#endif
     //Buffer Result(cst_result_len);
-    
-    ConnectTdxHqServer();
+    if( !LoadTdxHqApi() ) 
+        ConnectTdxHqServer();
     //qDebug() << Result.data() << endl;
 
 #ifdef USE_WINNER_MOCK
@@ -195,6 +163,65 @@ bool StockTicker::Init()
    return true;
 }
 
+bool StockTicker::LoadTdxHqApi()
+{
+#ifdef USE_OLD_TDXHQ
+    //载入dll, dll要复制到debug和release目录下,必须采用多字节字符集编程设置,用户编程时需自己控制浮点数显示的小数位数与精度
+    HMODULE TdxApiHMODULE = LoadLibrary("TdxHqApi20991230.dll");
+#else
+    HMODULE TdxApiHMODULE = LoadLibrary(cst_hq_api_dll_name);
+#endif
+    if( TdxApiHMODULE == nullptr )
+    {
+        //QMessageBox::information(nullptr, "info", "null dll");
+        logger_.LogLocal(TSystem::utility::FormatStr("StockTicker::LoadTdxHqApi %s fail", cst_hq_api_dll_name));
+        return false;
+    }
+    tdx_api_ = TdxApiHMODULE;
+#ifdef USE_OLD_TDXHQ
+    //获取api函数
+    TdxHq_Connect = (TdxHq_ConnectDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_Connect");
+    TdxHq_Disconnect = (TdxHq_DisconnectDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_Disconnect");
+
+    TdxHq_GetSecurityBars = (TdxHq_GetSecurityBarsDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetSecurityBars");
+    /*TdxHq_GetIndexBars = (TdxHq_GetIndexBarsDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetIndexBars");
+    TdxHq_GetMinuteTimeData = (TdxHq_GetMinuteTimeDataDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetMinuteTimeData");
+    TdxHq_GetHistoryMinuteTimeData = (TdxHq_GetHistoryMinuteTimeDataDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetHistoryMinuteTimeData");
+    TdxHq_GetTransactionData = (TdxHq_GetTransactionDataDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetTransactionData");
+    TdxHq_GetHistoryTransactionData = (TdxHq_GetHistoryTransactionDataDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetHistoryTransactionData");
+    TdxHq_GetSecurityQuotes = (TdxHq_GetSecurityQuotesDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetSecurityQuotes");
+    TdxHq_GetCompanyInfoCategory = (TdxHq_GetCompanyInfoCategoryDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetCompanyInfoCategory");
+    TdxHq_GetCompanyInfoContent = (TdxHq_GetCompanyInfoContentDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetCompanyInfoContent");
+    TdxHq_GetXDXRInfo = (TdxHq_GetXDXRInfoDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetXDXRInfo");
+    TdxHq_GetFinanceInfo = (TdxHq_GetFinanceInfoDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetFinanceInfo");*/
+
+    return TdxHq_Connect && TdxHq_Disconnect && TdxHq_GetSecurityQuotes;
+#else
+    //获取api函数
+    Func_TdxHq_Connect = (TdxHq_ConnectDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_Connect");
+    Func_TdxHq_Disconnect = (TdxHq_DisconnectDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_Disconnect");
+    Func_TdxHq_GetSecurityQuotes = (TdxHq_GetSecurityQuotesDelegate)GetProcAddress(TdxApiHMODULE, "TdxHq_GetSecurityQuotes");
+    
+    if( Func_TdxHq_Connect && Func_TdxHq_Disconnect && Func_TdxHq_GetSecurityQuotes )
+    {
+        logger_.LogLocal(TSystem::utility::FormatStr("StockTicker::LoadTdxHqApi %s ok", cst_hq_api_dll_name));
+        return true;
+    }else
+        return false;
+#endif
+    
+}
+
+void StockTicker::UnInstallTdxHqApi()
+{
+    if( tdx_api_ )
+       FreeLibrary( (HMODULE)tdx_api_ );
+    tdx_api_ = nullptr;
+    Func_TdxHq_Connect = nullptr;
+    Func_TdxHq_Disconnect = nullptr;
+    Func_TdxHq_GetSecurityQuotes = nullptr;
+}
+
 bool StockTicker::ConnectTdxHqServer()
 {
     char buf[1024] = {'\0'};
@@ -210,13 +237,18 @@ bool StockTicker::ConnectTdxHqServer()
     Buffer result(cst_result_len);
 #ifdef USE_OLD_TDXHQ   
     byte maket[1] = {(byte)TypeMarket::SH};
-    ret = TdxHq_GetSecurityQuotes(maket, zqdm, count, result.data(), error_buf.data());
+    if( Func_TdxHq_GetSecurityQuotes )
+        ret = TdxHq_GetSecurityQuotes(maket, zqdm, count, result.data(), error_buf.data());
 #else
     char maket[1] = {(char)TypeMarket::SH};
-    ret = Func_TdxHq_GetSecurityQuotes(connn_id_, maket, zqdm, &count, result.data(), error_buf.data());
+    if( Func_TdxHq_GetSecurityQuotes )
+        ret = Func_TdxHq_GetSecurityQuotes(connn_id_, maket, zqdm, &count, result.data(), error_buf.data());
 #endif
     if( ret )
         return true;
+
+    if( !Func_TdxHq_Connect || !Func_TdxHq_Disconnect || !Func_TdxHq_GetSecurityQuotes )
+        goto END_PROC;
 
     error_buf.reset();
     const int svr_num = sizeof(cst_hq_server)/sizeof(cst_hq_server[0]);
@@ -224,11 +256,13 @@ bool StockTicker::ConnectTdxHqServer()
         j < svr_num; ++j , i = (i + 1) % svr_num )
     {
 #ifdef USE_OLD_TDXHQ        
+        
         TdxHq_Disconnect();
         logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer TdxHq_Connect %s : %d ", cst_hq_server[i], cst_hq_port));
+
         ret = TdxHq_Connect(cst_hq_server[i], cst_hq_port, buf, error_buf.data());
 #else
-        if( connn_id_ >= 0 )
+        //if( connn_id_ >= 0 )
         {
             logger_.LogLocal(utility::FormatStr("StockTicker::ConnectTdxHqServer Disconnect %d", connn_id_));
             Func_TdxHq_Disconnect();
@@ -249,9 +283,17 @@ bool StockTicker::ConnectTdxHqServer()
             break;
         }
     } 
+
+END_PROC:
+   /* if( !ret )
+    {
+        Func_TdxHq_Disconnect();
+        UnInstallTdxHqApi();
+        std::this_thread::sleep_for(std::chrono::system_clock::duration(std::chrono::milliseconds(50)));
+        LoadTdxHqApi();
+    }*/
     
     return ret;
-    //logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes TdxHq_Connect ok!"));
 }
 
 bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
@@ -334,7 +376,7 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
         }
     }
 
-    return true;
+    return ret;
 }
 
 void StockTicker::DecodeStkQuoteResult(Buffer &Result, INOUT TCodeMapQuotesData *codes_quote_datas

@@ -64,6 +64,9 @@ public:
 #endif
 protected:
 
+    bool LoadTdxHqApi();
+    void UnInstallTdxHqApi();
+
     bool ConnectTdxHqServer();
       
     TTaskIdMapStrategyTask  registered_tasks_;
@@ -92,6 +95,7 @@ protected:
     std::mutex connect_hq_svr_mutext_;
 
     int connn_id_;
+    void *tdx_api_;
 };
 
 //////////////////////////////////////////////////////////////////
