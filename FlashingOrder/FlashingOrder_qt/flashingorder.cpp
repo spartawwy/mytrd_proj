@@ -13,6 +13,8 @@
 #include <Qdir.h>
 #include <QSettings>
 #include <QMessageBox>
+#include <qtextcodec>
+
 #include <QDebug>
 
 #include "gloakm_capture_api.h"
@@ -137,6 +139,12 @@ FlashingOrder::FlashingOrder(QWidget *parent)
     ret = connect(ui.pbtn_save, SIGNAL(clicked()), this, SLOT(DoSaveCfg()));
     
 	thread_.start();
+
+    // temp code
+    QString ck_str = QString::fromLocal8Bit("分析图表-");
+    qDebug() << ck_str.toLocal8Bit().data() << " \n";
+    //QString ck_str = "分析图表-";
+    qDebug() << ck_str.toLocal8Bit().data() << " \n";
 }
 
 FlashingOrder::~FlashingOrder()
@@ -305,7 +313,7 @@ bool FlashingOrder::GetWinTileAndStockName(QString& title, QString& stock_name)
 	title = QString::fromLocal8Bit(buf);
 
 	std::string title_str = buf;   
-	std::string key_str = "[组合图-";
+	std::string key_str = prefix_tag_; //"[组合图-";
 
 	auto pos = title_str.find(key_str);
 	if( std::string::npos == pos )
@@ -322,9 +330,18 @@ void FlashingOrder::DoReadCfg()
     // -------read config file ------------
     QString iniFilePath = CONFIG_FILE_NAME;  
     QSettings settings(iniFilePath, QSettings::IniFormat);  
-    QString app_title = QString::fromLocal8Bit(settings.value("config/broker_app_title").toString().toLatin1().constData());
+    settings.setIniCodec( QTextCodec::codecForName("utf-8") );
+
+    //QString app_title = QString::fromLocal8Bit(settings.value("config/broker_app_title").toString().toLatin1().constData());
+    QString app_title = settings.value("config/broker_app_title").toString();
     qDebug() << app_title << "\n";
-    target_win_title_tag_ = app_title.toLocal8Bit();
+    target_win_title_tag_ = app_title.toLocal8Bit().data();
+
+    QString prefix_tag = settings.value("config/prefix_tag").toString();
+    //QString prefix_tag = QString::fromLocal8Bit(settings.value("config/prefix_tag").toString().toLatin1().constData());
+    qDebug() << prefix_tag << "\n";
+    prefix_tag_ = prefix_tag.toLocal8Bit().data();
+    
     qty_buy_ = settings.value("config/buy_quantity").toInt();
     qty_sell_ = settings.value("config/sell_quantity").toInt();
     quote_level_ = (TypeQuoteLevel)settings.value("config/quote_level").toInt();

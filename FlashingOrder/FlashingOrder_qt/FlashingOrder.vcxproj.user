@@ -4,9 +4,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <QTDIR>C:\Qt32\Qt5.2.1\5.2.1\msvc2012</QTDIR>
     <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin%3b"$(QTDIR)\bin%3b$(PATH)</LocalDebuggerEnvironment>
-    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>C:\Users\wwang.WINFAE\Desktop\TradeWinner_run\TradeWinner_new</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommand>D:\ProgramFilesBase\TradeWinner\FlashingOrder.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>C:\Users\wwang.WINFAE\Desktop\TradeWinner_run\TradeWinner_new\$(ProjectName).exe</LocalDebuggerCommand>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <QTDIR>C:\Qt32\Qt5.2.1\5.2.1\msvc2012</QTDIR>

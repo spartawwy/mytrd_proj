@@ -69,6 +69,7 @@ private:
 	bool exit_flag_;
 
 	std::string  target_win_title_tag_;
+	std::string  prefix_tag_;
     int qty_buy_;
     int qty_sell_;
     TypeQuoteLevel quote_level_;
