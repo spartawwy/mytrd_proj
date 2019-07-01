@@ -149,7 +149,7 @@ int Agent_FANG_ZHENG::QueryPosition(T_PositionData *out_pos_data, int max_pos_si
 
 	//std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
      
-	int start = 14;
+	int start = 15; // version before 20190626 is 14. cause of fangzeng edit. changed to 15
 	int content_col = 13;
 #if 0
     if( p_user_broker_info_->type == TypeBroker::ZHONGY_GJ )
