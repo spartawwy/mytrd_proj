@@ -159,8 +159,13 @@ int Agent_ZHONG_XIN::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
         UtilityUse::WriteLog("%s\n---------------\n", result_array.at(i).c_str());
     }
 #endif
-    int start = 19;
-    int content_col = 18;
+
+    /*int start = 19;   // before ver 8.42
+    int content_col = 18;*/
+
+    int start = 20;
+    int content_col = 19;
+
 
     int index = 0;
 	for( unsigned int n = 0 ; n < (result_array.size() - start) / content_col; ++n )
