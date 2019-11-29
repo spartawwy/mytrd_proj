@@ -38,7 +38,20 @@ bool Agent_ZHONG_XIN::Login(char* ip, short port, char* ver, short yybid, char* 
 
 	char error_info[1024] = {0};
     trade_client_id_ = -1;
-#if 1
+#ifdef  USE_TRADE_X
+    int nQsid = 32;
+	std::string sHost = "180.153.18.180";
+	int nPort = 7708;
+	std::string sVersion = "8.27";
+	int nBranchID = 1;
+	char nAccountType = 8;
+	std::string sAccountNo = "880003767427";
+	std::string sTradeAccountNo = "880003767427";
+	//std::string sPassword = "123321"; 
+	std::string sTxPassword = "";
+    trade_client_id_ = trade_delegater_->Logon(nQsid, /*ip*/sHost.c_str(), nPort, sVersion.c_str(), nBranchID, nAccountType, account_no
+		, trade_account, trade_pwd, txpwd, error_info);
+#elif 1
 	trade_client_id_ = trade_delegater_->Logon(ip, port, ver, yybid, account_no
 		, trade_account, trade_pwd, txpwd, error);
 #elif 0
@@ -160,11 +173,10 @@ int Agent_ZHONG_XIN::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
     }
 #endif
 
-    /*int start = 19;   // before ver 8.42
-    int content_col = 18;*/
+    //int start = 19;   // before ver 8.42
 
     int start = 20;
-    int content_col = 19;
+    int content_col = 18;
 
 
     int index = 0;

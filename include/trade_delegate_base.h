@@ -1,7 +1,11 @@
 #ifndef TRADE_DELEGATER_SDF23SDFSD_H_
 #define TRADE_DELEGATER_SDF23SDFSD_H_
 
+#ifdef USE_TRADE_X
+#include "TradeXApi.h"
+#else
 #include "TdxTradeApi.h"
+#endif
 
 #define NOMINMAX  // cause, for qt adapt window.h
 
@@ -20,7 +24,7 @@ public:
 	SendOrderDelegate SendOrder; 
 	CancelOrderDelegate CancelOrder;
 	GetQuoteDelegate GetQuote; 
-	RepayDelegate Repay; 
+	//RepayDelegate Repay; 
 
 	//是普通批量版功能函数
 	QueryDatasDelegate QueryDatas;

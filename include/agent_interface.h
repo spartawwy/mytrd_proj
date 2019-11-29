@@ -6,6 +6,8 @@
 
 #include "common_base.h"
 
+#define   USE_TRADE_X
+
 #ifdef AGENT_INTERFACE_EXPORTS
 #define AGENT_INTERFACE_API __declspec(dllexport)
 #else

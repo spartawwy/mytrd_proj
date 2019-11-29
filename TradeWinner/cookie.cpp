@@ -30,17 +30,18 @@ Cookie::TRetCookie Cookie::Init()
 { 
     DWORD error_code;
     TRetCookie  ret = TRetCookie::OK;
-
-    //const char* shared_name = "cookietrdw";
-    const char* shared_name = "cookietrdzx";
-     
+    
     _mkdir("c:\\trade_localf");
+
+    //const char* shared_name = "cookietrdzx";
+    const char* shared_name = "cookietrdpinan";
 
     //mmf_flags flags = FILE_FLAG_SEQUENTIAL_SCAN;//|FILE_FLAG_WRITE_THROUGH|FILE_FLAG_NO_BUFFERING;
 
     mmfm_ = INVALID_HANDLE_VALUE;
     // create file
     mmHandle_ = CreateFile("c:\\trade_localf\\my.cookie_zhongxin",
+    //mmHandle_ = CreateFile("c:\\trade_localf\\my.cookie_pinan",
              GENERIC_READ | GENERIC_WRITE,  //access_mode
              FILE_SHARE_READ | FILE_SHARE_WRITE, //share_mode
              NULL,

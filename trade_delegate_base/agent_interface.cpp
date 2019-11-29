@@ -20,7 +20,8 @@ bool AgentInterface::__Setup(char* account_no)
 	assert(trade_delegater_);
 
 	char path_str[256] = {0};
-	sprintf_s(path_str, "%s_%s.dll\0", dll_pre_str_, account_no);
+	//sprintf_s(path_str, "%s_%s.dll\0", dll_pre_str_, account_no); //TradeX-M
+	sprintf_s(path_str, "TradeX2-M.dll\0", dll_pre_str_, account_no); //TradeX-M
 	trade_delegater_->TdxApiHMODULE = LoadLibrary(path_str);
 	if( trade_delegater_->TdxApiHMODULE == nullptr )
 	{
@@ -37,7 +38,7 @@ bool AgentInterface::__Setup(char* account_no)
 	trade_delegater_->SendOrder = (SendOrderDelegate)GetProcAddress(trade_delegater_->TdxApiHMODULE, "SendOrder");
 	trade_delegater_->CancelOrder = (CancelOrderDelegate)GetProcAddress(trade_delegater_->TdxApiHMODULE, "CancelOrder");
 	trade_delegater_->GetQuote = (GetQuoteDelegate)GetProcAddress(trade_delegater_->TdxApiHMODULE, "GetQuote");
-	trade_delegater_->Repay = (RepayDelegate)GetProcAddress(trade_delegater_->TdxApiHMODULE, "Repay");
+	//trade_delegater_->Repay = (RepayDelegate)GetProcAddress(trade_delegater_->TdxApiHMODULE, "Repay");
 
 
 	//以下是普通批量版功能函数
@@ -53,7 +54,40 @@ bool AgentInterface::__Setup(char* account_no)
 	//CancelMultiAccountsOrdersDelegate CancelMultiAccountsOrders = (CancelMultiAccountsOrdersDelegate)GetProcAddress(TdxApiHMODULE, "CancelMultiAccountsOrders");
 	//GetMultiAccountsQuotesDelegate GetMultiAccountsQuotes = (GetMultiAccountsQuotesDelegate)GetProcAddress(TdxApiHMODULE, "GetMultiAccountsQuotes");
 
-	trade_delegater_->OpenTdx();
+#ifdef USE_TRADE_X
+    char ErrInfo[256] = {};
+    if( trade_delegater_->OpenTdx(14, "6.40", 12, 0, ErrInfo) < 0 )
+        return false;
+#if 1
+    int nQsid = 32;
+	std::string sHost = "180.153.18.180";
+	int nPort = 7708;
+	std::string sVersion = "8.27";
+	int nBranchID = 1;
+	char nAccountType = 8;
+	std::string sAccountNo = "880003767427";
+	std::string sTradeAccountNo = "880003767427";
+	std::string sPassword = "737372";
+	std::string sTxPassword = "";
+
+	int nClientID = trade_delegater_->Logon(
+	    nQsid,
+	    sHost.c_str(),
+		nPort,
+		sVersion.c_str(),
+		nBranchID,
+		nAccountType,
+		sAccountNo.c_str(),
+		sTradeAccountNo.c_str(),
+		sPassword.c_str(),
+		sTxPassword.c_str(),
+		ErrInfo);
+	if (nClientID < 0)
+        return false;
+#endif
+#else
+    trade_delegater_->OpenTdx();
+#endif
 	return true;
 };
  
