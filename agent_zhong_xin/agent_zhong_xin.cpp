@@ -38,7 +38,7 @@ bool Agent_ZHONG_XIN::Login(char* ip, short port, char* ver, short yybid, char* 
 
 	char error_info[1024] = {0};
     trade_client_id_ = -1;
-#ifdef  USE_TRADE_X
+#ifdef  USE_TRADE_X  //debug
     int nQsid = 32;
 	std::string sHost = "180.153.18.180";
 	int nPort = 7708;
@@ -83,6 +83,40 @@ bool Agent_ZHONG_XIN::Login(char* ip, short port, char* ver, short yybid, char* 
  
 #endif
     
+    return trade_client_id_ != -1;
+}
+
+bool Agent_ZHONG_XIN::Relogin()
+{
+    UtilityUse::WriteLog("Relogin %d ", __LINE__);
+    assert(trade_delegater_);  
+
+    if( trade_client_id_ > -1 )
+    {
+        UtilityUse::WriteLog("Logoff %d ", __LINE__);
+        trade_delegater_->Logoff(trade_client_id_);
+    }
+    char error_info[1024] = {0};
+    trade_client_id_ = -1;
+#ifdef  USE_TRADE_X  //debug
+    int nQsid = 32;
+    std::string sHost = "180.153.18.180";
+    int nPort = 7708;
+    std::string sVersion = "8.27";
+    int nBranchID = 1;
+    char nAccountType = 8;
+    char sAccountNo[] = {"880003767427"};
+    char sTradeAccountNo[] = {"880003767427"};
+    char sPassword[] = {"123321"};
+    char sTxPassword[] = {""};
+    UtilityUse::WriteLog("Relogin %d ", __LINE__);
+    trade_client_id_ = trade_delegater_->Logon(nQsid, /*ip*/sHost.c_str(), nPort, sVersion.c_str(), nBranchID, nAccountType, sAccountNo
+        , sTradeAccountNo, sPassword, sTxPassword, error_info);
+#elif 1
+    trade_client_id_ = trade_delegater_->Logon(ip, port, ver, yybid, account_no
+        , trade_account, trade_pwd, txpwd, error);
+#endif
+    UtilityUse::WriteLog("Relogin ret %d ", trade_client_id_);
     return trade_client_id_ != -1;
 }
 
@@ -144,13 +178,14 @@ int Agent_ZHONG_XIN::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
         return -1;
 
     auto result = std::make_shared<Buffer>(5*1024);
-      
+    UtilityUse::WriteLog("QueryData %d", __LINE__);
     trade_delegater_->QueryData(trade_client_id_, (int)TypeQueryCategory::STOCK, result->data(), error);
 	if( strlen(error) != 0 )
 	{  
+        UtilityUse::WriteLog("QueryData ret -1");
 		return -1;
 	} 
-
+    UtilityUse::WriteLog("after QueryData %d", __LINE__);
 	std::string str_result = result->c_data();
     //UtilityUse::WriteLog("QueryPosition raw ret:\n%s", result->c_data());
 
@@ -206,6 +241,7 @@ int Agent_ZHONG_XIN::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
         if( index < max_pos_size )
             out_pos_data[index++] = pos_data;
 	}
+    UtilityUse::WriteLog("out QueryPosition %d ", __LINE__);
 	return index;
 }
 

@@ -27,6 +27,9 @@
     <ClInclude Include="tdx_ticker.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="tdx_trade.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -36,6 +39,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="tdx_ticker.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="tdx_trade.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

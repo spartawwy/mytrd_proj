@@ -12,6 +12,7 @@ public:
     virtual bool Setup(char* account_no) override;
     virtual bool Login(char* ip, short port, char* ver, short yybid, char* account_no
         , char* trade_account, char* trade_pwd, char* txpwd, char* error) override;
+    virtual bool Relogin() override;
 
     virtual bool InstallAccountData(char *error) override;
 

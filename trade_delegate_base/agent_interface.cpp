@@ -58,7 +58,7 @@ bool AgentInterface::__Setup(char* account_no)
     char ErrInfo[256] = {};
     if( trade_delegater_->OpenTdx(14, "6.40", 12, 0, ErrInfo) < 0 )
         return false;
-#if 1
+#if 0
     int nQsid = 32;
 	std::string sHost = "180.153.18.180";
 	int nPort = 7708;
@@ -67,7 +67,7 @@ bool AgentInterface::__Setup(char* account_no)
 	char nAccountType = 8;
 	std::string sAccountNo = "880003767427";
 	std::string sTradeAccountNo = "880003767427";
-	std::string sPassword = "737372";
+	std::string sPassword = "123321";
 	std::string sTxPassword = "";
 
 	int nClientID = trade_delegater_->Logon(

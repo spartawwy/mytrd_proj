@@ -385,8 +385,11 @@ T_CodeMapPosition WinnerApp::QueryPosition()
     
     const int stock_kind_count = trade_agent_.QueryPosition(pos_data, sizeof(pos_data)/sizeof(pos_data[0]), error);
     if( stock_kind_count <= 0 )
+    {
+        if( stock_kind_count < 0 )
+            trade_agent_.Relogin();
         return stocks_position_;
-
+    }
     std::lock_guard<std::mutex>  locker(stocks_position_mutex_);
     stocks_position_.clear();
     for(int i = 0; i < stock_kind_count; ++ i)
@@ -713,7 +716,7 @@ void WinnerApp::DoNormalTimer()
     assert( cst_normal_timer_interval / 1000 > 0 );
 	// 30 second do a position query
     const int query_capital_seconds = 30 / (cst_normal_timer_interval / 1000);
-	if( count_query++ % query_capital_seconds == 0 )
+	if( !IsTdxSvrRestartTime() && count_query++ % query_capital_seconds == 0 )
 	{
 		trade_strand().PostTask([this]()
 		{
@@ -726,7 +729,7 @@ void WinnerApp::DoNormalTimer()
 	}
     
     const int heart_quote_quey_seconds = 5 / (cst_normal_timer_interval / 1000);
-    if( count_query % heart_quote_quey_seconds == 0 )
+    if( !IsTdxSvrRestartTime() && count_query % heart_quote_quey_seconds == 0 )
         GetStockPriceInfo("601398", false);
 }
 

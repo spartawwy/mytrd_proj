@@ -72,6 +72,12 @@ bool TradeAgent::Login(char* ip, short port, char* ver, short  yybid, char* acco
 	return p_agent_interface_->InstallAccountData(error);
 }
 
+bool TradeAgent::Relogin()
+{
+    assert(p_agent_interface_);
+    return p_agent_interface_->Relogin();
+}
+
 void TradeAgent::SendOrder(int Category, int PriceType, char* Gddm, char* Zqdm, float Price, int Quantity, char* Result, char* ErrInfo)
 {
 	assert(p_agent_interface_);

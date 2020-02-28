@@ -349,16 +349,20 @@ bool StockTicker::GetQuotes(char* stock_codes[], short count, Buffer &Result)
             logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes stock_codes[%d]:%s", i, stock_codes[i]));
         // end debug
 #endif
+            logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes %d", __LINE__));
             Result.reset(); 
             ErrInfo.reset();
             assert(Result.data());
             assert(ErrInfo.data());
+            logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes %d", __LINE__));
+
 #ifdef USE_OLD_TDXHQ   
             ret = TdxHq_GetSecurityQuotes(markets, stock_codes, count, Result.data(), ErrInfo.data());
 #else
             short n_count = count;
             ret = Func_TdxHq_GetSecurityQuotes(connn_id_, markets, stock_codes, &n_count, Result.data(), ErrInfo.data());
 #endif
+            logger_.LogLocal(utility::FormatStr("StockTicker::GetQuotes %d", __LINE__));
             if ( !ret )
             {
                 logger_.LogLocal(std::string("StockTicker::GetQuotes retry TdxHq_GetSecurityQuotes fail:") + ErrInfo.data());

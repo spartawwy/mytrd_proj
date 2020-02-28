@@ -339,6 +339,24 @@ bool IsNowTradeTime()
         return false;
 }
 
+bool IsTdxSvrRestartTime()
+{
+    time_t rawtime;
+    struct tm * timeinfo;
+    time( &rawtime );
+    timeinfo = localtime( &rawtime );
+
+    /*if( p_date )
+    {
+    *p_date = (1900+timeinfo->tm_year) * 10000 + (1+timeinfo->tm_mon) * 100 + timeinfo->tm_mday;
+    }*/
+    int time_value = (timeinfo->tm_hour) * 10000 + timeinfo->tm_min * 100 + timeinfo->tm_sec;
+    if ( timeinfo->tm_hour == 23 && timeinfo->tm_min > 55 || timeinfo->tm_hour == 0 && timeinfo->tm_min < 5 )
+        return true;
+    else
+        return false;
+}
+
 QString IndexCode2IndexName(const QString& code)
 {
 	if( code == cst_sh_index ) return QString::fromLocal8Bit(cst_sh_index_name);

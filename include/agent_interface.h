@@ -33,6 +33,7 @@ public:
 
 	virtual bool Login(char* ip, short port, char* ver, short yybid, char* account_no
 		, char* trade_account, char* trade_pwd, char* txpwd, char* error){ return false; }
+    virtual bool Relogin(){ return false; }
 	// ps: make sure error arrary len is larger than 1024
     virtual bool InstallAccountData(char *error){ return false; }
     virtual const T_AccountData * account_data(TypeMarket type_market) const;
