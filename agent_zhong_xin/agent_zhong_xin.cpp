@@ -185,13 +185,15 @@ int Agent_ZHONG_XIN::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
         UtilityUse::WriteLog("QueryData ret -1");
 		return -1;
 	} 
-    UtilityUse::WriteLog("after QueryData %d", __LINE__);
+    UtilityUse::WriteLog("after QueryData %d %s", __LINE__, result->c_data());
+
 	std::string str_result = result->c_data();
     //UtilityUse::WriteLog("QueryPosition raw ret:\n%s", result->c_data());
-
+    UtilityUse::WriteLog("after QueryData %d %s", __LINE__, result->c_data());
 	UtilityUse::replace_all_distinct(str_result, "\n", "\t");
 	UtilityUse::replace_all_distinct(str_result, "\t\t\t", "\t");
 	UtilityUse::replace_all_distinct(str_result, "\t\t", "\t");
+    UtilityUse::WriteLog("after QueryData %d %s", __LINE__, result->c_data());
 	/*qDebug() << " line 382" << "\n";
 	qDebug() << str_result.c_str() << " ----\n";*/
     //UtilityUse::WriteLog("QueryPosition afterreplace_all_distinct:\n%s", str_result.c_str());
@@ -218,7 +220,7 @@ int Agent_ZHONG_XIN::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
 	for( unsigned int n = 0 ; n < (result_array.size() - start) / content_col; ++n )
 	{
 		T_PositionData  pos_data;
-
+        UtilityUse::WriteLog("after QueryData in for %d %s", __LINE__, result->c_data());
         std::string stock_code = result_array.at( start + n * content_col);
 		UtilityUse::replace_all_distinct(stock_code, "\t", "");
         strcpy_s(pos_data.code, stock_code.c_str());
