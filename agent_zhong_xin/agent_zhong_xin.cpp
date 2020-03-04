@@ -180,24 +180,23 @@ int Agent_ZHONG_XIN::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
     auto result = std::make_shared<Buffer>(5*1024);
     UtilityUse::WriteLog("QueryData %d", __LINE__);
     trade_delegater_->QueryData(trade_client_id_, (int)TypeQueryCategory::STOCK, result->data(), error);
-	if( strlen(error) != 0 )
+	if( strlen(error) != 0 || strlen(result->data()) == 0 )
 	{  
-        UtilityUse::WriteLog("QueryData ret -1");
+        UtilityUse::WriteLog("QueryData ret -1. error:%s", error);
 		return -1;
 	} 
-    UtilityUse::WriteLog("after QueryData %d %s", __LINE__, result->c_data());
 
 	std::string str_result = result->c_data();
     //UtilityUse::WriteLog("QueryPosition raw ret:\n%s", result->c_data());
-    UtilityUse::WriteLog("after QueryData %d %s", __LINE__, result->c_data());
 	UtilityUse::replace_all_distinct(str_result, "\n", "\t");
 	UtilityUse::replace_all_distinct(str_result, "\t\t\t", "\t");
 	UtilityUse::replace_all_distinct(str_result, "\t\t", "\t");
-    UtilityUse::WriteLog("after QueryData %d %s", __LINE__, result->c_data());
+    
 	/*qDebug() << " line 382" << "\n";
 	qDebug() << str_result.c_str() << " ----\n";*/
     //UtilityUse::WriteLog("QueryPosition afterreplace_all_distinct:\n%s", str_result.c_str());
 	auto result_array = UtilityUse::split(str_result, "\t");
+    UtilityUse::WriteLog("after QueryData %d %d %s", __LINE__, result_array.size(), result->c_data());
 #if 0
     UtilityUse::WriteLog("QueryPosition");
 
@@ -217,7 +216,7 @@ int Agent_ZHONG_XIN::QueryPosition(T_PositionData *out_pos_data, int max_pos_siz
 
 
     int index = 0;
-	for( unsigned int n = 0 ; n < (result_array.size() - start) / content_col; ++n )
+	for( int n = 0 ; n < ((int)result_array.size() - start) / content_col; ++n )
 	{
 		T_PositionData  pos_data;
         UtilityUse::WriteLog("after QueryData in for %d %s", __LINE__, result->c_data());
