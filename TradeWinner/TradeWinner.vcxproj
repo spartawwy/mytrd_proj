@@ -127,7 +127,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
+      <OutputFile>$(OutDir)\$(ProjectName)_r.exe</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;Z:\lib\win32;$(VMP_ROOT)\Lib\COFF;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;TLib.lib;TLibTool.lib;SQLite.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -135,7 +135,7 @@
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <CustomBuild>
-      <Command>copy  $(OutDir)$(TargetName)$(TargetExt)  E:\Dev_wwy\StockTrader\src\TradeWinner\build\Win32\Debug\  /y</Command>
+      <Command>copy  $(OutDir)$(TargetName)$(TargetExt)  E:\Dev_wwy\StockTrader\src\mytrd_proj\build\Win32\Debug\$(TargetName)_r$(TargetExt) /y</Command>
     </CustomBuild>
     <CustomBuild>
       <Outputs>'copy to debug'</Outputs>

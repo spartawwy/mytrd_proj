@@ -3,7 +3,8 @@
 #include <cctype>
 #include <algorithm>
 #include <regex>
-  
+#include <thread>
+
 #include "agent_utility_use.h"
 
 unsigned int KMP(const char* text, size_t text_length, const char* pattern, size_t pattern_length, unsigned int* matches);
@@ -214,7 +215,7 @@ void UtilityUse::WriteLog(const char *fmt, ...)
 {
 	va_list ap;
 
-	const int cst_buf_len = 1024;
+	const int cst_buf_len = 1024*10;
 	char szContent[cst_buf_len] = {0};
 	
 
@@ -242,4 +243,10 @@ void UtilityUse::WriteLog(const char *fmt, ...)
 	 
 	//delete [] p_buf;
 	//emit PrintLogSignal(p_buf);
+}
+
+void UtilityUse::Delay(__int64 mseconds)
+{
+    //TSystem::WaitFor([]()->bool { return false;}, mseconds); // only make effect to timer
+    std::this_thread::sleep_for(std::chrono::system_clock::duration(std::chrono::milliseconds(mseconds)));
 }

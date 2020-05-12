@@ -12,5 +12,6 @@ std::vector<std::string> split(const std::string& source, const std::string& sep
 							   const std::string& quotation = "\"");
 
 void WriteLog(const char *fmt, ...);
+void Delay(__int64 mseconds);
 }
 #endif // AGENT_UTILITY_USE_SDF3KSDFDS_H_

@@ -18,6 +18,7 @@ public:
 
     virtual int QueryPosition(T_PositionData *out_pos_data, int max_pos_size, char* error) override;
     virtual bool QueryCapital(T_Capital *capital) override; 
+
 };
 
 #endif // AGNET_ZHONG_XIN_SD45FFD56SDF_H_

@@ -387,7 +387,12 @@ T_CodeMapPosition WinnerApp::QueryPosition()
     if( stock_kind_count <= 0 )
     {
         if( stock_kind_count < 0 )
-            trade_agent_.Relogin();
+        {
+            if( !trade_agent_.IsConnectOk() )
+                trade_agent_.Relogin();
+            else
+                local_logger().LogLocal(utility::FormatStr("QueryPosition ret %d but Connect is ok", stock_kind_count));
+        }
         return stocks_position_;
     }
     std::lock_guard<std::mutex>  locker(stocks_position_mutex_);

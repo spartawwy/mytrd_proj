@@ -28,6 +28,8 @@ public:
     int QueryPosition(T_PositionData *out_pos_data, int max_pos_size, char* error);
     bool QueryCapital(T_Capital *capital);
 
+    bool IsConnectOk();
+
 private:
       
      void *hmd_;

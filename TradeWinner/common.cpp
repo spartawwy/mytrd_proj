@@ -272,6 +272,7 @@ bool IsNowTradeTime()
 	    timeinfo = localtime( &rawtime ); // from 1900 year
         return timeinfo->tm_year * 10000 + timeinfo->tm_mon *100 + timeinfo->tm_mday;
     };
+    
 #ifdef USE_WINNER_MOCK
     return true; // tmp code  
 #endif

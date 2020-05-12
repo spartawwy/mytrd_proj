@@ -34,6 +34,8 @@ bool AgentInterface::__Setup(char* account_no)
 	trade_delegater_->CloseTdx = (CloseTdxDelegate)GetProcAddress(trade_delegater_->TdxApiHMODULE, "CloseTdx");
 	trade_delegater_->Logon = (LogonDelegate)GetProcAddress(trade_delegater_->TdxApiHMODULE, "Logon");
 	trade_delegater_->Logoff = (LogoffDelegate)GetProcAddress(trade_delegater_->TdxApiHMODULE, "Logoff");
+    trade_delegater_->IsConnectOK = (IsConnectOKDelegate)GetProcAddress(trade_delegater_->TdxApiHMODULE, "IsConnectOK");
+
 	trade_delegater_->QueryData = (QueryDataDelegate)GetProcAddress(trade_delegater_->TdxApiHMODULE, "QueryData");
 	trade_delegater_->SendOrder = (SendOrderDelegate)GetProcAddress(trade_delegater_->TdxApiHMODULE, "SendOrder");
 	trade_delegater_->CancelOrder = (CancelOrderDelegate)GetProcAddress(trade_delegater_->TdxApiHMODULE, "CancelOrder");
@@ -119,4 +121,10 @@ void AgentInterface::SendOrder(int Category, int PriceType, char* Gddm, char* Zq
 	assert(trade_delegater_);
     assert(trade_client_id_ != -1);
 	trade_delegater_->SendOrder(trade_client_id_, Category, PriceType, Gddm, Zqdm, Price, Quantity, Result,  ErrInfo);
+}
+
+bool AgentInterface::IsConnOk()
+{
+    assert(trade_client_id_);
+    return trade_delegater_->IsConnectOK(trade_client_id_);
 }

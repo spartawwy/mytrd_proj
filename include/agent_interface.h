@@ -46,6 +46,8 @@ public:
     virtual bool QueryCapital(T_Capital *capital) { return false; }
     //TradeDelegater * trade_delegater() { return trade_delegater_; }
 
+    virtual bool IsConnOk();
+
 protected:
 	bool __Setup(char* account_no);
     void FreeDynamic();

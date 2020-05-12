@@ -19,7 +19,9 @@ public:
 	OpenTdxDelegate OpenTdx;
 	CloseTdxDelegate CloseTdx;
 	LogonDelegate Logon;
-	LogoffDelegate Logoff;
+	LogoffDelegate Logoff; 
+    IsConnectOKDelegate IsConnectOK;
+
 	QueryDataDelegate QueryData; 
 	SendOrderDelegate SendOrder; 
 	CancelOrderDelegate CancelOrder;

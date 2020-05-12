@@ -97,6 +97,11 @@ bool TradeAgent::QueryCapital(T_Capital *capital)
     return p_agent_interface_->QueryCapital(capital);
 }
 
+bool TradeAgent::IsConnectOk()
+{
+    assert(p_agent_interface_);
+    return p_agent_interface_->IsConnOk();
+}
 #if 0
 void TradeAgent::SetupAccountInfo( char*str)
 {
